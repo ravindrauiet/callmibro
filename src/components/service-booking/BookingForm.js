@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../contexts/AuthContext'
 import { toast } from 'react-hot-toast'
+import { db } from '@/firebase/config'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 
 export default function BookingForm({ service, brand, model, onComplete }) {
   const { currentUser } = useAuth()
@@ -38,15 +40,45 @@ export default function BookingForm({ service, brand, model, onComplete }) {
       return
     }
     
+    if (!currentUser) {
+      toast.error('You must be logged in to book a service')
+      return
+    }
+    
     setLoading(true)
     
     try {
-      // Simulate API call to save booking
-      // In a real app, this would be a call to your backend/Firebase
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Save booking to Firestore
+      const bookingData = {
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        serviceName: service,
+        serviceType: model.name,
+        brandName: brand.name,
+        price: model.price,
+        schedule: {
+          date: formData.date,
+          timeSlot: formData.time
+        },
+        contactInfo: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address
+        },
+        issue: formData.issue,
+        additionalNotes: formData.additionalNotes,
+        status: 'scheduled',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }
+      
+      const docRef = await addDoc(collection(db, 'bookings'), bookingData)
       
       toast.success('Service booking created successfully!')
-      onComplete()
+      
+      // Redirect to booking confirmation page
+      router.push(`/services/booking-confirmation?bookingId=${docRef.id}&serviceName=${encodeURIComponent(service)}&serviceType=${encodeURIComponent(model.name)}&date=${encodeURIComponent(formData.date)}&timeSlot=${encodeURIComponent(formData.time)}`)
     } catch (error) {
       console.error('Error creating booking:', error)
       toast.error('Failed to create booking. Please try again.')
@@ -84,6 +116,18 @@ export default function BookingForm({ service, brand, model, onComplete }) {
           </div>
         </div>
       </div>
+      
+      {!currentUser && (
+        <div className="bg-red-900/20 border border-red-800 text-red-300 p-4 rounded mb-6">
+          <p className="font-medium">You need to login to book a service</p>
+          <button 
+            onClick={() => document.getElementById('login-btn')?.click()}
+            className="mt-2 text-white bg-red-800 hover:bg-red-700 px-4 py-2 rounded text-sm"
+          >
+            Login / Sign Up
+          </button>
+        </div>
+      )}
       
       {/* Booking Form */}
       <form onSubmit={handleSubmit}>
@@ -202,9 +246,9 @@ export default function BookingForm({ service, brand, model, onComplete }) {
           <div className="mt-6">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !currentUser}
               className={`w-full bg-[#e60012] text-white py-3 rounded-md font-medium ${
-                loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-red-700'
+                (loading || !currentUser) ? 'opacity-70 cursor-not-allowed' : 'hover:bg-red-700'
               } transition-colors`}
             >
               {loading ? 'Processing...' : 'Confirm Booking'}

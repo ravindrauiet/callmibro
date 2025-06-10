@@ -9,9 +9,10 @@ import {
   GoogleAuthProvider, 
   signInWithPopup,
   FacebookAuthProvider,
-  updateProfile
+  updateProfile as updateAuthProfile
 } from 'firebase/auth';
-import { auth } from '../firebase/config';
+import { auth, db } from '../firebase/config';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 // Create auth context
 const AuthContext = createContext();
@@ -26,18 +27,33 @@ export function AuthProvider({ children }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       // Update profile with displayName
-      await updateProfile(userCredential.user, {
+      await updateAuthProfile(userCredential.user, {
         displayName: name
       });
+      
+      // Create a user document in Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        name: name,
+        email: email,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
       return userCredential;
     } catch (error) {
+      console.error("Error during signup:", error);
       throw error;
     }
   };
 
   // Login with email and password
-  const login = (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password);
+  const login = async (email, password) => {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    // Update lastLogin in Firestore
+    await setDoc(doc(db, 'users', userCredential.user.uid), {
+      lastLogin: serverTimestamp()
+    }, { merge: true });
+    return userCredential;
   };
 
   // Logout
@@ -46,15 +62,91 @@ export function AuthProvider({ children }) {
   };
 
   // Google Sign In
-  const googleSignIn = () => {
-    const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
+  const googleSignIn = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      // Check if the user document exists
+      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+      // If not, create a new user document
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, 'users', result.user.uid), {
+          name: result.user.displayName,
+          email: result.user.email,
+          photoURL: result.user.photoURL,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          lastLogin: serverTimestamp()
+        });
+      } else {
+        // Update lastLogin if user exists
+        await setDoc(doc(db, 'users', result.user.uid), {
+          lastLogin: serverTimestamp()
+        }, { merge: true });
+      }
+      return result;
+    } catch (error) {
+      console.error("Error during Google sign in:", error);
+      throw error;
+    }
   };
 
   // Facebook Sign In
-  const facebookSignIn = () => {
-    const provider = new FacebookAuthProvider();
-    return signInWithPopup(auth, provider);
+  const facebookSignIn = async () => {
+    try {
+      const provider = new FacebookAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      // Check if the user document exists
+      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+      // If not, create a new user document
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, 'users', result.user.uid), {
+          name: result.user.displayName,
+          email: result.user.email,
+          photoURL: result.user.photoURL,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          lastLogin: serverTimestamp()
+        });
+      } else {
+        // Update lastLogin if user exists
+        await setDoc(doc(db, 'users', result.user.uid), {
+          lastLogin: serverTimestamp()
+        }, { merge: true });
+      }
+      return result;
+    } catch (error) {
+      console.error("Error during Facebook sign in:", error);
+      throw error;
+    }
+  };
+
+  // Update user profile
+  const updateUserProfile = async (data) => {
+    try {
+      if (!currentUser) throw new Error('No user logged in');
+      // Update auth profile
+      if (data.displayName) {
+        await updateAuthProfile(auth.currentUser, {
+          displayName: data.displayName
+        });
+      }
+      // Update Firestore user document
+      const userRef = doc(db, 'users', currentUser.uid);
+      await setDoc(userRef, {
+        ...data,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      // Update local state
+      setCurrentUser(prev => ({
+        ...prev,
+        ...data
+      }));
+      return true;
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      throw error;
+    }
   };
 
   // Set current user on auth state change
@@ -74,7 +166,8 @@ export function AuthProvider({ children }) {
     login,
     logout,
     googleSignIn,
-    facebookSignIn
+    facebookSignIn,
+    updateUserProfile
   };
 
   return (

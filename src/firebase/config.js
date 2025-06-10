@@ -9,7 +9,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCxgEegetMFGha1ZIcBdLRb0XI7lu5cYiA",
   authDomain: "callmibro.firebaseapp.com",
   projectId: "callmibro",
-  storageBucket: "callmibro.firebasestorage.app",
+  storageBucket: "callmibro.appspot.com",
   messagingSenderId: "411367076640",
   appId: "1:411367076640:web:0b654f87bb3d2b65ba5d45"
 };

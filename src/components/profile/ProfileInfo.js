@@ -1,18 +1,38 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { toast } from 'react-hot-toast'
 
-export default function ProfileInfo() {
+export default function ProfileInfo({ userProfile }) {
   const { currentUser, updateUserProfile } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
-    displayName: currentUser?.displayName || '',
-    email: currentUser?.email || '',
-    phone: currentUser?.phoneNumber || '',
+    displayName: '',
+    email: '',
+    phone: '',
     address: ''
   })
+  const [loading, setLoading] = useState(false)
+
+  // Initialize form data when userProfile or currentUser changes
+  useEffect(() => {
+    if (userProfile && currentUser) {
+      setFormData({
+        displayName: userProfile.name || currentUser.displayName || '',
+        email: userProfile.email || currentUser.email || '',
+        phone: userProfile.phone || '',
+        address: userProfile.address || ''
+      })
+    } else if (currentUser) {
+      setFormData({
+        displayName: currentUser.displayName || '',
+        email: currentUser.email || '',
+        phone: '',
+        address: ''
+      })
+    }
+  }, [userProfile, currentUser])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -25,16 +45,30 @@ export default function ProfileInfo() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
+    if (!currentUser) {
+      toast.error('You must be logged in to update your profile')
+      return
+    }
+
     try {
-      await updateUserProfile({
-        displayName: formData.displayName
-      })
+      setLoading(true)
+      
+      // Only send the fields that have changed
+      const updateData = {
+        displayName: formData.displayName,
+        phone: formData.phone,
+        address: formData.address
+      }
+
+      await updateUserProfile(updateData)
       
       toast.success('Profile updated successfully')
       setIsEditing(false)
     } catch (error) {
-      console.error(error)
-      toast.error('Failed to update profile')
+      console.error('Error updating profile:', error)
+      toast.error('Failed to update profile. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -45,6 +79,7 @@ export default function ProfileInfo() {
         <button 
           onClick={() => setIsEditing(!isEditing)}
           className="text-[#e60012] hover:underline"
+          disabled={loading}
         >
           {isEditing ? 'Cancel' : 'Edit'}
         </button>
@@ -61,6 +96,8 @@ export default function ProfileInfo() {
                 value={formData.displayName}
                 onChange={handleChange}
                 className="w-full bg-[#222] border border-[#333] rounded p-2 text-white"
+                required
+                disabled={loading}
               />
             </div>
             
@@ -84,6 +121,8 @@ export default function ProfileInfo() {
                 value={formData.phone}
                 onChange={handleChange}
                 className="w-full bg-[#222] border border-[#333] rounded p-2 text-white"
+                required
+                disabled={loading}
               />
             </div>
             
@@ -95,14 +134,17 @@ export default function ProfileInfo() {
                 onChange={handleChange}
                 rows="3"
                 className="w-full bg-[#222] border border-[#333] rounded p-2 text-white"
+                required
+                disabled={loading}
               ></textarea>
             </div>
             
             <button
               type="submit"
-              className="mt-2 bg-[#e60012] text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+              className="mt-2 bg-[#e60012] text-white px-4 py-2 rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
             >
-              Save Changes
+              {loading ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
@@ -110,22 +152,22 @@ export default function ProfileInfo() {
         <div className="space-y-4">
           <div>
             <p className="text-sm text-gray-400">Full Name</p>
-            <p>{currentUser?.displayName || 'Not set'}</p>
+            <p>{userProfile?.name || currentUser?.displayName || 'Not set'}</p>
           </div>
           
           <div>
             <p className="text-sm text-gray-400">Email Address</p>
-            <p>{currentUser?.email}</p>
+            <p>{userProfile?.email || currentUser?.email || 'Not set'}</p>
           </div>
           
           <div>
             <p className="text-sm text-gray-400">Phone Number</p>
-            <p>{currentUser?.phoneNumber || 'Not set'}</p>
+            <p>{userProfile?.phone || 'Not set'}</p>
           </div>
           
           <div>
             <p className="text-sm text-gray-400">Shipping Address</p>
-            <p>Not set</p>
+            <p>{userProfile?.address || 'Not set'}</p>
           </div>
         </div>
       )}

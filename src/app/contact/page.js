@@ -1,9 +1,72 @@
+'use client';
+
+import { useState } from 'react';
+import { db } from '@/firebase/config';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { FiMapPin, FiPhone, FiMail, FiClock } from 'react-icons/fi';
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import ContactForm from '../../components/ContactForm'
 import ContactInfo from '../../components/ContactInfo'
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: ''
+  });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState({ success: false, message: '' });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus({ success: false, message: '' });
+
+    try {
+      // Validate form data
+      if (!formData.name || !formData.email || !formData.message) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      // Add the form data to Firestore
+      await addDoc(collection(db, 'contactMessages'), {
+        ...formData,
+        createdAt: serverTimestamp()
+      });
+
+      // Reset form and show success message
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+
+      setSubmitStatus({
+        success: true,
+        message: 'Your message has been sent. We will get back to you soon!'
+      });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitStatus({
+        success: false,
+        message: error.message || 'There was an error sending your message. Please try again.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-black text-white">
       <Header activePage="contact" />

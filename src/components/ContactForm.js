@@ -1,8 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { db } from '@/firebase/config'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function ContactForm() {
+  const { currentUser } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -12,6 +16,7 @@ export default function ContactForm() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -21,14 +26,25 @@ export default function ContactForm() {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setSubmitError('')
     
-    // Simulate form submission
-    setTimeout(() => {
-      console.log('Form submitted:', formData)
-      setIsSubmitting(false)
+    try {
+      // Validate form data
+      if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+        throw new Error('Please fill in all required fields');
+      }
+      
+      // Add to Firestore
+      await addDoc(collection(db, 'contactMessages'), {
+        ...formData,
+        userId: currentUser ? currentUser.uid : 'guest',
+        createdAt: serverTimestamp()
+      });
+      
+      // Show success message
       setSubmitSuccess(true)
       
       // Reset form after successful submission
@@ -42,7 +58,12 @@ export default function ContactForm() {
         })
         setSubmitSuccess(false)
       }, 3000)
-    }, 1500)
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitError(error.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -54,6 +75,12 @@ export default function ContactForm() {
           Thank you for your message! We'll get back to you soon.
         </div>
       ) : null}
+      
+      {submitError && (
+        <div className="bg-red-900 text-red-100 p-4 rounded mb-6">
+          {submitError}
+        </div>
+      )}
       
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
