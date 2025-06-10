@@ -67,25 +67,25 @@ export default function ProductsGrid() {
   ];
 
   return (
-    <section className="bg-[#111] py-12">
-      <div className="max-w-7xl mx-auto px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <section className="bg-[#111] py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {products.map(product => (
             <div 
               key={product.id} 
               className="bg-[#111] border border-[#222] rounded-lg overflow-hidden transition-all hover:border-[#e60012]"
             >
-              <div className="h-48 flex items-center justify-center p-4">
+              <div className="h-36 sm:h-48 flex items-center justify-center p-3 sm:p-4">
                 <img 
                   src={product.image} 
                   alt={product.name}
                   className="max-h-full object-contain"
                 />
               </div>
-              <div className="p-4 text-center">
-                <h3 className="text-white font-medium text-lg">{product.name}</h3>
-                <p className="text-gray-400 text-sm mb-2">{product.sku}</p>
-                <div className="text-[#e60012] font-bold">{product.price}</div>
+              <div className="p-3 sm:p-4 text-center">
+                <h3 className="text-white font-medium text-base sm:text-lg">{product.name}</h3>
+                <p className="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2">{product.sku}</p>
+                <div className="text-[#e60012] font-bold text-sm sm:text-base">{product.price}</div>
               </div>
             </div>
           ))}

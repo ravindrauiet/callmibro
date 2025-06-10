@@ -49,19 +49,19 @@ export default function RepairServices() {
   ]
 
   return (
-    <section className="py-16 px-8 bg-black">
+    <section className="py-10 sm:py-16 px-4 sm:px-8 bg-black">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Our Repair Services</h1>
-          <p className="text-gray-400 text-lg">Select your device category and get professional help.</p>
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4">Our Repair Services</h1>
+          <p className="text-gray-400 text-sm sm:text-lg">Select your device category and get professional help.</p>
         </div>
 
         {/* Filter Section */}
-        <div className="bg-[#111] rounded-lg p-6 mb-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-[#111] rounded-lg p-4 sm:p-6 mb-8 sm:mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             <div className="relative">
               <select 
-                className="w-full appearance-none bg-[#111] border border-[#333] rounded px-4 py-3 pr-8 text-white focus:outline-none focus:border-[#e60012]"
+                className="w-full appearance-none bg-[#111] border border-[#333] rounded px-3 sm:px-4 py-2 sm:py-3 pr-8 text-white focus:outline-none focus:border-[#e60012] text-sm sm:text-base"
                 value={deviceCategory}
                 onChange={(e) => setDeviceCategory(e.target.value)}
               >
@@ -80,7 +80,7 @@ export default function RepairServices() {
 
             <div className="relative">
               <select 
-                className="w-full appearance-none bg-[#111] border border-[#333] rounded px-4 py-3 pr-8 text-white focus:outline-none focus:border-[#e60012]"
+                className="w-full appearance-none bg-[#111] border border-[#333] rounded px-3 sm:px-4 py-2 sm:py-3 pr-8 text-white focus:outline-none focus:border-[#e60012] text-sm sm:text-base"
                 value={subCategory}
                 onChange={(e) => setSubCategory(e.target.value)}
               >
@@ -98,7 +98,7 @@ export default function RepairServices() {
 
             <div className="relative">
               <select 
-                className="w-full appearance-none bg-[#111] border border-[#333] rounded px-4 py-3 pr-8 text-white focus:outline-none focus:border-[#e60012]"
+                className="w-full appearance-none bg-[#111] border border-[#333] rounded px-3 sm:px-4 py-2 sm:py-3 pr-8 text-white focus:outline-none focus:border-[#e60012] text-sm sm:text-base"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               >
@@ -118,7 +118,7 @@ export default function RepairServices() {
         </div>
 
         {/* Service Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {services.map(service => (
             <ServiceCard 
               key={service.id}
