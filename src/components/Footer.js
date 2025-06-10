@@ -1,10 +1,10 @@
 export default function Footer() {
   return (
     <footer className="bg-black pt-12 pb-6 border-t border-[#e60012]">
-      <div className="max-w-7xl mx-auto px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <div>
-            <div className="flex items-center mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-8">
+          <div className="text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start mb-4">
               <div className="flex items-center">
                 <span className="text-[#e60012] font-bold text-2xl mr-2">●</span>
                 <span className="text-xl font-bold">CallMiBro</span>
@@ -13,7 +13,7 @@ export default function Footer() {
             <p className="text-gray-400">Connecting you to trusted repair pros</p>
           </div>
           
-          <div>
+          <div className="text-center sm:text-left">
             <h3 className="text-lg font-medium mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li><a href="/services" className="text-gray-400 hover:text-white">Services</a></li>
@@ -22,9 +22,9 @@ export default function Footer() {
             </ul>
           </div>
           
-          <div>
+          <div className="text-center sm:text-left">
             <h3 className="text-lg font-medium mb-4">Follow us</h3>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 justify-center sm:justify-start">
               <a href="#" className="text-gray-400 hover:text-white">
                 <span className="sr-only">Facebook</span>
                 <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

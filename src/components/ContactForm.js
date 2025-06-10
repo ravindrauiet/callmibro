@@ -46,8 +46,8 @@ export default function ContactForm() {
   }
 
   return (
-    <div className="bg-[#111] border border-[#333] rounded-lg p-8">
-      <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
+    <div className="bg-[#111] border border-[#333] rounded-lg p-4 sm:p-8">
+      <h2 className="text-2xl font-bold mb-6 text-center sm:text-left">Send Us a Message</h2>
       
       {submitSuccess ? (
         <div className="bg-green-900 text-green-100 p-4 rounded mb-6">
@@ -56,7 +56,7 @@ export default function ContactForm() {
       ) : null}
       
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           {/* Name field */}
           <div>
             <label htmlFor="name" className="block text-white mb-2">Full Name</label>
@@ -86,7 +86,7 @@ export default function ContactForm() {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           {/* Phone field */}
           <div>
             <label htmlFor="phone" className="block text-white mb-2">Phone Number</label>
