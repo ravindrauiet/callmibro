@@ -2,11 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import AuthModal from './AuthModal'
+import { useAuth } from '../contexts/AuthContext'
+import { toast } from 'react-hot-toast'
 
 export default function Header({ activePage }) {
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  
+  const { currentUser, logout } = useAuth()
 
   // Handle scroll event for header shadow
   useEffect(() => {
@@ -23,6 +28,31 @@ export default function Header({ activePage }) {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [])
+  
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userMenuOpen && !e.target.closest('#user-menu-container')) {
+        setUserMenuOpen(false)
+      }
+    }
+    
+    document.addEventListener('click', handleClickOutside)
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [userMenuOpen])
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      toast.success('Logged out successfully')
+      setUserMenuOpen(false)
+    } catch (error) {
+      console.error('Logout error:', error)
+      toast.error('Failed to log out')
+    }
+  }
 
   return (
     <>
@@ -61,13 +91,49 @@ export default function Header({ activePage }) {
         </nav>
         
         <div className="flex items-center space-x-4">
-          {/* Login button */}
-          <button 
-            className="hidden md:block bg-[#e60012] text-white px-4 py-2 rounded hover:bg-[#b3000f] transition-colors"
-            onClick={() => setAuthModalOpen(true)}
-          >
-            Login / Signup
-          </button>
+          {/* Login button or User menu */}
+          {currentUser ? (
+            <div className="relative hidden md:block" id="user-menu-container">
+              <button 
+                className="flex items-center space-x-2 focus:outline-none"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+              >
+                <div className="w-8 h-8 rounded-full bg-[#e60012] flex items-center justify-center text-white">
+                  {currentUser.displayName ? currentUser.displayName.charAt(0).toUpperCase() : currentUser.email.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-sm font-medium hidden lg:block">
+                  {currentUser.displayName || currentUser.email.split('@')[0]}
+                </span>
+              </button>
+              
+              {/* User dropdown menu */}
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-[#111] border border-[#333] rounded-md shadow-lg z-10">
+                  <div className="p-3 border-b border-[#333]">
+                    <p className="text-sm font-medium">{currentUser.displayName || 'User'}</p>
+                    <p className="text-xs text-gray-400 truncate">{currentUser.email}</p>
+                  </div>
+                  <div className="py-1">
+                    <a href="/profile" className="block px-4 py-2 text-sm hover:bg-[#222]">Profile</a>
+                    <a href="/orders" className="block px-4 py-2 text-sm hover:bg-[#222]">My Orders</a>
+                    <button 
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-[#222]"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button 
+              className="hidden md:block bg-[#e60012] text-white px-4 py-2 rounded hover:bg-[#b3000f] transition-colors"
+              onClick={() => setAuthModalOpen(true)}
+            >
+              Login / Signup
+            </button>
+          )}
           
           {/* Mobile menu button */}
           <button 
@@ -119,15 +185,56 @@ export default function Header({ activePage }) {
             >
               Contact
             </a>
-            <button 
-              className="mt-4 bg-[#e60012] text-white py-2 rounded hover:bg-[#b3000f] transition-colors text-center"
-              onClick={() => {
-                setMobileMenuOpen(false)
-                setAuthModalOpen(true)
-              }}
-            >
-              Login / Signup
-            </button>
+            
+            {/* Mobile user menu or login button */}
+            {currentUser ? (
+              <>
+                <div className="py-3 border-b border-[#333]">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-full bg-[#e60012] flex items-center justify-center text-white">
+                      {currentUser.displayName ? currentUser.displayName.charAt(0).toUpperCase() : currentUser.email.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{currentUser.displayName || 'User'}</p>
+                      <p className="text-xs text-gray-400 truncate">{currentUser.email}</p>
+                    </div>
+                  </div>
+                </div>
+                <a 
+                  href="/profile" 
+                  className="py-3 border-b border-[#333]"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Profile
+                </a>
+                <a 
+                  href="/orders" 
+                  className="py-3 border-b border-[#333]"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  My Orders
+                </a>
+                <button 
+                  className="py-3 text-left text-red-500"
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <button 
+                className="mt-4 bg-[#e60012] text-white py-2 rounded hover:bg-[#b3000f] transition-colors text-center"
+                onClick={() => {
+                  setMobileMenuOpen(false)
+                  setAuthModalOpen(true)
+                }}
+              >
+                Login / Signup
+              </button>
+            )}
           </nav>
         </div>
       )}
