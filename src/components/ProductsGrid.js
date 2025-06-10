@@ -5,63 +5,63 @@ export default function ProductsGrid() {
       id: 1,
       name: "Phone Battery",
       sku: "ASCF5 Y3000A",
-      price: "BCCNOW",
+      price: "₹143.00",
       image: "/phone-battery.jpg"
     },
     {
       id: 2,
       name: "Laptop Charger",
       sku: "ASCAS-Y8200A",
-      price: "SCO25PC",
+      price: "₹143.00",
       image: "/laptop-charger.jpg"
     },
     {
       id: 3,
       name: "TV Remote",
       sku: "ASCAABEIJS2",
-      price: "$143.00V",
+      price: "₹143.00",
       image: "/tv-remote.jpg"
     },
     {
       id: 4,
       name: "AC Fitter",
       sku: "ASP7.03C3",
-      price: "Add CDTT",
+      price: "₹143.00",
       image: "/ac-fitter.jpg"
     },
     {
       id: 5,
       name: "TV Remote",
       sku: "TVECFHSS",
-      price: "$36.90AS",
+      price: "₹36.90",
       image: "/tv-remote-2.jpg"
     },
     {
       id: 6,
       name: "Refrigerator Shelf",
       sku: "FIDH31000371",
-      price: "Add Cart",
+      price: "₹143.00",
       image: "/refrigerator-shelf.jpg"
     },
     {
       id: 7,
       name: "Phone Battery",
       sku: "ASAAY 183BMH",
-      price: "Add COW",
+      price: "₹143.00",
       image: "/phone-battery-2.jpg"
     },
     {
       id: 8,
       name: "Laptop Charger",
       sku: "AN/OSTOAAL",
-      price: "SDO.09VV",
+      price: "₹143.00",
       image: "/laptop-charger-2.jpg"
     },
     {
       id: 9,
       name: "Refrigerator r Shelf",
       sku: "F3ll430SCO34",
-      price: "Add Cart",
+      price: "₹143.00",
       image: "/refrigerator-shelf-2.jpg"
     }
   ];

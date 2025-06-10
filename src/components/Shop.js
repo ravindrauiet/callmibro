@@ -2,17 +2,17 @@ export default function Shop() {
   const products = [
     {
       name: "iPhone Screen",
-      price: 19.99,
+      price: 1999.99,
       image: "/part1.jpg"
     },
     {
       name: "Samsung Battery",
-      price: 19.99,
+      price: 599.99,
       image: "/part2.jpg"
     },
     {
       name: "LG Compressor",
-      price: 19.99,
+      price: 2999.99,
       image: "/part3.jpg"
     }
   ]
@@ -41,7 +41,7 @@ export default function Shop() {
                 className="w-full rounded mb-3 sm:mb-4 transition-transform hover:scale-105"
               />
               <h4 className="text-base sm:text-lg mb-1 sm:mb-2">{product.name}</h4>
-              <div className="text-[#e60012] mb-3 sm:mb-4">${product.price}</div>
+              <div className="text-[#e60012] mb-3 sm:mb-4">₹{product.price}</div>
               <button className="bg-[#e60012] text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded hover:bg-[#b3000f] transition-colors text-sm">
                 Add to Cart
               </button>
