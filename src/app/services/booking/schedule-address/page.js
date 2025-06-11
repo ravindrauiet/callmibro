@@ -201,52 +201,52 @@ export default function ScheduleAddressPage() {
       {/* Progress Indicator */}
       <div className="bg-[#111] py-4 border-b border-[#333]">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between max-w-3xl mx-auto">
-            <div className="flex flex-col items-center">
-              <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white">
-                ✓
+          <div className="max-w-3xl mx-auto mb-10">
+            <div className="flex justify-between relative">
+              <div className="flex flex-col items-center z-10">
+                <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
+                  <span className="text-white">✓</span>
+                </div>
+                <span className="text-sm mt-2 text-gray-400">Select Service</span>
               </div>
-              <span className="text-xs mt-1 text-gray-400">Select Service</span>
-            </div>
-            <div className="flex-1 h-1 bg-[#333] mx-2">
-              <div className="h-full bg-green-600" style={{ width: '100%' }}></div>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white">
-                ✓
+              
+              <div className="flex flex-col items-center z-10">
+                <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
+                  <span className="text-white">✓</span>
+                </div>
+                <span className="text-sm mt-2 text-gray-400">Search Technician</span>
               </div>
-              <span className="text-xs mt-1 text-gray-400">Choose Tech</span>
-            </div>
-            <div className="flex-1 h-1 bg-[#333] mx-2">
-              <div className="h-full bg-red-600" style={{ width: '50%' }}></div>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white">
-                3
+              
+              <div className="flex flex-col items-center z-10">
+                <div className="w-10 h-10 rounded-full bg-[#e60012] flex items-center justify-center">
+                  <span className="text-white">3</span>
+                </div>
+                <span className="text-sm mt-2 text-white font-medium">Schedule & Address</span>
               </div>
-              <span className="text-xs mt-1 text-white">Schedule & Address</span>
-            </div>
-            <div className="flex-1 h-1 bg-[#333] mx-2"></div>
-            <div className="flex flex-col items-center">
-              <div className="w-8 h-8 rounded-full bg-[#333] flex items-center justify-center text-white">
-                4
+              
+              <div className="flex flex-col items-center z-10">
+                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                  <span className="text-white">4</span>
+                </div>
+                <span className="text-sm mt-2 text-gray-500">Confirmation</span>
               </div>
-              <span className="text-xs mt-1 text-gray-400">Confirmation</span>
+              
+              {/* Progress Line */}
+              <div className="absolute top-5 left-0 w-full h-1 bg-gray-700 -z-0">
+                <div className="h-full bg-green-600" style={{width: '66%'}}></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 text-center">Schedule & Address</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-center mb-2">Schedule & Address</h1>
+        <p className="text-gray-400 text-center mb-8">Choose a convenient time and provide your address</p>
         
         {error && (
-          <div className="bg-red-900 text-red-100 p-4 rounded-lg mb-6 max-w-4xl mx-auto">
-            <div className="flex items-start">
-              <FiInfo className="mt-1 mr-2" />
-              <p>{error}</p>
-            </div>
+          <div className="bg-red-900/50 text-red-200 p-4 rounded-lg mb-6 max-w-3xl mx-auto">
+            {error}
           </div>
         )}
         
