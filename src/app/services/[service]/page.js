@@ -17,9 +17,13 @@ export default function ServiceDetailPage({ params }) {
   const [selectedModel, setSelectedModel] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [isVisible, setIsVisible] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
+    // Set visibility for animations
+    setIsVisible(true)
+    
     // Decode the service name from the URL and format it properly
     if (params.service) {
       try {
@@ -77,9 +81,18 @@ export default function ServiceDetailPage({ params }) {
       <div className="min-h-screen bg-black text-white">
         <Header activePage="services" />
         
-        <main className="py-10 px-4 max-w-6xl mx-auto text-center">
-          <div className="animate-spin w-12 h-12 border-4 border-[#e60012] border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-xl">Loading service details...</p>
+        <main className="relative py-16 px-4">
+          {/* Background Elements */}
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="max-w-6xl mx-auto text-center">
+            <div className="w-16 h-16 border-4 border-t-transparent border-[#e60012] rounded-full animate-spin mx-auto mb-6"></div>
+            <h2 className="text-2xl font-bold text-white mb-2">Loading Service Details</h2>
+            <p className="text-gray-400">Please wait while we prepare your booking experience</p>
+          </div>
         </main>
         
         <Footer />
@@ -92,16 +105,29 @@ export default function ServiceDetailPage({ params }) {
       <div className="min-h-screen bg-black text-white">
         <Header activePage="services" />
         
-        <main className="py-10 px-4 max-w-6xl mx-auto text-center">
-          <div className="bg-red-900/30 text-red-300 p-6 rounded-lg mb-6">
-            <p className="text-xl">{error}</p>
+        <main className="relative py-16 px-4">
+          {/* Background Elements */}
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl"></div>
           </div>
-          <button
-            onClick={() => router.push('/services')}
-            className="bg-[#e60012] text-white px-4 py-2 rounded hover:bg-[#b3000f]"
-          >
-            Back to Services
-          </button>
+          
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-[#111] border border-[#333] rounded-xl p-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-[#e60012]/20 flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-4">{error}</h2>
+              <button
+                onClick={() => router.push('/services')}
+                className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white px-6 py-3 rounded-lg hover:shadow-lg hover:shadow-[#e60012]/20 transition-all"
+              >
+                Back to Services
+              </button>
+            </div>
+          </div>
         </main>
         
         <Footer />
@@ -113,85 +139,200 @@ export default function ServiceDetailPage({ params }) {
     <div className="min-h-screen bg-black text-white">
       <Header activePage="services" />
       
-      <main className="py-10 px-4 max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-center">{selectedService}</h1>
-          <p className="text-gray-400 text-center mt-2">
-            Select your device details to book a service
-          </p>
+      <main className="relative py-16 px-4">
+        {/* Background Elements */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl"></div>
         </div>
+        
+        <div className="max-w-6xl mx-auto">
+          {/* Service Header */}
+          <div 
+            className={`mb-12 text-center transform transition-all duration-1000 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+            }`}
+          >
+            <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
+              <span className="text-[#e60012] text-sm font-medium">Professional Service</span>
+            </div>
+            
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">
+                {selectedService}
+              </span>
+            </h1>
+            
+            <p className="text-gray-400 max-w-2xl mx-auto">
+              Follow the steps below to book your {selectedService.toLowerCase()} service with one of our certified technicians
+            </p>
+          </div>
 
-        {/* Progress steps */}
-        <div className="max-w-3xl mx-auto mb-10">
-          <div className="flex justify-between relative">
-            <div className="flex flex-col items-center z-10">
-              <div className={`w-10 h-10 rounded-full ${step === 'brands' ? 'bg-[#e60012]' : 'bg-green-600'} flex items-center justify-center`}>
-                <span className="text-white">{step === 'brands' ? '1' : '✓'}</span>
+          {/* Progress steps */}
+          <div 
+            className={`max-w-3xl mx-auto mb-10 transform transition-all duration-1000 delay-300 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+            }`}
+          >
+            <div className="flex justify-between relative">
+              <div className="flex flex-col items-center z-10">
+                <div className={`w-12 h-12 rounded-full ${
+                  step === 'brands' 
+                    ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' 
+                    : 'bg-gradient-to-r from-[#22c55e] to-[#16a34a]'
+                } flex items-center justify-center shadow-lg ${
+                  step === 'brands' ? 'animate-pulse-slow' : ''
+                }`}>
+                  <span className="text-white font-medium">{step === 'brands' ? '1' : '✓'}</span>
+                </div>
+                <span className={`text-sm mt-2 ${step === 'brands' ? 'text-white font-medium' : 'text-gray-400'}`}>Select Brand</span>
               </div>
-              <span className={`text-sm mt-2 ${step === 'brands' ? 'text-white font-medium' : 'text-gray-400'}`}>Select Brand</span>
-            </div>
-            
-            <div className="flex flex-col items-center z-10">
-              <div className={`w-10 h-10 rounded-full ${step === 'models' ? 'bg-[#e60012]' : step === 'booking' ? 'bg-green-600' : 'bg-gray-700'} flex items-center justify-center`}>
-                <span className="text-white">{step === 'models' ? '2' : step === 'booking' ? '✓' : '2'}</span>
+              
+              <div className="flex flex-col items-center z-10">
+                <div className={`w-12 h-12 rounded-full ${
+                  step === 'models' 
+                    ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' 
+                    : step === 'booking' 
+                      ? 'bg-gradient-to-r from-[#22c55e] to-[#16a34a]' 
+                      : 'bg-[#222]'
+                } flex items-center justify-center shadow-lg ${
+                  step === 'models' ? 'animate-pulse-slow' : ''
+                }`}>
+                  <span className="text-white font-medium">{step === 'models' ? '2' : step === 'booking' ? '✓' : '2'}</span>
+                </div>
+                <span className={`text-sm mt-2 ${step === 'models' ? 'text-white font-medium' : step === 'booking' ? 'text-gray-400' : 'text-gray-500'}`}>Select Model</span>
               </div>
-              <span className={`text-sm mt-2 ${step === 'models' ? 'text-white font-medium' : step === 'booking' ? 'text-gray-400' : 'text-gray-500'}`}>Select Model</span>
-            </div>
-            
-            <div className="flex flex-col items-center z-10">
-              <div className={`w-10 h-10 rounded-full ${step === 'booking' ? 'bg-[#e60012]' : 'bg-gray-700'} flex items-center justify-center`}>
-                <span className="text-white">3</span>
+              
+              <div className="flex flex-col items-center z-10">
+                <div className={`w-12 h-12 rounded-full ${
+                  step === 'booking' 
+                    ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' 
+                    : 'bg-[#222]'
+                } flex items-center justify-center shadow-lg ${
+                  step === 'booking' ? 'animate-pulse-slow' : ''
+                }`}>
+                  <span className="text-white font-medium">3</span>
+                </div>
+                <span className={`text-sm mt-2 ${step === 'booking' ? 'text-white font-medium' : 'text-gray-500'}`}>Book Service</span>
               </div>
-              <span className={`text-sm mt-2 ${step === 'booking' ? 'text-white font-medium' : 'text-gray-500'}`}>Book Service</span>
-            </div>
-            
-            {/* Progress Line */}
-            <div className="absolute top-5 left-0 w-full h-1 bg-gray-700 -z-0">
-              <div className="h-full bg-green-600" style={{
-                width: step === 'brands' ? '0%' : step === 'models' ? '50%' : '100%'
-              }}></div>
+              
+              {/* Progress Line */}
+              <div className="absolute top-6 left-0 w-full h-1 bg-[#222] -z-0">
+                <div 
+                  className="h-full bg-gradient-to-r from-[#22c55e] to-[#16a34a]"
+                  style={{
+                    width: step === 'brands' ? '0%' : step === 'models' ? '50%' : '100%',
+                    transition: 'width 0.5s ease-in-out'
+                  }}
+                ></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Back button if not on the first step */}
-        {step !== 'brands' && (
-          <button 
-            onClick={handleGoBack}
-            className="mb-6 flex items-center text-gray-400 hover:text-white"
+          {/* Back button if not on the first step */}
+          {step !== 'brands' && (
+            <div 
+              className={`max-w-3xl mx-auto mb-6 transform transition-all duration-500 ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+            >
+              <button 
+                onClick={handleGoBack}
+                className="flex items-center text-gray-400 hover:text-white transition-colors group"
+              >
+                <div className="w-8 h-8 rounded-full border border-[#333] flex items-center justify-center mr-2 group-hover:border-[#e60012] transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <span>Back to previous step</span>
+              </button>
+            </div>
+          )}
+
+          {/* Content based on current step */}
+          <div 
+            className={`bg-[#111] border border-[#222] rounded-xl p-6 md:p-8 shadow-xl max-w-3xl mx-auto transform transition-all duration-1000 delay-500 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+            }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-            Back
-          </button>
-        )}
+            {step === 'brands' && (
+              <BrandSelection 
+                service={selectedService} 
+                onBrandSelect={handleBrandSelect} 
+              />
+            )}
 
-        {/* Content based on current step */}
-        <div className="bg-[#111] border border-[#222] rounded-lg p-6">
-          {step === 'brands' && (
-            <BrandSelection 
-              service={selectedService} 
-              onBrandSelect={handleBrandSelect} 
-            />
-          )}
+            {step === 'models' && selectedBrand && (
+              <ModelSelection 
+                service={selectedService}
+                brand={selectedBrand}
+                onModelSelect={handleModelSelect}
+              />
+            )}
 
-          {step === 'models' && selectedBrand && (
-            <ModelSelection 
-              service={selectedService}
-              brand={selectedBrand}
-              onModelSelect={handleModelSelect}
-            />
-          )}
-
-          {step === 'booking' && selectedBrand && selectedModel && (
-            <BookingForm 
-              service={selectedService}
-              brand={selectedBrand}
-              model={selectedModel}
-              onComplete={handleBookingComplete}
-            />
-          )}
+            {step === 'booking' && selectedBrand && selectedModel && (
+              <BookingForm 
+                service={selectedService}
+                brand={selectedBrand}
+                model={selectedModel}
+                onComplete={handleBookingComplete}
+              />
+            )}
+          </div>
+          
+          {/* Service Benefits */}
+          <div 
+            className={`mt-16 max-w-3xl mx-auto transform transition-all duration-1000 delay-700 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+            }`}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { 
+                  title: "Expert Technicians", 
+                  description: "Highly trained specialists with years of experience",
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  )
+                },
+                { 
+                  title: "90-Day Warranty", 
+                  description: "All our repairs come with a solid warranty",
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  )
+                },
+                { 
+                  title: "Genuine Parts", 
+                  description: "We only use authentic replacement parts",
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )
+                }
+              ].map((benefit, index) => (
+                <div 
+                  key={index} 
+                  className="bg-[#111] border border-[#222] rounded-lg p-4 flex items-start"
+                  style={{ transitionDelay: `${index * 100 + 800}ms` }}
+                >
+                  <div className="mr-4 rounded-full bg-[#e60012]/10 p-3 text-[#e60012]">
+                    {benefit.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-white font-medium mb-1">{benefit.title}</h3>
+                    <p className="text-gray-400 text-sm">{benefit.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </main>
       
