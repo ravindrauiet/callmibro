@@ -1,7 +1,66 @@
 'use client'
 
 import ServiceCard from './ServiceCard'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import Link from 'next/link'
+
+// Service card data - moved outside the component to prevent recreation on each render
+const servicesData = [
+  {
+    id: 1,
+    title: "Mobile Screen Repair",
+    description: "Quick and professional screen replacement in 30 mins",
+    icon: "/icons/mobile-screen.svg",
+    category: "Mobile Phones",
+    subCategory: "Screen Repair",
+    color: "from-[#ff4b4b] to-[#ff7676]"
+  },
+  {
+    id: 2,
+    title: "TV Diagnostics",
+    description: "Expert TV diagnostics and repair services",
+    icon: "/icons/tv.svg",
+    category: "TVs",
+    subCategory: "Diagnostics",
+    color: "from-[#3366ff] to-[#5c8aff]"
+  },
+  {
+    id: 3,
+    title: "AC Gas Refill",
+    description: "Professional AC gas refill and maintenance",
+    icon: "/icons/ac.svg",
+    category: "ACs",
+    subCategory: "Gas Refill",
+    color: "from-[#00ccb8] to-[#39e5d5]"
+  },
+  {
+    id: 4,
+    title: "Battery Replacement",
+    description: "Fast and reliable battery replacement services",
+    icon: "/icons/battery.svg",
+    category: "Mobile Phones",
+    subCategory: "Battery Replacement",
+    color: "from-[#ff4b4b] to-[#ff7676]"
+  },
+  {
+    id: 5,
+    title: "Refrigerator Repair",
+    description: "Expert refrigerator troubleshooting and repair",
+    icon: "/icons/battery2.svg",
+    category: "Refrigerators",
+    subCategory: "Repair",
+    color: "from-[#6b46c1] to-[#8a63d2]"
+  },
+  {
+    id: 6,
+    title: "Speaker Repair",
+    description: "Professional audio equipment repair services",
+    icon: "/icons/speaker.svg",
+    category: "Audio",
+    subCategory: "Speaker Repair",
+    color: "from-[#00ccb8] to-[#39e5d5]"
+  }
+]
 
 export default function RepairServices() {
   const [deviceCategory, setDeviceCategory] = useState('Device Category')
@@ -27,67 +86,18 @@ export default function RepairServices() {
     }
   }, [])
 
-  // Service card data
-  const services = [
-    {
-      id: 1,
-      title: "Mobile Screen Repair",
-      description: "Quick and professional screen replacement in 30 mins",
-      icon: "/icons/mobile-screen.svg",
-      category: "Mobile Phones",
-      subCategory: "Screen Repair",
-      color: "from-[#ff4b4b] to-[#ff7676]"
-    },
-    {
-      id: 2,
-      title: "TV Diagnostics",
-      description: "Expert TV diagnostics and repair services",
-      icon: "/icons/tv.svg",
-      category: "TVs",
-      subCategory: "Diagnostics",
-      color: "from-[#3366ff] to-[#5c8aff]"
-    },
-    {
-      id: 3,
-      title: "AC Gas Refill",
-      description: "Professional AC gas refill and maintenance",
-      icon: "/icons/ac.svg",
-      category: "ACs",
-      subCategory: "Gas Refill",
-      color: "from-[#00ccb8] to-[#39e5d5]"
-    },
-    {
-      id: 4,
-      title: "Battery Replacement",
-      description: "Fast and reliable battery replacement services",
-      icon: "/icons/battery.svg",
-      category: "Mobile Phones",
-      subCategory: "Battery Replacement",
-      color: "from-[#ff4b4b] to-[#ff7676]"
-    },
-    {
-      id: 5,
-      title: "Refrigerator Repair",
-      description: "Expert refrigerator troubleshooting and repair",
-      icon: "/icons/battery2.svg",
-      category: "Refrigerators",
-      subCategory: "Repair",
-      color: "from-[#6b46c1] to-[#8a63d2]"
-    },
-    {
-      id: 6,
-      title: "Speaker Repair",
-      description: "Professional audio equipment repair services",
-      icon: "/icons/speaker.svg",
-      category: "Audio",
-      subCategory: "Speaker Repair",
-      color: "from-[#00ccb8] to-[#39e5d5]"
-    }
-  ]
+  // Get unique categories and subcategories for filters
+  const categories = useMemo(() => {
+    return ['Device Category', ...new Set(servicesData.map(service => service.category))];
+  }, []);
+  
+  const subCategories = useMemo(() => {
+    return ['Sub-Category', ...new Set(servicesData.map(service => service.subCategory))];
+  }, []);
 
   // Filter services based on selected filters
   useEffect(() => {
-    let result = [...services];
+    let result = [...servicesData];
     
     if (deviceCategory !== 'Device Category') {
       result = result.filter(service => service.category === deviceCategory);
@@ -98,11 +108,7 @@ export default function RepairServices() {
     }
     
     setFilteredServices(result);
-  }, [deviceCategory, subCategory, services]);
-
-  // Get unique categories and subcategories for filters
-  const categories = ['Device Category', ...new Set(services.map(service => service.category))];
-  const subCategories = ['Sub-Category', ...new Set(services.map(service => service.subCategory))];
+  }, [deviceCategory, subCategory]); // Removed services from dependency array
 
   // Reset subcategory when category changes
   const handleCategoryChange = (e) => {

@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'react-hot-toast'
 
 export default function BrandSelection({ service, onBrandSelect }) {
   // Comprehensive brands based on the service type
   const getBrands = () => {
     // Normalize service name for comparison
     const normalizeServiceName = (name) => {
-      return name.toLowerCase().replace(/[-\s]/g, '');
+      return name?.toLowerCase().replace(/[-\s]/g, '') || '';
     };
     
     const normalizedService = normalizeServiceName(service);
@@ -203,7 +204,8 @@ export default function BrandSelection({ service, onBrandSelect }) {
           { id: 'sansui', name: 'Sansui' }
         ];
       default:
-        console.log('Service not found:', service, 'Normalized:', normalizedService); // Enhanced logging
+        // Show toast for default brands
+        toast.warning(`Using default brands for service: ${service}`);
         return [
           { id: 'samsung', name: 'Samsung' },
           { id: 'lg', name: 'LG' },
@@ -222,22 +224,55 @@ export default function BrandSelection({ service, onBrandSelect }) {
   };
 
   const brands = getBrands();
+  const [selectedBrandId, setSelectedBrandId] = useState(null);
+
+  const handleBrandSelect = (brand) => {
+    try {
+      setSelectedBrandId(brand.id);
+      
+      // Show toast for brand selection
+      toast.success(`Selected brand: ${brand.name}`);
+      
+      // Check if callback exists
+      if (typeof onBrandSelect !== 'function') {
+        toast.error('Error: Cannot proceed with brand selection');
+        return;
+      }
+      
+      // Call the parent component's onBrandSelect function
+      onBrandSelect(brand);
+    } catch (error) {
+      toast.error(`Error selecting brand: ${error.message}`);
+    }
+  };
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-6">Select Brand</h2>
+    <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
+      <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Select Brand</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {brands.map((brand) => (
           <div 
             key={brand.id}
-            className="bg-[#111] border border-[#222] rounded-lg p-4 hover:border-[#e60012] transition-colors cursor-pointer"
-            onClick={() => onBrandSelect(brand)}
+            className={`bg-gradient-to-br from-[#1a1a1a] to-[#222] border ${
+              selectedBrandId === brand.id 
+                ? 'border-[#e60012] shadow-lg shadow-[#e60012]/10' 
+                : 'border-[#333] hover:border-[#e60012]/70'
+            } rounded-lg p-4 transition-all duration-300 cursor-pointer transform hover:scale-[1.02]`}
+            onClick={() => handleBrandSelect(brand)}
           >
-            {/* <div className="aspect-square overflow-hidden rounded-lg mb-4 bg-[#222] flex items-center justify-center">
-              <span className="text-2xl font-bold text-gray-500">{brand.name.charAt(0)}</span>
-            </div> */}
-            <h3 className="text-lg font-medium text-center">{brand.name}</h3>
+            <div className="aspect-square overflow-hidden rounded-lg mb-3 bg-[#222] flex items-center justify-center">
+              <span className={`text-2xl font-bold ${
+                selectedBrandId === brand.id
+                  ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent'
+                  : 'text-gray-500'
+              }`}>{brand.name.charAt(0)}</span>
+            </div>
+            <h3 className={`text-base font-medium text-center ${
+              selectedBrandId === brand.id
+                ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent'
+                : 'text-white'
+            }`}>{brand.name}</h3>
           </div>
         ))}
       </div>

@@ -25,32 +25,40 @@ export default function ServiceDetailPage({ params }) {
     setIsVisible(true)
     
     // Decode the service name from the URL and format it properly
-    if (params.service) {
+    if (params && params.service) {
       try {
         setLoading(true)
+        
         const decodedService = decodeURIComponent(params.service);
+        
         // Convert to title case and replace hyphens with spaces
         const formattedService = decodedService
           .split('-')
           .map(word => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ');
+        
         setSelectedService(formattedService);
         setLoading(false)
+        
+        // Show success toast
+        toast.success(`Service loaded: ${formattedService}`)
       } catch (error) {
         console.error("Error processing service parameter:", error);
-        setError("Unable to load service details. Please try again.");
+        setError(`Unable to load service details: ${error.message}`);
         setLoading(false)
       }
     } else {
-      router.push('/services')
+      setError("No service specified in URL parameters")
+      setLoading(false)
     }
-  }, [params.service, router])
+  }, [params])
 
   const handleBrandSelect = (brand) => {
     setSelectedBrand(brand)
     setStep('models')
     // Scroll to top when changing steps
     window.scrollTo(0, 0)
+    toast.success(`Brand selected: ${brand.name}`)
   }
 
   const handleModelSelect = (model) => {
@@ -58,22 +66,25 @@ export default function ServiceDetailPage({ params }) {
     setStep('booking')
     // Scroll to top when changing steps
     window.scrollTo(0, 0)
+    toast.success(`Model selected: ${model.name}`)
   }
 
   const handleGoBack = () => {
     if (step === 'models') {
       setStep('brands')
       setSelectedBrand(null)
+      toast.success('Back to brand selection')
     } else if (step === 'booking') {
       setStep('models')
       setSelectedModel(null)
+      toast.success('Back to model selection')
     }
   }
 
-  const handleBookingComplete = () => {
+  const handleBookingComplete = (bookingId) => {
     toast.success('Your booking has been successfully created!')
-    // Navigate to a confirmation page 
-    router.push('/services/booking-confirmation')
+    // Navigate to a confirmation page with the booking ID
+    router.push(`/services/booking-confirmation?bookingId=${bookingId}`)
   }
 
   if (loading) {

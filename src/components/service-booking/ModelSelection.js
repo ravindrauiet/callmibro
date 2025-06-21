@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'react-hot-toast'
 
 export default function ModelSelection({ service, brand, onModelSelect }) {
+  const [selectedModelId, setSelectedModelId] = useState(null);
+  
   // Comprehensive data for models based on brand and service type
   const getModels = () => {
     // Normalize service name for comparison
@@ -11,6 +14,9 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
     };
     
     const normalizedService = normalizeServiceName(service);
+    
+    // More debugging
+    console.log('ModelSelection: Normalized Service =', normalizedService);
     
     if (brand.id === 'apple' && normalizedService === 'mobilescreenrepair') {
       return [
@@ -362,33 +368,88 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
   };
 
   const models = getModels();
+  
+  const handleModelSelect = (model) => {
+    try {
+      setSelectedModelId(model.id);
+      
+      // Show toast for model selection
+      toast.success(`Selected model: ${model.name}`);
+      
+      // Check if callback exists
+      if (typeof onModelSelect !== 'function') {
+        toast.error('Error: Cannot proceed with model selection');
+        return;
+      }
+      
+      // Call the parent component's onModelSelect function
+      onModelSelect(model);
+    } catch (error) {
+      toast.error(`Error selecting model: ${error.message}`);
+    }
+  };
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-2">Select Model</h2>
-      <p className="text-gray-400 mb-6">Selected Brand: {brand.name}</p>
+    <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
+      <h2 className="text-2xl font-semibold mb-2 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Select Model</h2>
+      <p className="text-gray-400 mb-6">Selected Brand: <span className="font-medium text-white">{brand.name}</span></p>
       
-      <div className="space-y-4">
+      <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
         {models.map((model) => (
           <div 
             key={model.id}
-            className="bg-[#111] border border-[#222] rounded-lg p-4 hover:border-[#e60012] transition-colors cursor-pointer"
-            onClick={() => onModelSelect(model)}
+            className={`bg-gradient-to-br from-[#1a1a1a] to-[#222] border ${
+              selectedModelId === model.id 
+                ? 'border-[#e60012] shadow-lg shadow-[#e60012]/10' 
+                : 'border-[#333] hover:border-[#e60012]/70'
+            } rounded-lg p-4 transition-all duration-300 cursor-pointer transform hover:scale-[1.01]`}
+            onClick={() => handleModelSelect(model)}
           >
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-medium">{model.name}</h3>
-                <p className="text-sm text-gray-400">Service Price: {model.price}</p>
+                <h3 className={`text-lg font-medium ${
+                  selectedModelId === model.id
+                    ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent'
+                    : 'text-white'
+                }`}>{model.name}</h3>
+                <p className="text-sm text-gray-400 mt-1">Service Price: <span className="font-medium text-white">{model.price}</span></p>
               </div>
-              <div className="text-[#e60012]">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+              <div className={`${
+                selectedModelId === model.id
+                  ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]'
+                  : 'text-gray-500'
+              } rounded-full p-1.5 transition-all duration-300`}>
+                {selectedModelId === model.id ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                )}
               </div>
             </div>
           </div>
         ))}
       </div>
+      
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #222;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #444;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+      `}</style>
     </div>
   )
 } 

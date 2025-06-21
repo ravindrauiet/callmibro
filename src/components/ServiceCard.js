@@ -1,16 +1,12 @@
 'use client'
 
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function ServiceCard({ title, description, icon, color = "from-[#e60012] to-[#ff6b6b]" }) {
-  const router = useRouter()
-  
-  const handleBookNow = () => {
-    // Create URL-friendly version of title
-    const urlTitle = title.toLowerCase().replace(/ /g, '-')
-    router.push(`/services/${urlTitle}`)
-  }
+  // Create URL-friendly version of title for the link
+  const urlTitle = title.toLowerCase().replace(/ /g, '-')
+  const targetUrl = `/services/${urlTitle}`
   
   return (
     <div className="group bg-[#111] rounded-xl h-full border border-[#222] hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all duration-300 overflow-hidden flex flex-col">
@@ -34,16 +30,16 @@ export default function ServiceCard({ title, description, icon, color = "from-[#
           {description}
         </p>
         
-        {/* Action Button */}
-        <button 
-          onClick={handleBookNow}
+        {/* Action Button - Link component */}
+        <Link 
+          href={targetUrl}
           className={`mt-auto bg-gradient-to-r ${color} text-white px-4 py-3 rounded-lg font-medium transform transition-all opacity-90 hover:opacity-100 hover:shadow-lg hover:shadow-[#e60012]/20 w-full flex items-center justify-center`}
         >
           <span>Book Service</span>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 transform group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
           </svg>
-        </button>
+        </Link>
       </div>
     </div>
   )
