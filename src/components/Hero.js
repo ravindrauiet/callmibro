@@ -51,7 +51,7 @@ export default function Hero() {
           <div className="flex flex-wrap gap-4">
             <Link 
               href="/services" 
-              className="bg-gradient-to-r from-[#e60012] to-[#ff4b4b] text-white px-8 py-3 rounded-full hover:shadow-lg hover:shadow-[#e60012]/20 transition-all duration-300 font-medium text-base flex items-center"
+              className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white px-8 py-3 rounded-full hover:shadow-lg hover:shadow-[#e60012]/20 transition-all duration-300 font-medium text-base flex items-center"
             >
               <span>Book Service</span>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
@@ -71,7 +71,7 @@ export default function Hero() {
           <div className="mt-10 flex items-center">
             <div className="mr-4 flex -space-x-2">
               {[1, 2, 3, 4].map((item) => (
-                <div key={item} className={`w-8 h-8 rounded-full bg-[#e60012] border-2 border-black flex items-center justify-center text-xs font-bold`}>
+                <div key={item} className="w-8 h-8 rounded-full bg-[#e60012] border-2 border-black flex items-center justify-center text-xs font-bold text-white">
                   {item}
                 </div>
               ))}

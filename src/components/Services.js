@@ -30,28 +30,28 @@ export default function Services() {
       description: "Professional screen & battery replacement services",
       icon: "/icons/mobile-screen.svg",
       url: "/services?category=mobile",
-      color: "from-[#ff4b4b] to-[#ff7676]"
+      primary: true
     },
     {
       title: "TV Services",
       description: "Expert screen, software & power issue solutions",
       icon: "/icons/tv.svg",
       url: "/services?category=tv",
-      color: "from-[#3366ff] to-[#5c8aff]"
+      primary: false
     },
     {
       title: "AC Repairs",
       description: "Specialized cooling, gas refill & maintenance",
       icon: "/icons/ac.svg",
       url: "/services?category=ac",
-      color: "from-[#00ccb8] to-[#39e5d5]"
+      primary: true
     },
     {
       title: "Refrigerator Fix",
       description: "Professional compressor & seal replacement",
       icon: "/icons/battery.svg", // Using battery icon as placeholder for refrigerator
       url: "/services?category=refrigerator",
-      color: "from-[#6b46c1] to-[#8a63d2]"
+      primary: false
     }
   ]
 
@@ -91,7 +91,7 @@ export default function Services() {
               } transition-all duration-700 delay-${index * 100}`}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <div className={`w-16 h-16 mb-6 p-3 rounded-lg bg-gradient-to-br ${service.color} flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}>
+              <div className={`w-16 h-16 mb-6 p-3 rounded-lg ${service.primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}>
                 <Image 
                   src={service.icon} 
                   alt={service.title} 

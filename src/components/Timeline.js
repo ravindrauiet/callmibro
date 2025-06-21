@@ -32,7 +32,7 @@ export default function Timeline() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       ),
-      color: "from-[#ff4b4b] to-[#ff7676]"
+      primary: true
     },
     {
       number: 2,
@@ -43,7 +43,7 @@ export default function Timeline() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       ),
-      color: "from-[#3366ff] to-[#5c8aff]"
+      primary: false
     },
     {
       number: 3,
@@ -54,7 +54,7 @@ export default function Timeline() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
         </svg>
       ),
-      color: "from-[#00ccb8] to-[#39e5d5]"
+      primary: true
     },
     {
       number: 4,
@@ -65,7 +65,7 @@ export default function Timeline() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
       ),
-      color: "from-[#6b46c1] to-[#8a63d2]"
+      primary: false
     }
   ]
 
@@ -115,7 +115,7 @@ export default function Timeline() {
                   {/* Outer Circle */}
                   <div className="absolute inset-0 rounded-full bg-[#e60012]/20 scale-125"></div>
                   {/* Inner Circle */}
-                  <div className={`w-16 h-16 bg-gradient-to-br ${step.color} rounded-full flex items-center justify-center z-10 shadow-lg`}>
+                  <div className={`w-16 h-16 ${step.primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} rounded-full flex items-center justify-center z-10 shadow-lg`}>
                     {step.icon}
                   </div>
                   {/* Number Badge */}
@@ -150,7 +150,7 @@ export default function Timeline() {
               {/* Step Content */}
               <div className="flex flex-col items-center mr-6 relative">
                 {/* Circle */}
-                <div className={`w-16 h-16 bg-gradient-to-br ${step.color} rounded-full flex items-center justify-center z-10 mb-2 shadow-lg`}>
+                <div className={`w-16 h-16 ${step.primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} rounded-full flex items-center justify-center z-10 mb-2 shadow-lg`}>
                   {step.icon}
                   
                   {/* Number Badge */}

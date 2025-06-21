@@ -32,7 +32,7 @@ export default function Shop() {
       rating: 4.8,
       reviews: 126,
       url: "/spare-parts/phone-battery",
-      color: "from-[#ff4b4b] to-[#ff7676]",
+      featured: true,
       badge: "Bestseller"
     },
     {
@@ -42,7 +42,7 @@ export default function Shop() {
       rating: 4.5,
       reviews: 84,
       url: "/spare-parts/laptop-charger",
-      color: "from-[#3366ff] to-[#5c8aff]"
+      featured: false
     },
     {
       name: "TV Remote",
@@ -51,7 +51,7 @@ export default function Shop() {
       rating: 4.7,
       reviews: 52,
       url: "/spare-parts/tv-remote",
-      color: "from-[#00ccb8] to-[#39e5d5]",
+      featured: true,
       badge: "New"
     }
   ]
@@ -176,7 +176,7 @@ export default function Shop() {
                 <h3 className="text-lg font-bold mb-1 group-hover:text-[#e60012] transition-colors">{product.name}</h3>
                 <div className="text-[#e60012] font-medium mb-4">₹{product.price.toLocaleString()}</div>
                 
-                <div className={`mt-2 py-2 px-4 rounded-lg text-center text-white bg-gradient-to-r ${product.color} opacity-80 group-hover:opacity-100 transition-opacity`}>
+                <div className={`mt-2 py-2 px-4 rounded-lg text-center text-white ${product.featured ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} opacity-80 group-hover:opacity-100 transition-opacity`}>
                   View Details
                 </div>
               </div>

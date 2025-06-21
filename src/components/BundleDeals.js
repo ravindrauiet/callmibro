@@ -33,7 +33,7 @@ export default function BundleDeals() {
       image: "/product-deals.jpg",
       discount: "20% OFF",
       url: "/deals/protection-pack",
-      color: "from-[#ff4b4b] to-[#ff7676]"
+      featured: true
     },
     {
       id: 2,
@@ -42,7 +42,7 @@ export default function BundleDeals() {
       image: "/bundle-deals.jpg",
       discount: "15% OFF",
       url: "/deals/repair-bundle",
-      color: "from-[#3366ff] to-[#5c8aff]"
+      featured: false
     }
   ];
 
@@ -105,7 +105,7 @@ export default function BundleDeals() {
                 <p className="text-gray-400 text-sm mb-5">{bundle.description}</p>
                 
                 <div className="flex items-center">
-                  <div className={`px-4 py-2 rounded-lg text-white bg-gradient-to-r ${bundle.color} flex items-center`}>
+                  <div className={`px-4 py-2 rounded-lg text-white ${bundle.featured ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} flex items-center`}>
                     <span className="font-medium">View Deal</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />

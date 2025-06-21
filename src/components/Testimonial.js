@@ -19,7 +19,7 @@ export default function Testimonial() {
       image: "/icons/certified.svg",
       rating: 5,
       serviceName: "iPhone Screen Repair",
-      color: "from-[#ff4b4b] to-[#ff7676]"
+      primary: true
     },
     {
       id: 2,
@@ -29,7 +29,7 @@ export default function Testimonial() {
       image: "/icons/ontime.svg",
       rating: 4.8,
       serviceName: "AC Repair Service", 
-      color: "from-[#3366ff] to-[#5c8aff]"
+      primary: false
     },
     {
       id: 3,
@@ -39,7 +39,7 @@ export default function Testimonial() {
       image: "/icons/pricing.svg",
       rating: 5,
       serviceName: "Refrigerator Repair",
-      color: "from-[#00ccb8] to-[#39e5d5]"
+      primary: true
     }
   ]
   
@@ -171,14 +171,14 @@ export default function Testimonial() {
           <div className="bg-[#111] border border-[#222] rounded-xl overflow-hidden shadow-xl transition-all">
             <div className="relative">
               {/* Background Gradient */}
-              <div className={`absolute inset-0 bg-gradient-to-r ${testimonials[activeIndex].color} opacity-10`}></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#e60012]/10 to-[#ff6b6b]/10"></div>
               
               {/* Content */}
               <div className="relative p-8 md:p-10">
                 <div className="md:flex items-center gap-8">
                   {/* Profile Section */}
                   <div className="mb-8 md:mb-0 flex flex-col items-center md:items-start">
-                    <div className={`w-20 h-20 rounded-full bg-gradient-to-r ${testimonials[activeIndex].color} p-1 mb-4`}>
+                    <div className={`w-20 h-20 rounded-full ${testimonials[activeIndex].primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} p-1 mb-4`}>
                       <div className="bg-black rounded-full w-full h-full flex items-center justify-center overflow-hidden">
                         <Image 
                           src={testimonials[activeIndex].image} 
@@ -199,7 +199,7 @@ export default function Testimonial() {
                   
                   {/* Quote Section */}
                   <div className="flex-1">
-                    <div className={`w-12 h-12 mb-4 rounded-full bg-gradient-to-r ${testimonials[activeIndex].color} flex items-center justify-center text-white text-2xl font-serif`}>
+                    <div className="w-12 h-12 mb-4 rounded-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white text-2xl font-serif">
                       "
                     </div>
                     
@@ -210,7 +210,7 @@ export default function Testimonial() {
                     </div>
                     
                     <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#222] text-sm">
-                      <span className={`inline-block w-2 h-2 rounded-full bg-gradient-to-r ${testimonials[activeIndex].color} mr-2`}></span>
+                      <span className="inline-block w-2 h-2 rounded-full bg-[#e60012] mr-2"></span>
                       {testimonials[activeIndex].serviceName}
                     </div>
                   </div>
