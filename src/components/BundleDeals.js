@@ -1,46 +1,119 @@
+'use client'
+
+import Image from 'next/image'
+import Link from 'next/link'
+import { useState, useEffect } from 'react'
+
 export default function BundleDeals() {
-  // Bundle data
+  const [isVisible, setIsVisible] = useState(false)
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setIsVisible(true)
+      }
+    }, {
+      threshold: 0.2
+    })
+    
+    const element = document.getElementById('bundle-deals-section')
+    if (element) observer.observe(element)
+    
+    return () => {
+      if (element) observer.unobserve(element)
+    }
+  }, [])
+  
+  // Enhanced bundle data
   const bundles = [
     {
       id: 1,
-      title: "Product Deals",
+      title: "Device Protection Pack",
+      description: "Screen protector, case & extended warranty",
       image: "/product-deals.jpg",
+      discount: "20% OFF",
+      url: "/deals/protection-pack",
+      color: "from-[#ff4b4b] to-[#ff7676]"
     },
     {
       id: 2,
-      title: "Bundle Deals",
+      title: "Complete Repair Bundle",
+      description: "Screen, battery & diagnostic service",
       image: "/bundle-deals.jpg",
+      discount: "15% OFF",
+      url: "/deals/repair-bundle",
+      color: "from-[#3366ff] to-[#5c8aff]"
     }
   ];
 
   return (
-    <section className="bg-black py-8 sm:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Bundle Deals</h2>
+    <section id="bundle-deals-section" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden bg-gradient-to-b from-black to-[#111]">
+      {/* Background Effects */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="container mx-auto max-w-6xl">
+        {/* Section Heading */}
+        <div 
+          className={`mb-12 md:mb-16 text-center transform transition-all duration-700 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
+        >
+          <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
+            <span className="text-[#e60012] text-sm font-medium">Special Offers</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+            Premium <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Bundle Deals</span>
+          </h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Save with our specially curated packages designed to give you maximum value
+          </p>
+        </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          {bundles.map(bundle => (
-            <div 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+          {bundles.map((bundle, index) => (
+            <Link 
+              href={bundle.url}
               key={bundle.id} 
-              className="bg-[#111] border border-[#222] rounded-lg overflow-hidden transition-all"
+              className={`group bg-[#111] border border-[#222] rounded-xl overflow-hidden transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transform ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+              } transition-all duration-700`}
+              style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <div className="h-32 sm:h-40 flex items-center justify-center p-3 sm:p-4">
-                <img 
+              <div className="relative h-48 sm:h-56 overflow-hidden">
+                {/* Image */}
+                <Image 
                   src={bundle.image} 
                   alt={bundle.title}
-                  className="max-h-full object-contain"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-              </div>
-              <div className="p-3 sm:p-4">
-                <h3 className="text-white font-medium text-base sm:text-lg mb-3 sm:mb-4 text-center">{bundle.title}</h3>
                 
-                <div className="flex justify-center">
-                  <button className="bg-[#e60012] text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded hover:bg-[#b3000f] transition-colors text-sm sm:text-base">
-                    VIEW DEAL
-                  </button>
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+                
+                {/* Discount Badge */}
+                <div className="absolute top-4 right-4 bg-white text-[#111] px-3 py-1 rounded-full font-bold text-sm">
+                  {bundle.discount}
                 </div>
               </div>
-            </div>
+              
+              <div className="p-6">
+                <h3 className="text-xl font-bold mb-2 group-hover:text-[#e60012] transition-colors">{bundle.title}</h3>
+                <p className="text-gray-400 text-sm mb-5">{bundle.description}</p>
+                
+                <div className="flex items-center">
+                  <div className={`px-4 py-2 rounded-lg text-white bg-gradient-to-r ${bundle.color} flex items-center`}>
+                    <span className="font-medium">View Deal</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
       </div>
