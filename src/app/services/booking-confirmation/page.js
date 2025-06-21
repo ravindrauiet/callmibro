@@ -25,6 +25,7 @@ export default function BookingConfirmationPage() {
   const date = searchParams?.get('date')
   const timeSlot = searchParams?.get('timeSlot')
   const isReschedule = searchParams?.get('reschedule') === 'true'
+  const paymentSuccess = searchParams?.get('payment') === 'success'
   
   useEffect(() => {
     // If there's a bookingId, we need to fetch the booking details
@@ -142,12 +143,12 @@ export default function BookingConfirmationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-gradient-to-b from-black to-[#111] text-white">
         <Header activePage="services" />
         
         <main className="py-10 px-4 max-w-6xl mx-auto">
-          <div className="bg-[#111] border border-[#222] rounded-xl p-6 md:p-12 max-w-3xl mx-auto text-center">
-            <div className="animate-spin w-12 h-12 border-4 border-[#e60012] border-t-transparent rounded-full mx-auto mb-4"></div>
+          <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] border border-[#222] rounded-xl p-6 md:p-12 max-w-3xl mx-auto text-center shadow-lg">
+            <div className="animate-spin w-12 h-12 border-4 border-t-transparent rounded-full mx-auto mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b]"></div>
             <p className="text-xl">Processing your booking...</p>
           </div>
         </main>
@@ -159,23 +160,23 @@ export default function BookingConfirmationPage() {
   
   if (error) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-gradient-to-b from-black to-[#111] text-white">
         <Header activePage="services" />
         
         <main className="py-10 px-4 max-w-6xl mx-auto">
-          <div className="bg-[#111] border border-[#222] rounded-xl p-6 md:p-12 max-w-3xl mx-auto text-center">
-            <div className="w-20 h-20 rounded-full bg-red-900 mx-auto flex items-center justify-center mb-6">
+          <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] border border-[#222] rounded-xl p-6 md:p-12 max-w-3xl mx-auto text-center shadow-lg">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-r from-red-900 to-red-800 mx-auto flex items-center justify-center mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
             
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Booking Error</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Booking Error</h1>
             <p className="text-gray-400 mb-8">{error}</p>
             
             <button 
               onClick={() => router.push('/services')}
-              className="bg-[#e60012] hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#ff6b6b] hover:to-[#e60012] text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md"
             >
               Back to Services
             </button>
@@ -188,7 +189,7 @@ export default function BookingConfirmationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-black to-[#111] text-white">
       <Header activePage="services" />
       
       <main className="py-10 px-4 max-w-6xl mx-auto">
@@ -196,28 +197,28 @@ export default function BookingConfirmationPage() {
         <div className="max-w-3xl mx-auto mb-10">
           <div className="flex justify-between relative">
             <div className="flex flex-col items-center z-10">
-              <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-600 to-green-700 flex items-center justify-center shadow-md">
                 <span className="text-white">✓</span>
               </div>
               <span className="text-sm mt-2 text-gray-400">Select Service</span>
             </div>
             
             <div className="flex flex-col items-center z-10">
-              <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-600 to-green-700 flex items-center justify-center shadow-md">
                 <span className="text-white">✓</span>
               </div>
               <span className="text-sm mt-2 text-gray-400">Choose Technician</span>
             </div>
             
             <div className="flex flex-col items-center z-10">
-              <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-600 to-green-700 flex items-center justify-center shadow-md">
                 <span className="text-white">✓</span>
               </div>
               <span className="text-sm mt-2 text-gray-400">Schedule & Address</span>
             </div>
             
             <div className="flex flex-col items-center z-10">
-              <div className="w-10 h-10 rounded-full bg-[#e60012] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] flex items-center justify-center shadow-md">
                 <span className="text-white">4</span>
               </div>
               <span className="text-sm mt-2 text-white font-medium">Confirmation</span>
@@ -225,19 +226,19 @@ export default function BookingConfirmationPage() {
             
             {/* Progress Line */}
             <div className="absolute top-5 left-0 w-full h-1 bg-gray-700 -z-0">
-              <div className="h-full bg-green-600" style={{width: '100%'}}></div>
+              <div className="h-full bg-gradient-to-r from-green-600 to-green-700" style={{width: '100%'}}></div>
             </div>
           </div>
         </div>
       
-        <div className="bg-[#111] border border-[#222] rounded-xl p-6 md:p-12 max-w-3xl mx-auto">
-          <div className="w-20 h-20 rounded-full bg-green-900 mx-auto flex items-center justify-center mb-6">
+        <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] border border-[#222] rounded-xl p-6 md:p-12 max-w-3xl mx-auto shadow-lg">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-r from-green-700 to-green-800 mx-auto flex items-center justify-center mb-6 shadow-lg">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
           
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">
             {isReschedule ? 'Booking Rescheduled!' : 'Booking Confirmed!'}
           </h1>
           
@@ -247,69 +248,82 @@ export default function BookingConfirmationPage() {
           </p>
           
           {bookingDetails && (
-            <div className="bg-[#222] rounded-lg p-6 mb-8">
-              <h3 className="text-xl font-semibold mb-4">Our Repair Services</h3>
+            <div className="bg-[#161616] rounded-lg p-6 mb-8 border border-[#222] shadow-md">
+              <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Our Repair Services</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <p className="text-gray-400">Service</p>
+                <div className="bg-[#0d0d0d] p-4 rounded-lg border border-[#222]">
+                  <p className="text-gray-400 mb-1">Service</p>
                   <p className="font-medium">{bookingDetails.serviceName}</p>
                 </div>
                 
-                <div>
-                  <p className="text-gray-400">Date & Time</p>
+                <div className="bg-[#0d0d0d] p-4 rounded-lg border border-[#222]">
+                  <p className="text-gray-400 mb-1">Date & Time</p>
                   <p className="font-medium">
                     {bookingDetails.schedule?.date || 'To be confirmed'}, {bookingDetails.schedule?.timeSlot || ''}
                   </p>
                 </div>
                 
-                <div>
-                  <p className="text-gray-400">Address</p>
+                <div className="bg-[#0d0d0d] p-4 rounded-lg border border-[#222]">
+                  <p className="text-gray-400 mb-1">Address</p>
                   <p className="font-medium">{bookingDetails.address?.street || 'To be confirmed'}</p>
                 </div>
                 
-                <div>
-                  <p className="text-gray-400">Price</p>
-                  <p className="font-medium text-[#e60012]">₹ 1,200</p>
+                <div className="bg-[#0d0d0d] p-4 rounded-lg border border-[#222]">
+                  <p className="text-gray-400 mb-1">Price</p>
+                  <p className="font-medium bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">₹ 1,200</p>
                 </div>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-3 mt-6">
                 <button 
                   onClick={() => router.push(`/services/booking?serviceId=${bookingDetails.serviceId}&serviceName=${bookingDetails.serviceName}&edit=true`)}
-                  className="px-4 py-2 border border-[#e60012] text-[#e60012] hover:bg-[#e60012] hover:text-white transition-colors rounded-md flex-1"
+                  className="px-4 py-3 border border-[#e60012] text-[#e60012] hover:bg-[#e60012] hover:text-white transition-all rounded-lg flex-1 font-medium"
                 >
                   Modify Booking
                 </button>
                 <button 
                   onClick={() => router.push(`/payment?bookingId=${bookingDetails.id}`)}
-                  className="px-4 py-2 bg-[#e60012] text-white hover:bg-red-700 transition-colors rounded-md flex-1"
+                  className="px-4 py-3 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#ff6b6b] hover:to-[#e60012] text-white transition-all rounded-lg flex-1 font-medium shadow-md"
                 >
                   Confirm & Pay
                 </button>
               </div>
+              
+              {bookingDetails.payment && bookingDetails.payment.status === 'paid' && (
+                <div className="mt-4 bg-gradient-to-r from-green-900/30 to-green-800/30 border border-green-800 rounded-lg p-4 text-center">
+                  <p className="text-green-300">
+                    Payment completed! This booking has been added to your <button 
+                      onClick={() => router.push('/orders')}
+                      className="underline hover:text-white transition-colors font-medium"
+                    >
+                      order history
+                    </button>.
+                  </p>
+                </div>
+              )}
             </div>
           )}
           
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">What happens next?</h2>
+            <h2 className="text-lg font-semibold mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">What happens next?</h2>
             <div className="text-left space-y-3">
               <div className="flex items-start">
-                <div className="bg-[#e60012] rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-0.5">
+                <div className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-0.5 shadow-sm">
                   <span className="text-white text-sm">1</span>
                 </div>
                 <p className="text-gray-300">Our team will contact you within 2 hours to confirm your booking details.</p>
               </div>
               
               <div className="flex items-start">
-                <div className="bg-[#e60012] rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-0.5">
+                <div className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-0.5 shadow-sm">
                   <span className="text-white text-sm">2</span>
                 </div>
                 <p className="text-gray-300">A technician will be assigned and will arrive at your location on the scheduled date and time.</p>
               </div>
               
               <div className="flex items-start">
-                <div className="bg-[#e60012] rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-0.5">
+                <div className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-0.5 shadow-sm">
                   <span className="text-white text-sm">3</span>
                 </div>
                 <p className="text-gray-300">You can track your booking status from your profile section.</p>
@@ -320,7 +334,7 @@ export default function BookingConfirmationPage() {
           <div className="text-center">
             <button 
               onClick={() => router.push('/')}
-              className="px-6 py-3 bg-gray-800 text-white hover:bg-gray-700 transition-colors rounded-md"
+              className="px-6 py-3 bg-[#222] hover:bg-[#333] text-white transition-all rounded-lg shadow-md"
             >
               Back to Home
             </button>

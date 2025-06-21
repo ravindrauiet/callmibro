@@ -8,10 +8,10 @@ export const metadata = {
 
 export default function OrdersLayout({ children }) {
   return (
-    <>
-      <Header />
-      <main>{children}</main>
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-black to-[#111]">
+      <Header activePage="orders" />
+      <main className="flex-grow">{children}</main>
       <Footer />
-    </>
+    </div>
   );
 } 
