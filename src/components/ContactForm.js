@@ -67,75 +67,84 @@ export default function ContactForm() {
   }
 
   return (
-    <div className="bg-[#111] border border-[#333] rounded-lg p-4 sm:p-8">
-      <h2 className="text-2xl font-bold mb-6 text-center sm:text-left">Send Us a Message</h2>
+    <div className="bg-[#111] border border-[#333] rounded-xl p-6 sm:p-8 shadow-lg hover:shadow-[#e60012]/10 transition-shadow">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-2">Send Us a Message</h2>
+        <p className="text-gray-400 text-sm">Fill out the form below and we'll get back to you shortly</p>
+      </div>
       
       {submitSuccess ? (
-        <div className="bg-green-900 text-green-100 p-4 rounded mb-6">
-          Thank you for your message! We'll get back to you soon.
+        <div className="bg-gradient-to-r from-green-900 to-green-800 text-green-100 p-4 rounded-lg mb-6 border border-green-700 flex items-center">
+          <svg className="w-5 h-5 mr-2 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span>Thank you for your message! We'll get back to you soon.</span>
         </div>
       ) : null}
       
       {submitError && (
-        <div className="bg-red-900 text-red-100 p-4 rounded mb-6">
-          {submitError}
+        <div className="bg-gradient-to-r from-red-900 to-red-800 text-red-100 p-4 rounded-lg mb-6 border border-red-700 flex items-center">
+          <svg className="w-5 h-5 mr-2 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>{submitError}</span>
         </div>
       )}
       
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
           {/* Name field */}
           <div>
-            <label htmlFor="name" className="block text-white mb-2">Full Name</label>
+            <label htmlFor="name" className="block text-white text-sm font-medium mb-2">Full Name <span className="text-[#e60012]">*</span></label>
             <input
               type="text"
               id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full bg-[#222] border border-[#333] rounded px-3 py-2 text-white focus:outline-none focus:border-[#e60012]"
+              className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
               required
             />
           </div>
           
           {/* Email field */}
           <div>
-            <label htmlFor="email" className="block text-white mb-2">Email</label>
+            <label htmlFor="email" className="block text-white text-sm font-medium mb-2">Email <span className="text-[#e60012]">*</span></label>
             <input
               type="email"
               id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full bg-[#222] border border-[#333] rounded px-3 py-2 text-white focus:outline-none focus:border-[#e60012]"
+              className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
               required
             />
           </div>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
           {/* Phone field */}
           <div>
-            <label htmlFor="phone" className="block text-white mb-2">Phone Number</label>
+            <label htmlFor="phone" className="block text-white text-sm font-medium mb-2">Phone Number</label>
             <input
               type="tel"
               id="phone"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full bg-[#222] border border-[#333] rounded px-3 py-2 text-white focus:outline-none focus:border-[#e60012]"
+              className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
             />
           </div>
           
           {/* Subject field */}
           <div>
-            <label htmlFor="subject" className="block text-white mb-2">Subject</label>
+            <label htmlFor="subject" className="block text-white text-sm font-medium mb-2">Subject <span className="text-[#e60012]">*</span></label>
             <select
               id="subject"
               name="subject"
               value={formData.subject}
               onChange={handleChange}
-              className="w-full bg-[#222] border border-[#333] rounded px-3 py-2 text-white focus:outline-none focus:border-[#e60012]"
+              className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors appearance-none cursor-pointer"
               required
             >
               <option value="">Select a subject</option>
@@ -149,21 +158,21 @@ export default function ContactForm() {
         
         {/* Message field */}
         <div className="mb-6">
-          <label htmlFor="message" className="block text-white mb-2">Message</label>
+          <label htmlFor="message" className="block text-white text-sm font-medium mb-2">Message <span className="text-[#e60012]">*</span></label>
           <textarea
             id="message"
             name="message"
             value={formData.message}
             onChange={handleChange}
             rows="5"
-            className="w-full bg-[#222] border border-[#333] rounded px-3 py-2 text-white focus:outline-none focus:border-[#e60012]"
+            className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
             required
           ></textarea>
         </div>
         
         <button
           type="submit"
-          className={`w-full bg-[#e60012] text-white py-3 rounded hover:bg-[#b3000f] transition-colors flex items-center justify-center ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
+          className={`w-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white py-3 rounded-lg hover:shadow-lg hover:shadow-[#e60012]/20 transition-all flex items-center justify-center ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
           disabled={isSubmitting}
         >
           {isSubmitting ? (
@@ -175,7 +184,12 @@ export default function ContactForm() {
               Sending...
             </>
           ) : (
-            'Send Message'
+            <>
+              Send Message
+              <svg className="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </>
           )}
         </button>
       </form>
