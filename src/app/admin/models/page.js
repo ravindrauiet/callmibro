@@ -21,6 +21,7 @@ export default function ModelsManagement() {
     name: '',
     brandId: '',
     description: '',
+    photoURL: '',
     isActive: true
   })
 
@@ -79,6 +80,7 @@ export default function ModelsManagement() {
         name: model.name || '',
         brandId: model.brandId || '',
         description: model.description || '',
+        photoURL: model.photoURL || '',
         isActive: model.isActive !== false
       })
       setSelectedModel(model)
@@ -87,6 +89,7 @@ export default function ModelsManagement() {
         name: '',
         brandId: brands.length > 0 ? brands[0].id : '',
         description: '',
+        photoURL: '',
         isActive: true
       })
       setSelectedModel(null)
@@ -109,6 +112,7 @@ export default function ModelsManagement() {
         await updateDoc(doc(db, 'brands', modelForm.brandId, 'models', selectedModel.id), {
           name: modelForm.name,
           description: modelForm.description,
+          photoURL: modelForm.photoURL,
           isActive: modelForm.isActive,
           updatedAt: serverTimestamp()
         })
@@ -123,6 +127,7 @@ export default function ModelsManagement() {
                 ...model, 
                 name: modelForm.name,
                 description: modelForm.description,
+                photoURL: modelForm.photoURL,
                 isActive: modelForm.isActive,
                 brandId: modelForm.brandId,
                 brandName: brandName,
@@ -138,6 +143,7 @@ export default function ModelsManagement() {
         const docRef = await addDoc(collection(db, 'brands', modelForm.brandId, 'models'), {
           name: modelForm.name,
           description: modelForm.description,
+          photoURL: modelForm.photoURL,
           isActive: modelForm.isActive,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
@@ -249,6 +255,9 @@ export default function ModelsManagement() {
                   Model
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Image
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Brand
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -271,6 +280,23 @@ export default function ModelsManagement() {
                   <tr key={`${model.brandId}-${model.id}`} className="hover:bg-[#222] transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-white">{model.name}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {model.photoURL ? (
+                        <div className="h-10 w-10 bg-[#222] rounded-md flex items-center justify-center overflow-hidden">
+                          <img 
+                            src={model.photoURL} 
+                            alt={model.name} 
+                            className="h-8 w-8 object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-10 w-10 bg-[#222] rounded-md flex items-center justify-center text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {model.brandName}
@@ -313,7 +339,7 @@ export default function ModelsManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-400">
+                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-400">
                     {searchTerm || filterBrand !== 'all' 
                       ? 'No models found matching your search criteria' 
                       : 'No models found. Add your first model!'
@@ -365,6 +391,36 @@ export default function ModelsManagement() {
                   className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
                   required
                 />
+              </div>
+              
+              <div>
+                <label htmlFor="photoURL" className="block text-sm font-medium text-gray-300 mb-1">
+                  Photo URL
+                </label>
+                <input
+                  type="text"
+                  id="photoURL"
+                  value={modelForm.photoURL}
+                  onChange={(e) => setModelForm({...modelForm, photoURL: e.target.value})}
+                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  placeholder="https://example.com/image.jpg"
+                />
+                {modelForm.photoURL && (
+                  <div className="mt-2 flex items-center">
+                    <div className="h-12 w-12 bg-[#222] rounded-md flex items-center justify-center overflow-hidden">
+                      <img 
+                        src={modelForm.photoURL} 
+                        alt="Preview" 
+                        className="h-10 w-10 object-contain"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /%3E%3C/svg%3E";
+                        }}
+                      />
+                    </div>
+                    <span className="ml-2 text-xs text-gray-400">Preview (if URL is valid)</span>
+                  </div>
+                )}
               </div>
               
               <div>
