@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 export default function ServiceCard({ title, description, icon }) {
@@ -12,9 +13,14 @@ export default function ServiceCard({ title, description, icon }) {
   }
   
   return (
-    <div className="bg-[#111] rounded-lg p-4 sm:p-8 flex flex-col items-center text-center">
-      <div className="text-[#e60012] mb-4 sm:mb-6">
-        <img src={icon} alt={title} className="h-12 w-12 sm:h-16 sm:w-16" />
+    <div className="bg-[#111] rounded-lg p-4 sm:p-8 flex flex-col items-center text-center hover:border-[#e60012] hover:shadow-[0_0_10px_rgba(230,0,18,0.3)] transition-all border border-[#222]">
+      <div className="text-[#e60012] mb-4 sm:mb-6 h-12 w-12 sm:h-16 sm:w-16 relative">
+        <Image 
+          src={icon} 
+          alt={title} 
+          fill
+          className="object-contain"
+        />
       </div>
       <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">{title}</h3>
       <p className="text-gray-400 text-xs sm:text-sm mb-4 sm:mb-6">{description}</p>

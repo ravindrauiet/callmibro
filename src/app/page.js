@@ -1,6 +1,7 @@
 import Header from '../components/Header'
 import Hero from '../components/Hero'
 import Services from '../components/Services'
+import BundleDeals from '../components/BundleDeals'
 import Shop from '../components/Shop'
 import Timeline from '../components/Timeline'
 import Testimonial from '../components/Testimonial'
@@ -12,8 +13,9 @@ export default function Home() {
       <Header activePage="home" />
       <Hero />
       <Services />
-      <Shop />
       <Timeline />
+      <BundleDeals />
+      <Shop />
       <Testimonial />
       <Footer />
     </div>
