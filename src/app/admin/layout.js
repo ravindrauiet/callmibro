@@ -1,95 +1,115 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { collection, getDocs, query, where } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { toast } from 'react-hot-toast'
 
 export default function AdminLayout({ children }) {
-  const { currentUser } = useAuth()
-  const router = useRouter()
-  const pathname = usePathname()
+  const { user, loading: authLoading } = useAuth()
   const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [adminLoading, setAdminLoading] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const pathname = usePathname()
+  const router = useRouter()
 
-  // Check if current user is an admin
+  // Check if user is admin
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!currentUser) {
-        router.push('/admin/login')
+    const checkAdmin = async () => {
+      if (!user) {
+        setAdminLoading(false)
         return
       }
 
       try {
-        const adminQuery = query(
-          collection(db, 'admins'),
-          where('email', '==', currentUser.email)
-        )
-        const querySnapshot = await getDocs(adminQuery)
-        
-        if (querySnapshot.empty) {
-          toast.error('Access denied. You do not have admin privileges.')
-          router.push('/')
-          return
+        const adminsRef = collection(db, 'admins')
+        const q = query(adminsRef, where('email', '==', user.email))
+        const querySnapshot = await getDocs(q)
+
+        if (!querySnapshot.empty) {
+          setIsAdmin(true)
+          // If user is admin and on login page, redirect to admin dashboard
+          if (pathname === '/admin/login') {
+            router.push('/admin')
+          }
+        } else {
+          // Only redirect to login if not already on login page
+          if (pathname !== '/admin/login') {
+            toast.error('You do not have admin access')
+            router.push('/admin/login')
+          }
         }
-        
-        setIsAdmin(true)
       } catch (error) {
         console.error('Error checking admin status:', error)
-        toast.error('Something went wrong. Please try again.')
-        router.push('/')
       } finally {
-        setLoading(false)
+        setAdminLoading(false)
       }
     }
 
-    checkAdminStatus()
-  }, [currentUser, router])
+    if (!authLoading) {
+      checkAdmin()
+    }
+  }, [user, authLoading, router, pathname])
 
-  // Navigation items
-  const navItems = [
-    { name: 'Dashboard', path: '/admin', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-    { name: 'Services', path: '/admin/services', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
-    { name: 'Bookings', path: '/admin/bookings', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
-    { name: 'Users', path: '/admin/users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-    { name: 'Technicians', path: '/admin/technicians', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
-    { name: 'Products', path: '/admin/products', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
-    { name: 'Orders', path: '/admin/orders', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
-    { name: 'Settings', path: '/admin/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
-  ]
+  // If not logged in, redirect to login
+  useEffect(() => {
+    if (!authLoading && !user && pathname !== '/admin/login') {
+      router.push('/admin/login')
+    }
+  }, [user, authLoading, pathname, router])
 
-  if (loading) {
+  // Skip layout on login page
+  if (pathname === '/admin/login') {
+    return <>{children}</>
+  }
+
+  // Show loading while checking admin status
+  if (authLoading || adminLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#111]">
+      <div className="flex items-center justify-center min-h-screen bg-[#121212]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#e60012]"></div>
       </div>
     )
   }
 
-  if (!isAdmin) {
+  // If not admin, don't render the admin layout
+  if (!isAdmin && pathname !== '/admin/login') {
     return null
   }
 
+  const navItems = [
+    { name: 'Dashboard', href: '/admin', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+    { name: 'Services', href: '/admin/services', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+    { name: 'Bookings', href: '/admin/bookings', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+    { name: 'Products', href: '/admin/products', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+    { name: 'Orders', href: '/admin/orders', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+    { name: 'Users', href: '/admin/users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+    { name: 'Technicians', href: '/admin/technicians', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+    { name: 'Brands', href: '/admin/brands', icon: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z' },
+    { name: 'Models', href: '/admin/models', icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z' },
+    { name: 'Settings', href: '/admin/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+  ]
+
   return (
-    <div className="flex h-screen bg-[#111]">
+    <div className="flex h-screen bg-[#121212] text-white">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-[#0a0a0a] border-r border-[#222] transition-all duration-300 flex flex-col`}>
+      <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300 bg-[#1a1a1a] border-r border-[#333] flex flex-col`}>
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-[#222]">
-          <Link href="/admin" className="flex items-center">
-            <span className="text-[#e60012] font-bold text-2xl">●</span>
-            {sidebarOpen && <span className="ml-2 font-medium text-white">CallMiBro Admin</span>}
-          </Link>
+        <div className="h-16 flex items-center justify-between px-4 border-b border-[#333]">
+          {isSidebarOpen ? (
+            <Link href="/" className="text-xl font-bold text-[#e60012]">CallMiBro Admin</Link>
+          ) : (
+            <Link href="/" className="text-xl font-bold text-[#e60012]">CMB</Link>
+          )}
           <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1 rounded-md text-gray-400 hover:bg-[#222] hover:text-white"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-1 rounded-md hover:bg-[#333]"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {sidebarOpen ? (
+              {isSidebarOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
               ) : (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
@@ -99,30 +119,24 @@ export default function AdminLayout({ children }) {
         </div>
         
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4 px-2">
-          <ul className="space-y-1">
+        <nav className="flex-1 overflow-y-auto py-4">
+          <ul className="space-y-1 px-2">
             {navItems.map((item) => {
-              const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`)
+              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
               return (
                 <li key={item.name}>
                   <Link 
-                    href={item.path}
-                    className={`flex items-center px-3 py-2.5 rounded-md transition-colors ${
+                    href={item.href}
+                    className={`flex items-center px-4 py-3 rounded-md ${
                       isActive 
-                        ? 'bg-[#e60012]/10 text-[#e60012]' 
-                        : 'text-gray-300 hover:bg-[#1a1a1a] hover:text-white'
+                        ? 'bg-[#e60012] text-white' 
+                        : 'hover:bg-[#333] text-gray-300'
                     }`}
                   >
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className="h-5 w-5 mr-3 flex-shrink-0" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${isSidebarOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                     </svg>
-                    {sidebarOpen && <span>{item.name}</span>}
+                    {isSidebarOpen && <span>{item.name}</span>}
                   </Link>
                 </li>
               )
@@ -131,44 +145,41 @@ export default function AdminLayout({ children }) {
         </nav>
         
         {/* User info */}
-        <div className={`p-4 border-t border-[#222] ${sidebarOpen ? '' : 'hidden'}`}>
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white">
-              {currentUser?.email?.charAt(0).toUpperCase()}
-            </div>
-            {sidebarOpen && (
-              <div className="ml-3">
-                <p className="text-sm font-medium text-white">{currentUser?.displayName || currentUser?.email?.split('@')[0]}</p>
-                <p className="text-xs text-gray-400">Admin</p>
-              </div>
-            )}
+        <div className="p-4 border-t border-[#333] flex items-center">
+          <div className="h-8 w-8 rounded-full bg-[#333] flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
           </div>
+          {isSidebarOpen && (
+            <div className="ml-3">
+              <p className="text-sm font-medium text-white">{user?.displayName || user?.email}</p>
+              <p className="text-xs text-gray-400">Admin</p>
+            </div>
+          )}
         </div>
       </div>
       
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-[#0a0a0a] border-b border-[#222] h-16 flex items-center justify-between px-6">
-          <h1 className="text-xl font-medium">Admin Dashboard</h1>
+        <header className="h-16 bg-[#1a1a1a] border-b border-[#333] flex items-center justify-between px-6">
+          <div className="flex items-center">
+            <h1 className="text-xl font-semibold text-white">
+              {navItems.find(item => pathname === item.href || pathname.startsWith(`${item.href}/`))?.name || 'Admin Panel'}
+            </h1>
+          </div>
           <div className="flex items-center space-x-4">
-            <Link href="/" className="text-gray-400 hover:text-white">
-              View Site
-            </Link>
-            <button 
-              onClick={() => router.push('/admin/profile')}
-              className="text-gray-400 hover:text-white"
-            >
+            <Link href="/" className="text-gray-300 hover:text-white">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-            </button>
+            </Link>
           </div>
         </header>
         
         {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-[#111] p-6">
+        <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>
       </div>

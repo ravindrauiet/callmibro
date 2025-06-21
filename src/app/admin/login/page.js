@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { collection, query, where, getDocs } from 'firebase/firestore'
@@ -12,9 +12,37 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [checkingAuth, setCheckingAuth] = useState(true)
   
   const router = useRouter()
-  const { login } = useAuth()
+  const { login, user } = useAuth()
+
+  // Check if user is already logged in and is an admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user) {
+        try {
+          const adminQuery = query(
+            collection(db, 'admins'),
+            where('email', '==', user.email)
+          )
+          
+          const querySnapshot = await getDocs(adminQuery)
+          
+          if (!querySnapshot.empty) {
+            // User is already logged in and is an admin, redirect to admin dashboard
+            router.push('/admin')
+            return
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error)
+        }
+      }
+      setCheckingAuth(false)
+    }
+
+    checkAdminStatus()
+  }, [user, router])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -48,6 +76,14 @@ export default function AdminLogin() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#111]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#e60012]"></div>
+      </div>
+    )
   }
 
   return (

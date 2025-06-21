@@ -300,36 +300,35 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Set current user on auth state change
+  // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
-      
       if (user) {
-        // Fetch user profile when user is logged in
         await fetchUserProfile(user.uid);
       } else {
         setUserProfile(null);
       }
-      
       setLoading(false);
     });
 
-    // Cleanup subscription
     return unsubscribe;
   }, []);
 
+  // Context value
   const value = {
+    user: currentUser,
     currentUser,
     userProfile,
+    loading,
     authError,
     authInProgress,
     signup,
     login,
     logout,
-    resetPassword,
     googleSignIn,
     facebookSignIn,
+    resetPassword,
     updateUserProfile
   };
 
