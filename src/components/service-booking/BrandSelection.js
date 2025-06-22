@@ -375,53 +375,54 @@ export default function BrandSelection({ service, onBrandSelect }) {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
-        <h3 className="text-xl font-semibold text-white mb-4">Select Brand</h3>
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#e60012]"></div>
-        </div>
-      </div>
-    );
-  }
-
+  // Render brand cards
   return (
     <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
-      <h3 className="text-xl font-semibold text-white mb-4">Select Brand</h3>
+      <h2 className="text-xl font-medium text-white mb-4">Select Brand</h2>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {brands.map((brand) => (
-          <div
-            key={brand.id}
-            onClick={() => handleBrandSelect(brand)}
-            className={`flex flex-col items-center justify-center p-3 rounded-lg cursor-pointer transition-all ${
-              selectedBrandId === brand.id
-                ? 'bg-[#e60012] border-2 border-[#ff6b6b]'
-                : 'bg-[#222] border border-[#333] hover:border-[#444] hover:bg-[#2a2a2a]'
-            }`}
-          >
-            <div className="w-12 h-12 mb-2 flex items-center justify-center">
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#e60012]"></div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {brands.map(brand => (
+            <div 
+              key={brand.id}
+              onClick={() => handleBrandSelect(brand)}
+              className={`border rounded-lg p-3 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                selectedBrandId === brand.id 
+                  ? 'bg-[#e60012] border-[#ff6b6b]' 
+                  : 'bg-[#222] border-[#333] hover:border-[#e60012]'
+              }`}
+            >
               {brand.logo ? (
-                <img
-                  src={brand.logo}
-                  alt={brand.name}
-                  className="max-w-full max-h-full object-contain"
+                <img 
+                  src={brand.logo} 
+                  alt={brand.name} 
+                  className="h-12 w-12 object-contain mb-2" 
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-[#333] flex items-center justify-center text-white text-lg font-medium">
-                  {brand.name?.charAt(0).toUpperCase() || 'B'}
+                <div className="h-12 w-12 flex items-center justify-center bg-[#333] rounded-full mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
                 </div>
               )}
+              <div className="text-center">
+                <div className={`font-medium ${selectedBrandId === brand.id ? 'text-white' : 'text-gray-300'}`}>
+                  {brand.name}
+                </div>
+                {brand.category && (
+                  <div className={`text-xs ${selectedBrandId === brand.id ? 'text-gray-200' : 'text-gray-500'}`}>
+                    {brand.category}
+                  </div>
+                )}
+              </div>
             </div>
-            <span className={`text-sm font-medium text-center ${
-              selectedBrandId === brand.id ? 'text-white' : 'text-gray-300'
-            }`}>
-              {brand.name}
-            </span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
-  );
+  )
 }

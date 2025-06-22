@@ -46,9 +46,13 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
           throw new Error('Database connection not available');
         }
         
-        // Get models for the selected brand from the database
-        const modelsCollection = collection(db, 'brands', brand.id, 'models')
-        const modelsQuery = query(modelsCollection, where('isActive', '==', true))
+        // Query models from the standalone collection instead of subcollections
+        console.log('Fetching models from standalone collection for brand:', brand.id);
+        const modelsQuery = query(
+          collection(db, 'models'),
+          where('brandId', '==', brand.id),
+          where('isActive', '==', true)
+        );
         
         console.log('Executing Firestore query for models...');
         const modelsSnapshot = await Promise.race([
@@ -59,6 +63,37 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         ]);
         
         console.log('Query executed, results:', modelsSnapshot.size);
+        
+        if (modelsSnapshot.empty) {
+          // Try fetching from the old structure if the new one has no results
+          console.log('No models found in models collection, trying legacy structure...');
+          
+          try {
+            // Legacy: Get models from the brand's subcollection
+            const legacyModelsCollection = collection(db, 'brands', brand.id, 'models');
+            const legacyModelsQuery = query(legacyModelsCollection, where('isActive', '==', true));
+            const legacyModelsSnapshot = await getDocs(legacyModelsQuery);
+            
+            if (!legacyModelsSnapshot.empty) {
+              console.log('Found models in legacy structure:', legacyModelsSnapshot.size);
+              
+              const modelsData = legacyModelsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                // Add price based on service if not already in the database
+                price: doc.data().price || getDefaultPrice(service, brand.id, doc.data().name)
+              }));
+              
+              setModels(modelsData);
+              toast.warning('Using legacy model data. Please run migration tool.');
+              setLoading(false);
+              return;
+            }
+          } catch (legacyError) {
+            console.error('Error fetching legacy models:', legacyError);
+            // Continue to fallback
+          }
+        }
         
         const modelsData = modelsSnapshot.docs.map(doc => ({
           id: doc.id,

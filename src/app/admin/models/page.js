@@ -12,14 +12,18 @@ export default function ModelsManagement() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterBrand, setFilterBrand] = useState('all')
+  const [filterCategory, setFilterCategory] = useState('all')
   const [showModelModal, setShowModelModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedModel, setSelectedModel] = useState(null)
+  const [categories, setCategories] = useState([])
   
   // Form state
   const [modelForm, setModelForm] = useState({
     name: '',
     brandId: '',
+    brandName: '',
+    category: '',
     description: '',
     photoURL: '',
     isActive: true
@@ -37,22 +41,30 @@ export default function ModelsManagement() {
         }))
         setBrands(brandsData)
         
-        // Fetch all models
-        const modelsData = []
+        // Extract all unique categories
+        const allCategories = new Set()
+        brandsData.forEach(brand => {
+          if (brand.category) {
+            allCategories.add(brand.category)
+          }
+        })
+        setCategories(Array.from(allCategories).sort())
         
-        for (const brand of brandsData) {
-          const modelsSnapshot = await getDocs(collection(db, 'brands', brand.id, 'models'))
+        // Fetch models from the dedicated models collection
+        const modelsCollection = collection(db, 'models')
+        const modelsSnapshot = await getDocs(modelsCollection)
+        
+        const modelsData = modelsSnapshot.docs.map(doc => {
+          const data = doc.data()
+          const brand = brandsData.find(b => b.id === data.brandId) || {}
           
-          modelsSnapshot.docs.forEach(doc => {
-            modelsData.push({
-              id: doc.id,
-              brandId: brand.id,
-              brandName: brand.name,
-              brandCategory: brand.category,
-              ...doc.data()
-            })
-          })
-        }
+          return {
+            id: doc.id,
+            ...data,
+            brandName: brand.name || data.brandName || 'Unknown Brand',
+            brandCategory: brand.category || data.category || 'Uncategorized'
+          }
+        })
         
         setModels(modelsData)
       } catch (error) {
@@ -66,12 +78,18 @@ export default function ModelsManagement() {
     fetchData()
   }, [])
 
-  // Filter models based on search term and brand filter
+  // Filter models based on search term, brand filter and category
   const filteredModels = models.filter(model => {
     const matchesSearch = model.name?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesBrand = filterBrand === 'all' || model.brandId === filterBrand
-    return matchesSearch && matchesBrand
+    const matchesCategory = filterCategory === 'all' || model.category === filterCategory
+    return matchesSearch && matchesBrand && matchesCategory
   })
+
+  // Filter brands by selected category
+  const filteredBrands = brands.filter(brand => 
+    filterCategory === 'all' || brand.category === filterCategory
+  )
 
   // Open model modal for add/edit
   const openModelModal = (model = null) => {
@@ -79,15 +97,23 @@ export default function ModelsManagement() {
       setModelForm({
         name: model.name || '',
         brandId: model.brandId || '',
+        brandName: model.brandName || '',
+        category: model.category || '',
         description: model.description || '',
         photoURL: model.photoURL || '',
         isActive: model.isActive !== false
       })
       setSelectedModel(model)
     } else {
+      // Start with empty form
+      const initialCategory = categories.length > 0 ? categories[0] : ''
+      const initialBrand = brands.filter(b => b.category === initialCategory)[0] || brands[0] || {}
+      
       setModelForm({
         name: '',
-        brandId: brands.length > 0 ? brands[0].id : '',
+        brandId: initialBrand.id || '',
+        brandName: initialBrand.name || '',
+        category: initialCategory,
         description: '',
         photoURL: '',
         isActive: true
@@ -97,41 +123,66 @@ export default function ModelsManagement() {
     setShowModelModal(true)
   }
 
+  // Handle category change in form
+  const handleCategoryChange = (category) => {
+    const brandsInCategory = brands.filter(b => b.category === category)
+    const firstBrand = brandsInCategory[0] || {}
+    
+    setModelForm(prev => ({
+      ...prev,
+      category,
+      brandId: firstBrand.id || '',
+      brandName: firstBrand.name || ''
+    }))
+  }
+
+  // Handle brand change in form
+  const handleBrandChange = (brandId) => {
+    const selectedBrand = brands.find(b => b.id === brandId) || {}
+    
+    setModelForm(prev => ({
+      ...prev,
+      brandId,
+      brandName: selectedBrand.name || '',
+      category: selectedBrand.category || prev.category
+    }))
+  }
+
   // Handle model form submit
   const handleModelSubmit = async (e) => {
     e.preventDefault()
     
-    if (!modelForm.name || !modelForm.brandId) {
-      toast.error('Model name and brand are required')
+    if (!modelForm.name || !modelForm.brandId || !modelForm.category) {
+      toast.error('Model name, brand and category are required')
       return
     }
     
     try {
+      // Get the brand details
+      const selectedBrand = brands.find(b => b.id === modelForm.brandId) || {}
+      
+      // Prepare model data
+      const modelData = {
+        name: modelForm.name,
+        brandId: modelForm.brandId,
+        brandName: selectedBrand.name || modelForm.brandName,
+        category: selectedBrand.category || modelForm.category,
+        description: modelForm.description,
+        photoURL: modelForm.photoURL,
+        isActive: modelForm.isActive,
+        updatedAt: serverTimestamp()
+      }
+      
       if (selectedModel) {
-        // Update existing model
-        await updateDoc(doc(db, 'brands', modelForm.brandId, 'models', selectedModel.id), {
-          name: modelForm.name,
-          description: modelForm.description,
-          photoURL: modelForm.photoURL,
-          isActive: modelForm.isActive,
-          updatedAt: serverTimestamp()
-        })
+        // Update existing model in standalone collection
+        await updateDoc(doc(db, 'models', selectedModel.id), modelData)
         
         // Update model in state
-        const brandName = brands.find(b => b.id === modelForm.brandId)?.name || ''
-        const brandCategory = brands.find(b => b.id === modelForm.brandId)?.category || ''
-        
         setModels(prev => prev.map(model => 
-          model.id === selectedModel.id && model.brandId === selectedModel.brandId
+          model.id === selectedModel.id
             ? { 
                 ...model, 
-                name: modelForm.name,
-                description: modelForm.description,
-                photoURL: modelForm.photoURL,
-                isActive: modelForm.isActive,
-                brandId: modelForm.brandId,
-                brandName: brandName,
-                brandCategory: brandCategory,
+                ...modelData,
                 updatedAt: new Date()
               } 
             : model
@@ -139,26 +190,15 @@ export default function ModelsManagement() {
         
         toast.success('Model updated successfully')
       } else {
-        // Add new model
-        const docRef = await addDoc(collection(db, 'brands', modelForm.brandId, 'models'), {
-          name: modelForm.name,
-          description: modelForm.description,
-          photoURL: modelForm.photoURL,
-          isActive: modelForm.isActive,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        })
+        // Add new model to standalone collection
+        modelData.createdAt = serverTimestamp()
+        
+        const docRef = await addDoc(collection(db, 'models'), modelData)
         
         // Add new model to state
-        const brandName = brands.find(b => b.id === modelForm.brandId)?.name || ''
-        const brandCategory = brands.find(b => b.id === modelForm.brandId)?.category || ''
-        
         setModels(prev => [...prev, {
           id: docRef.id,
-          brandId: modelForm.brandId,
-          brandName: brandName,
-          brandCategory: brandCategory,
-          ...modelForm,
+          ...modelData,
           createdAt: new Date(),
           updatedAt: new Date()
         }])
@@ -176,12 +216,11 @@ export default function ModelsManagement() {
   // Delete model
   const confirmDelete = async () => {
     try {
-      await deleteDoc(doc(db, 'brands', selectedModel.brandId, 'models', selectedModel.id))
+      // Delete from standalone collection
+      await deleteDoc(doc(db, 'models', selectedModel.id))
       
       // Remove model from state
-      setModels(prev => prev.filter(model => 
-        !(model.id === selectedModel.id && model.brandId === selectedModel.brandId)
-      ))
+      setModels(prev => prev.filter(model => model.id !== selectedModel.id))
       
       toast.success('Model deleted successfully')
       setShowDeleteModal(false)
@@ -203,15 +242,26 @@ export default function ModelsManagement() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-white">Models Management</h2>
-        <button
-          onClick={() => openModelModal()}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#e60012] hover:bg-[#d40010] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e60012]"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Add New Model
-        </button>
+        <div className="flex space-x-3">
+          <Link
+            href="/admin/models/migrate"
+            className="inline-flex items-center px-4 py-2 border border-[#333] rounded-md shadow-sm text-sm font-medium text-white hover:bg-[#222] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e60012]"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            Migration Tool
+          </Link>
+          <button
+            onClick={() => openModelModal()}
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#e60012] hover:bg-[#d40010] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e60012]"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add New Model
+          </button>
+        </div>
       </div>
 
       {/* Search and filters */}
@@ -231,6 +281,24 @@ export default function ModelsManagement() {
           </div>
         </div>
         
+        {/* Category filter */}
+        <div className="sm:w-64">
+          <select
+            value={filterCategory}
+            onChange={(e) => {
+              setFilterCategory(e.target.value)
+              setFilterBrand('all') // Reset brand filter when category changes
+            }}
+            className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+          >
+            <option value="all">All Categories</option>
+            {categories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+        </div>
+        
+        {/* Brand filter */}
         <div className="sm:w-64">
           <select
             value={filterBrand}
@@ -238,8 +306,10 @@ export default function ModelsManagement() {
             className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
           >
             <option value="all">All Brands</option>
-            {brands.map(brand => (
-              <option key={brand.id} value={brand.id}>{brand.name}</option>
+            {filteredBrands.map(brand => (
+              <option key={brand.id} value={brand.id}>
+                {brand.name} ({brand.category})
+              </option>
             ))}
           </select>
         </div>
@@ -255,19 +325,13 @@ export default function ModelsManagement() {
                   Model
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Image
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Brand
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Description
+                  Brand (Category)
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Created
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Actions
@@ -277,59 +341,56 @@ export default function ModelsManagement() {
             <tbody className="bg-[#1a1a1a] divide-y divide-[#333]">
               {filteredModels.length > 0 ? (
                 filteredModels.map((model) => (
-                  <tr key={`${model.brandId}-${model.id}`} className="hover:bg-[#222] transition-colors">
+                  <tr key={model.id} className="hover:bg-[#222] transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-white">{model.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {model.photoURL ? (
-                        <div className="h-10 w-10 bg-[#222] rounded-md flex items-center justify-center overflow-hidden">
-                          <img 
-                            src={model.photoURL} 
-                            alt={model.name} 
-                            className="h-8 w-8 object-contain"
-                          />
-                        </div>
-                      ) : (
-                        <div className="h-10 w-10 bg-[#222] rounded-md flex items-center justify-center text-gray-400">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      {model.brandName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      {model.brandCategory}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      <div className="max-w-xs truncate">{model.description || '-'}</div>
+                      <div className="flex items-center">
+                        {model.photoURL ? (
+                          <div className="h-10 w-10 bg-[#222] rounded-md flex items-center justify-center overflow-hidden mr-3">
+                            <img 
+                              src={model.photoURL} 
+                              alt={model.name} 
+                              className="h-8 w-8 object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-10 w-10 bg-[#222] rounded-md flex items-center justify-center text-gray-400 mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </div>
+                        )}
+                        <div className="text-white font-medium">{model.name}</div>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        model.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                      <div className="text-white">
+                        {model.brandName} <span className="text-gray-400">({model.category})</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${model.isActive ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200'}`}>
                         {model.isActive ? 'Active' : 'Inactive'}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                      {model.createdAt instanceof Date 
+                        ? model.createdAt.toLocaleDateString() 
+                        : 'Unknown'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-3">
                         <button
                           onClick={() => openModelModal(model)}
-                          className="text-blue-500 hover:text-blue-600"
+                          className="text-indigo-400 hover:text-indigo-300"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => {
-                            setSelectedModel(model)
-                            setShowDeleteModal(true)
+                            setSelectedModel(model);
+                            setShowDeleteModal(true);
                           }}
-                          className="text-red-500 hover:text-red-600"
+                          className="text-red-400 hover:text-red-300"
                         >
                           Delete
                         </button>
@@ -339,11 +400,10 @@ export default function ModelsManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-400">
-                    {searchTerm || filterBrand !== 'all' 
-                      ? 'No models found matching your search criteria' 
-                      : 'No models found. Add your first model!'
-                    }
+                  <td colSpan="5" className="px-6 py-4 text-center text-gray-400">
+                    {searchTerm || filterBrand !== 'all' || filterCategory !== 'all'
+                      ? 'No models found matching your filters.'
+                      : 'No models found. Add one to get started.'}
                   </td>
                 </tr>
               )}
@@ -352,47 +412,87 @@ export default function ModelsManagement() {
         </div>
       </div>
 
-      {/* Model Modal */}
+      {/* Add/Edit Model Modal */}
       {showModelModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#1a1a1a] rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-medium text-white mb-4">
+        <div className="fixed inset-0 z-10 overflow-y-auto bg-black bg-opacity-75 flex items-center justify-center p-4">
+          <div className="bg-[#1a1a1a] rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-medium text-white mb-4">
               {selectedModel ? 'Edit Model' : 'Add New Model'}
             </h3>
             
             <form onSubmit={handleModelSubmit} className="space-y-4">
+              {/* Category Selection */}
               <div>
-                <label htmlFor="brand" className="block text-sm font-medium text-gray-300 mb-1">
-                  Brand <span className="text-red-500">*</span>
+                <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-1">
+                  Category *
                 </label>
                 <select
-                  id="brand"
-                  value={modelForm.brandId}
-                  onChange={(e) => setModelForm({...modelForm, brandId: e.target.value})}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  id="category"
+                  value={modelForm.category}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
                   required
+                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
                 >
-                  <option value="">Select Brand</option>
-                  {brands.map(brand => (
-                    <option key={brand.id} value={brand.id}>{brand.name}</option>
+                  <option value="">Select Category</option>
+                  {categories.map(category => (
+                    <option key={category} value={category}>{category}</option>
                   ))}
                 </select>
               </div>
               
+              {/* Brand Selection */}
+              <div>
+                <label htmlFor="brandId" className="block text-sm font-medium text-gray-300 mb-1">
+                  Brand *
+                </label>
+                <select
+                  id="brandId"
+                  value={modelForm.brandId}
+                  onChange={(e) => handleBrandChange(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                >
+                  <option value="">Select Brand</option>
+                  {brands
+                    .filter(brand => !modelForm.category || brand.category === modelForm.category)
+                    .map(brand => (
+                      <option key={brand.id} value={brand.id}>{brand.name}</option>
+                    ))}
+                </select>
+              </div>
+              
+              {/* Model Name */}
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
-                  Model Name <span className="text-red-500">*</span>
+                  Model Name *
                 </label>
                 <input
                   type="text"
                   id="name"
                   value={modelForm.name}
                   onChange={(e) => setModelForm({...modelForm, name: e.target.value})}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
                   required
+                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  placeholder="Enter model name"
                 />
               </div>
               
+              {/* Description */}
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  value={modelForm.description}
+                  onChange={(e) => setModelForm({...modelForm, description: e.target.value})}
+                  rows="3"
+                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  placeholder="Enter model description"
+                ></textarea>
+              </div>
+              
+              {/* Photo URL */}
               <div>
                 <label htmlFor="photoURL" className="block text-sm font-medium text-gray-300 mb-1">
                   Photo URL
@@ -403,63 +503,35 @@ export default function ModelsManagement() {
                   value={modelForm.photoURL}
                   onChange={(e) => setModelForm({...modelForm, photoURL: e.target.value})}
                   className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
-                  placeholder="https://example.com/image.jpg"
-                />
-                {modelForm.photoURL && (
-                  <div className="mt-2 flex items-center">
-                    <div className="h-12 w-12 bg-[#222] rounded-md flex items-center justify-center overflow-hidden">
-                      <img 
-                        src={modelForm.photoURL} 
-                        alt="Preview" 
-                        className="h-10 w-10 object-contain"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /%3E%3C/svg%3E";
-                        }}
-                      />
-                    </div>
-                    <span className="ml-2 text-xs text-gray-400">Preview (if URL is valid)</span>
-                  </div>
-                )}
-              </div>
-              
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  value={modelForm.description}
-                  onChange={(e) => setModelForm({...modelForm, description: e.target.value})}
-                  rows={3}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  placeholder="Enter photo URL"
                 />
               </div>
               
+              {/* Active Status */}
               <div className="flex items-center">
                 <input
                   type="checkbox"
                   id="isActive"
                   checked={modelForm.isActive}
                   onChange={(e) => setModelForm({...modelForm, isActive: e.target.checked})}
-                  className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
+                  className="h-4 w-4 text-[#e60012] bg-[#222] border-[#333] rounded focus:ring-[#e60012]"
                 />
                 <label htmlFor="isActive" className="ml-2 block text-sm text-gray-300">
-                  Active (visible to customers)
+                  Active
                 </label>
               </div>
               
-              <div className="flex justify-end space-x-3 pt-4">
+              <div className="flex justify-end space-x-3 pt-4 border-t border-[#333]">
                 <button
                   type="button"
                   onClick={() => setShowModelModal(false)}
-                  className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none"
+                  className="px-4 py-2 border border-[#333] rounded-md text-white hover:bg-[#222] focus:outline-none"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#e60012] rounded-md text-white hover:bg-[#d40010] focus:outline-none"
+                  className="px-4 py-2 bg-[#e60012] border border-transparent rounded-md text-white hover:bg-[#d40010] focus:outline-none"
                 >
                   {selectedModel ? 'Update Model' : 'Add Model'}
                 </button>
@@ -468,25 +540,26 @@ export default function ModelsManagement() {
           </div>
         </div>
       )}
-
-      {/* Delete Modal */}
+      
+      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#1a1a1a] rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-medium text-white mb-4">Confirm Delete</h3>
+        <div className="fixed inset-0 z-10 overflow-y-auto bg-black bg-opacity-75 flex items-center justify-center p-4">
+          <div className="bg-[#1a1a1a] rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-medium text-white mb-4">Confirm Delete</h3>
             <p className="text-gray-300 mb-6">
-              Are you sure you want to delete the model "{selectedModel?.name}" from brand "{selectedModel?.brandName}"? This action cannot be undone.
+              Are you sure you want to delete the model "{selectedModel?.name}"? This action cannot be undone.
             </p>
+            
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none"
+                className="px-4 py-2 border border-[#333] rounded-md text-white hover:bg-[#222] focus:outline-none"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 rounded-md text-white hover:bg-red-700 focus:outline-none"
+                className="px-4 py-2 bg-red-600 border border-transparent rounded-md text-white hover:bg-red-700 focus:outline-none"
               >
                 Delete
               </button>
