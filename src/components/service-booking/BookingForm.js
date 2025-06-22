@@ -356,116 +356,177 @@ export default function BookingForm({ service, brand, model, onComplete }) {
   }, [formData.address, formData.issue, formData.additionalNotes]);
 
   return (
-    <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-4 sm:p-6 shadow-lg">
-      <div className="mb-6">
-        <h2 className="text-xl sm:text-2xl font-semibold mb-2 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Booking Details</h2>
-        <p className="text-gray-400">Complete your booking for {service}</p>
+    <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-xl p-6 sm:p-8 shadow-2xl">
+      <div className="mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Book Your Service</h2>
+        <p className="text-gray-400">Complete your booking details for {service} service</p>
       </div>
       
-      {/* Express booking option */}
-      <div className="bg-gradient-to-br from-[#2a1a1a] to-[#331a1a] rounded-lg p-4 sm:p-5 mb-6 border border-[#e60012]/50 shadow-md">
-        <h3 className="font-medium mb-3 text-white">Express Booking</h3>
-        <p className="text-gray-300 text-sm mb-3">Want to skip the form? Book your service with one click and we'll use your saved information.</p>
+      {/* Express booking option - UPDATED DESIGN */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#2a1a1a] to-[#331a1a] rounded-xl p-6 mb-8 border border-[#e60012]/30 shadow-lg transform hover:scale-[1.01] transition-all duration-300">
+        <div className="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 opacity-20">
+          <div className="absolute transform rotate-12 w-full h-full bg-[#e60012] rounded-full"></div>
+        </div>
+        <h3 className="text-xl font-bold mb-3 text-white flex items-center">
+          <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#e60012]">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </span>
+          Express Booking
+        </h3>
+        <p className="text-gray-300 mb-4">Skip the details and get instant service with our express booking option. We'll use your saved information.</p>
         <button
           type="button"
           onClick={handleExpressBooking}
           disabled={loading || !currentUser}
-          className="w-full py-3 px-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#d40010] hover:to-[#e55b5b] text-white font-medium rounded-md shadow-sm transition-colors flex items-center justify-center"
+          className="w-full py-4 px-6 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#d40010] hover:to-[#e55b5b] text-white font-bold rounded-lg shadow-lg transition-all flex items-center justify-center group"
         >
           {loading ? (
             <span className="animate-pulse">Processing...</span>
           ) : (
-            <>Continue to Book Your Service</>
+            <>
+              <span>Book Instantly</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </>
           )}
         </button>
       </div>
       
-      {/* Service Summary */}
-      <div className="bg-gradient-to-br from-[#1a1a1a] to-[#222] rounded-lg p-4 sm:p-5 mb-6 border border-[#333] shadow-md">
-        <h3 className="font-medium mb-3 text-white">Service Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div>
-            <p className="text-gray-400 mb-1">Service</p>
-            <p className="font-medium">{service}</p>
+      {/* Service Summary - UPDATED DESIGN */}
+      <div className="bg-gradient-to-br from-[#1a1a1a] to-[#222] rounded-xl p-6 mb-8 border border-[#333] shadow-lg">
+        <h3 className="text-xl font-bold mb-4 text-white flex items-center">
+          <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#333]">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </span>
+          Your Service Details
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-[#111] p-4 rounded-lg border border-[#333] hover:border-[#444] transition-colors">
+            <p className="text-gray-400 text-sm mb-1">Service Type</p>
+            <p className="font-bold text-lg text-white">{service}</p>
           </div>
-          <div>
-            <p className="text-gray-400 mb-1">Brand</p>
-            <p className="font-medium">{brand.name}</p>
+          <div className="bg-[#111] p-4 rounded-lg border border-[#333] hover:border-[#444] transition-colors">
+            <p className="text-gray-400 text-sm mb-1">Selected Brand</p>
+            <p className="font-bold text-lg text-white">{brand.name}</p>
           </div>
-          <div>
-            <p className="text-gray-400 mb-1">Model</p>
-            <p className="font-medium">{model.name}</p>
+          <div className="bg-[#111] p-4 rounded-lg border border-[#333] hover:border-[#444] transition-colors">
+            <p className="text-gray-400 text-sm mb-1">Device Model</p>
+            <p className="font-bold text-lg text-white">{model.name}</p>
           </div>
         </div>
       </div>
       
       {!currentUser && (
-        <div className="bg-gradient-to-r from-red-900/30 to-red-800/20 border border-red-800 text-red-300 p-4 rounded-lg mb-6">
-          <p className="font-medium">You need to login to book a service</p>
-          <button 
-            onClick={() => document.getElementById('login-btn')?.click()}
-            className="mt-2 text-white bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#d40010] hover:to-[#e55b5b] px-4 py-2 rounded text-sm transition-all duration-300"
-          >
-            Login Now
-          </button>
+        <div className="bg-gradient-to-r from-red-900/30 to-red-800/20 border border-red-800 text-red-300 p-4 rounded-lg mb-8">
+          <div className="flex items-start">
+            <div className="mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-medium text-lg">Login Required</p>
+              <p className="text-sm mb-3">You need to be logged in to book a service with us.</p>
+              <button 
+                onClick={() => document.getElementById('login-btn')?.click()}
+                className="px-6 py-2 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#d40010] hover:to-[#e55b5b] text-white font-medium rounded-md shadow-md transition-all flex items-center"
+              >
+                <FiLock className="mr-2" size={16} />
+                Login Now
+              </button>
+            </div>
+          </div>
         </div>
       )}
       
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Booking for self or other */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-white">Who are you booking this service for?</label>
-          <div className="flex gap-3">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Booking for self or other - UPDATED DESIGN */}
+        <div className="space-y-4 mb-2">
+          <label className="block text-lg font-bold text-white">Who needs this service?</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div 
               onClick={() => handleBookingForToggle('self')}
-              className={`flex-1 p-4 rounded-lg cursor-pointer border flex items-center gap-2 transition-all ${
+              className={`p-5 rounded-xl cursor-pointer border-2 flex items-center gap-4 transition-all ${
                 bookingFor === 'self' 
-                  ? 'border-[#e60012] bg-[#e60012]/10' 
-                  : 'border-[#333] hover:border-gray-600'
+                  ? 'border-[#e60012] bg-gradient-to-br from-[#e60012]/10 to-[#e60012]/5' 
+                  : 'border-[#333] hover:border-gray-600 bg-[#1a1a1a]'
               }`}
             >
-              <FiUser size={18} className={bookingFor === 'self' ? 'text-[#e60012]' : 'text-gray-400'} />
-              <div>
-                <p className={`font-medium ${bookingFor === 'self' ? 'text-white' : 'text-gray-300'}`}>Myself</p>
-                <p className="text-xs text-gray-500">Use my profile information</p>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                bookingFor === 'self' ? 'bg-[#e60012]' : 'bg-[#333]'
+              }`}>
+                <FiUser size={24} className="text-white" />
               </div>
+              <div>
+                <p className={`font-bold text-lg ${bookingFor === 'self' ? 'text-white' : 'text-gray-300'}`}>For Myself</p>
+                <p className="text-sm text-gray-400">We'll use your profile information</p>
+              </div>
+              {bookingFor === 'self' && (
+                <div className="ml-auto">
+                  <div className="w-6 h-6 rounded-full bg-[#e60012] flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+              )}
             </div>
             <div 
               onClick={() => handleBookingForToggle('other')}
-              className={`flex-1 p-4 rounded-lg cursor-pointer border flex items-center gap-2 transition-all ${
+              className={`p-5 rounded-xl cursor-pointer border-2 flex items-center gap-4 transition-all ${
                 bookingFor === 'other' 
-                  ? 'border-[#e60012] bg-[#e60012]/10' 
-                  : 'border-[#333] hover:border-gray-600'
+                  ? 'border-[#e60012] bg-gradient-to-br from-[#e60012]/10 to-[#e60012]/5' 
+                  : 'border-[#333] hover:border-gray-600 bg-[#1a1a1a]'
               }`}
             >
-              <FiUserPlus size={18} className={bookingFor === 'other' ? 'text-[#e60012]' : 'text-gray-400'} />
-              <div>
-                <p className={`font-medium ${bookingFor === 'other' ? 'text-white' : 'text-gray-300'}`}>Someone else</p>
-                <p className="text-xs text-gray-500">Enter their details</p>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                bookingFor === 'other' ? 'bg-[#e60012]' : 'bg-[#333]'
+              }`}>
+                <FiUserPlus size={24} className="text-white" />
               </div>
+              <div>
+                <p className={`font-bold text-lg ${bookingFor === 'other' ? 'text-white' : 'text-gray-300'}`}>For Someone Else</p>
+                <p className="text-sm text-gray-400">Enter their contact details</p>
+              </div>
+              {bookingFor === 'other' && (
+                <div className="ml-auto">
+                  <div className="w-6 h-6 rounded-full bg-[#e60012] flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
         
-        {/* Customer Information Section */}
+        {/* Customer Information Section - UPDATED */}
         {bookingFor === 'self' ? (
-          <div className="bg-gradient-to-br from-[#1a1a1a] to-[#222] rounded-lg p-4 sm:p-5 mb-2 border border-[#333] shadow-md">
-            <h3 className="font-medium mb-4 text-white flex items-center gap-2">
-              <FiUser size={16} className="text-[#e60012]" />
+          <div className="bg-[#111] rounded-xl p-6 border border-[#333] shadow-lg">
+            <h3 className="text-xl font-bold mb-4 text-white flex items-center">
+              <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#333]">
+                <FiUser className="h-4 w-4 text-[#e60012]" />
+              </span>
               Your Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-gray-400 mb-1">Full Name</p>
-                <p className="font-medium text-white">{formData.name || 'Not provided'}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-[#1a1a1a] p-4 rounded-lg">
+                <p className="text-gray-400 text-sm mb-1">Full Name</p>
+                <p className="font-bold text-white">{formData.name || 'Not provided'}</p>
               </div>
-              <div>
-                <p className="text-gray-400 mb-1">Phone Number</p>
-                <p className="font-medium text-white">{formData.phone || 'Not provided'}</p>
+              <div className="bg-[#1a1a1a] p-4 rounded-lg">
+                <p className="text-gray-400 text-sm mb-1">Phone Number</p>
+                <p className="font-bold text-white">{formData.phone || 'Not provided'}</p>
               </div>
-              <div className="md:col-span-2">
-                <p className="text-gray-400 mb-1">Email Address</p>
-                <p className="font-medium text-white">{formData.email || 'Not provided'}</p>
+              <div className="bg-[#1a1a1a] p-4 rounded-lg md:col-span-2">
+                <p className="text-gray-400 text-sm mb-1">Email Address</p>
+                <p className="font-bold text-white">{formData.email || 'Not provided'}</p>
               </div>
             </div>
           </div>
@@ -524,141 +585,277 @@ export default function BookingForm({ service, brand, model, onComplete }) {
           </div>
         )}
 
-        <div className="space-y-2 md:col-span-2">
-          {/* Saved addresses selector */}
-          {currentUser && savedAddresses.length > 0 && (
-            <div className="mb-4">
-              <label htmlFor="savedAddress" className="block text-sm font-medium text-white mb-2">
-                Use a saved address
-              </label>
-              <div className="flex gap-2">
-                <select
-                  id="savedAddress"
-                  value={selectedSavedAddress}
-                  onChange={handleAddressSelect}
-                  className="flex-grow px-4 py-3 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012]"
-                >
-                  <option value="">Select a saved address</option>
+        {/* Address Section - UPDATED DESIGN */}
+        <div className="mb-8">
+          <h3 className="text-xl font-bold mb-4 text-white flex items-center">
+            <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#333]">
+              <FiMapPin className="h-4 w-4 text-[#e60012]" />
+            </span>
+            Service Location
+          </h3>
+          
+          <div className="bg-[#111] p-6 rounded-xl border border-[#333]">
+            {/* Saved addresses selector - only show if user has saved addresses */}
+            {currentUser && savedAddresses.length > 0 && (
+              <div className="mb-6">
+                <label className="block text-base font-medium text-white mb-3">
+                  Select a Saved Address
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {savedAddresses.map((addr) => (
-                    <option key={addr.id} value={addr.id}>
-                      {addr.name} - {addr.fullAddress.substring(0, 30)}...
-                    </option>
+                    <div
+                      key={addr.id}
+                      onClick={() => {
+                        setSelectedSavedAddress(addr.id);
+                        setFormData(prev => ({
+                          ...prev,
+                          address: addr.fullAddress
+                        }));
+                      }}
+                      className={`cursor-pointer p-3 rounded-lg border ${
+                        selectedSavedAddress === addr.id
+                          ? 'border-[#e60012] bg-[#e60012]/10'
+                          : 'border-[#333] hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-start">
+                        <div className="mr-3">
+                          {selectedSavedAddress === addr.id ? (
+                            <div className="w-5 h-5 rounded-full bg-[#e60012] flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          ) : (
+                            <div className="w-5 h-5 rounded-full border border-gray-500"></div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-white">{addr.name}</p>
+                          <p className="text-sm text-gray-400">{addr.fullAddress.substring(0, 50)}...</p>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </select>
+                </div>
               </div>
-            </div>
-          )}
-
-          <div className="flex justify-between items-center">
-            <label htmlFor="address" className="block text-sm font-medium text-white">Service Address</label>
-            {/* Location detection button */}
+            )}
+            
+            {/* Location detection */}
             {navigator.geolocation && (
               <button 
                 type="button"
                 onClick={getCurrentLocation}
-                className="text-xs flex items-center gap-1 text-[#e60012] hover:text-[#ff6b6b]"
+                className="w-full mb-4 bg-[#222] hover:bg-[#333] text-white py-3 px-4 rounded-lg border border-[#333] hover:border-gray-600 flex items-center justify-center transition-all group"
                 disabled={isLoadingLocation}
               >
-                <FiMapPin size={14} />
-                {isLoadingLocation ? 'Detecting...' : 'Use my current location'}
+                {isLoadingLocation ? (
+                  <>
+                    <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                    <span>Detecting your location...</span>
+                  </>
+                ) : (
+                  <>
+                    <FiMapPin className="mr-2 group-hover:text-[#e60012] transition-colors" />
+                    <span>Use my current location</span>
+                  </>
+                )}
               </button>
             )}
+            
+            {/* Address textarea */}
+            <div>
+              <label htmlFor="address" className="block text-base font-medium text-white mb-3">
+                Service Address
+              </label>
+              <textarea 
+                id="address" 
+                name="address" 
+                value={formData.address} 
+                onChange={handleChange}
+                placeholder="Enter your complete address for service"
+                rows="3"
+                className={`w-full px-4 py-3 bg-[#1a1a1a] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
+                  errors.address ? 'border-red-600' : 'border-[#333]'
+                }`}
+                required
+              ></textarea>
+              {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
+              
+              <p className="text-xs text-gray-400 mt-2">
+                Please provide a complete address including landmarks to help our technician locate you easily.
+              </p>
+            </div>
           </div>
+        </div>
+
+        {/* Modern Date & Time Selector */}
+        <div className="mb-8">
+          <h3 className="text-xl font-bold mb-4 text-white flex items-center">
+            <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#333]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </span>
+            Schedule Service
+          </h3>
           
-          <textarea 
-            id="address" 
-            name="address" 
-            value={formData.address} 
-            onChange={handleChange}
-            placeholder="Enter complete service address"
-            rows="3"
-            className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-              errors.address ? 'border-red-600' : 'border-[#333]'
-            }`}
-            required
-          ></textarea>
-          {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
+          <div className="bg-[#111] p-6 rounded-xl border border-[#333]">
+            {/* Date selector */}
+            <div className="mb-6">
+              <label htmlFor="date" className="block text-base font-medium text-white mb-3">Select Date</label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {Array.from({ length: 4 }).map((_, dayOffset) => {
+                  const date = new Date();
+                  date.setDate(date.getDate() + dayOffset);
+                  const dateString = date.toISOString().split('T')[0];
+                  const isSelected = formData.date === dateString;
+                  
+                  return (
+                    <div 
+                      key={dateString}
+                      onClick={() => {
+                        setFormData(prev => ({...prev, date: dateString}));
+                        setErrors(prev => ({...prev, date: null}));
+                      }}
+                      className={`relative overflow-hidden rounded-lg cursor-pointer transition-all border-2 ${
+                        isSelected 
+                          ? 'border-[#e60012] bg-gradient-to-b from-[#e60012]/10 to-[#e60012]/5' 
+                          : 'border-[#222] bg-[#1a1a1a] hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="px-2 py-1 text-center">
+                        <p className="text-xs text-gray-400">{date.toLocaleDateString('en-US', {weekday: 'short'})}</p>
+                        <p className={`text-2xl font-bold ${isSelected ? 'text-white' : 'text-gray-200'}`}>
+                          {date.getDate()}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {date.toLocaleDateString('en-US', {month: 'short'})}
+                        </p>
+                      </div>
+                      {isSelected && (
+                        <div className="absolute bottom-0 left-0 w-full h-1 bg-[#e60012]"></div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
+            </div>
+            
+            {/* Time selector */}
+            <div>
+              <label className="block text-base font-medium text-white mb-3">Select Time Slot</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {['09:00 AM - 11:00 AM', '11:00 AM - 01:00 PM', '01:00 PM - 03:00 PM', 
+                 '03:00 PM - 05:00 PM', '05:00 PM - 07:00 PM'].map((timeSlot) => {
+                  const isSelected = formData.time === timeSlot;
+                  
+                  return (
+                    <div 
+                      key={timeSlot}
+                      onClick={() => {
+                        setFormData(prev => ({...prev, time: timeSlot}));
+                        setErrors(prev => ({...prev, time: null}));
+                      }}
+                      className={`relative rounded-lg cursor-pointer transition-all border ${
+                        isSelected 
+                          ? 'border-[#e60012] bg-[#e60012]/10' 
+                          : 'border-[#333] bg-[#222] hover:border-gray-600'
+                      } p-3`}
+                    >
+                      <div className="flex items-center">
+                        <div className={`w-4 h-4 rounded-full mr-2 ${isSelected ? 'bg-[#e60012]' : 'border border-gray-500'}`}>
+                          {isSelected && (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            </div>
+                          )}
+                        </div>
+                        <span className={isSelected ? 'text-white' : 'text-gray-300'}>
+                          {timeSlot}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {errors.time && <p className="text-xs text-red-500 mt-1">{errors.time}</p>}
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label htmlFor="date" className="block text-sm font-medium text-white">Preferred Date</label>
-            <input 
-              type="date" 
-              id="date" 
-              name="date" 
-              value={formData.date} 
-              onChange={handleChange}
-              min={new Date().toISOString().split('T')[0]}
-              className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-                errors.date ? 'border-red-600' : 'border-[#333]'
-              }`}
-              required
-            />
-            {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
+        {/* Issue Description - UPDATED DESIGN */}
+        <div className="mb-8">
+          <h3 className="text-xl font-bold mb-4 text-white flex items-center">
+            <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#333]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </span>
+            Problem Details
+          </h3>
+          
+          <div className="bg-[#111] p-6 rounded-xl border border-[#333]">
+            {/* Issue description textarea */}
+            <div className="mb-6">
+              <label htmlFor="issue" className="block text-base font-medium text-white mb-3">
+                Describe the issue you're experiencing
+              </label>
+              <textarea 
+                id="issue" 
+                name="issue" 
+                value={formData.issue} 
+                onChange={handleChange}
+                placeholder="Example: My phone screen is cracked and unresponsive on the right side..."
+                rows="3"
+                className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
+              ></textarea>
+            </div>
+            
+            {/* Additional notes textarea */}
+            <div>
+              <label htmlFor="additionalNotes" className="block text-base font-medium text-white mb-3">
+                Additional Notes (Optional)
+              </label>
+              <textarea 
+                id="additionalNotes" 
+                name="additionalNotes" 
+                value={formData.additionalNotes} 
+                onChange={handleChange}
+                placeholder="Example: The security code to enter the building is 2580..."
+                rows="2"
+                className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
+              ></textarea>
+            </div>
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <label htmlFor="time" className="block text-sm font-medium text-white">Preferred Time</label>
-            <select 
-              id="time" 
-              name="time" 
-              value={formData.time} 
-              onChange={handleChange}
-              className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-                errors.time ? 'border-red-600' : 'border-[#333]'
-              }`}
-              required
+        <div className="pt-6 border-t border-[#333]">
+          <div className="flex flex-col items-center">
+            <button
+              type="submit"
+              disabled={loading || !currentUser}
+              className="w-full py-4 px-8 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#d40010] hover:to-[#e55b5b] text-white text-lg font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
             >
-              <option value="">Select Time Slot</option>
-              <option value="09:00 AM - 11:00 AM">9:00 AM - 11:00 AM</option>
-              <option value="11:00 AM - 01:00 PM">11:00 AM - 1:00 PM</option>
-              <option value="01:00 PM - 03:00 PM">1:00 PM - 3:00 PM</option>
-              <option value="03:00 PM - 05:00 PM">3:00 PM - 5:00 PM</option>
-              <option value="05:00 PM - 07:00 PM">5:00 PM - 7:00 PM</option>
-            </select>
-            {errors.time && <p className="text-xs text-red-500 mt-1">{errors.time}</p>}
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                  <span>Processing your booking...</span>
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <span>Complete Booking</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              )}
+            </button>
+            <p className="text-gray-400 text-sm mt-3 text-center">
+              By completing this booking, you agree to our <span className="text-[#e60012] cursor-pointer">Terms of Service</span>
+            </p>
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="issue" className="block text-sm font-medium text-white">Issue Description</label>
-          <textarea 
-            id="issue" 
-            name="issue" 
-            value={formData.issue} 
-            onChange={handleChange}
-            placeholder="Describe the issue you're experiencing"
-            rows="2"
-            className="w-full px-4 py-3 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
-          ></textarea>
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="additionalNotes" className="block text-sm font-medium text-white">Additional Notes (Optional)</label>
-          <textarea 
-            id="additionalNotes" 
-            name="additionalNotes" 
-            value={formData.additionalNotes} 
-            onChange={handleChange}
-            placeholder="Any additional information you want us to know"
-            rows="2"
-            className="w-full px-4 py-3 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
-          ></textarea>
-        </div>
-
-        <div className="pt-4 border-t border-[#333]">
-          <button
-            type="submit"
-            disabled={loading || !currentUser}
-            className="w-full py-3 px-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#d40010] hover:to-[#e55b5b] text-white font-medium rounded-md shadow-sm transition-colors flex items-center justify-center"
-          >
-            {loading ? (
-              <span className="animate-pulse">Processing...</span>
-            ) : (
-              <>Complete Booking</>
-            )}
-          </button>
         </div>
       </form>
     </div>
