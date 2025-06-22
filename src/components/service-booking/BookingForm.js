@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { toast } from 'react-hot-toast'
 import { db } from '@/firebase/config'
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore'
-import { FiMapPin, FiUser, FiUserPlus } from 'react-icons/fi'
+import { FiMapPin, FiUser, FiUserPlus, FiLock } from 'react-icons/fi'
 
 export default function BookingForm({ service, brand, model, onComplete }) {
   const { currentUser } = useAuth()
@@ -18,6 +18,7 @@ export default function BookingForm({ service, brand, model, onComplete }) {
   const [selectedSavedAddress, setSelectedSavedAddress] = useState('')
   const [userCoordinates, setUserCoordinates] = useState(null)
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
+  const [userProfile, setUserProfile] = useState(null)
   
   const [formData, setFormData] = useState({
     name: currentUser?.displayName || '',
@@ -29,8 +30,15 @@ export default function BookingForm({ service, brand, model, onComplete }) {
     issue: '',
     additionalNotes: ''
   })
+  
+  // Original user data for resetting when switching between self/other
+  const [originalUserData, setOriginalUserData] = useState({
+    name: '',
+    email: '',
+    phone: ''
+  })
 
-  // Fetch user's saved addresses
+  // Fetch user's saved addresses and profile data
   useEffect(() => {
     const fetchUserData = async () => {
       if (currentUser) {
@@ -38,18 +46,35 @@ export default function BookingForm({ service, brand, model, onComplete }) {
           const userDoc = await getDoc(doc(db, 'users', currentUser.uid))
           if (userDoc.exists()) {
             const userData = userDoc.data()
+            setUserProfile(userData)
+            
+            // Save original user data for resetting
+            const originalData = {
+              name: userData.name || currentUser.displayName || '',
+              email: userData.email || currentUser.email || '',
+              phone: userData.phone || ''
+            }
+            setOriginalUserData(originalData)
             
             // Set form data from user profile
             setFormData(prev => ({
               ...prev,
-              name: userData.name || currentUser.displayName || prev.name,
-              email: userData.email || currentUser.email || prev.email,
-              phone: userData.phone || prev.phone
+              ...originalData
             }))
             
             // Get saved addresses
             if (userData.savedAddresses && Array.isArray(userData.savedAddresses)) {
               setSavedAddresses(userData.savedAddresses)
+              
+              // If user has a default address, select it
+              const defaultAddress = userData.savedAddresses.find(addr => addr.isDefault)
+              if (defaultAddress) {
+                setSelectedSavedAddress(defaultAddress.id)
+                setFormData(prev => ({
+                  ...prev,
+                  address: defaultAddress.fullAddress
+                }))
+              }
             }
           }
         } catch (error) {
@@ -60,6 +85,29 @@ export default function BookingForm({ service, brand, model, onComplete }) {
     
     fetchUserData()
   }, [currentUser])
+  
+  // Handle booking for self/other toggle
+  const handleBookingForToggle = (value) => {
+    setBookingFor(value)
+    
+    if (value === 'self') {
+      // Reset to original user data
+      setFormData(prev => ({
+        ...prev,
+        name: originalUserData.name,
+        email: originalUserData.email,
+        phone: originalUserData.phone
+      }))
+    } else {
+      // Clear fields for someone else
+      setFormData(prev => ({
+        ...prev,
+        name: '',
+        email: '',
+        phone: ''
+      }))
+    }
+  }
 
   // Get current location
   const getCurrentLocation = () => {
@@ -136,6 +184,12 @@ export default function BookingForm({ service, brand, model, onComplete }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target
+    
+    // Don't update if field should be read-only
+    if (bookingFor === 'self' && (name === 'name' || name === 'email' || name === 'phone')) {
+      return
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -363,7 +417,7 @@ export default function BookingForm({ service, brand, model, onComplete }) {
           <label className="block text-sm font-medium text-white">Who are you booking this service for?</label>
           <div className="flex gap-3">
             <div 
-              onClick={() => setBookingFor('self')}
+              onClick={() => handleBookingForToggle('self')}
               className={`flex-1 p-4 rounded-lg cursor-pointer border flex items-center gap-2 transition-all ${
                 bookingFor === 'self' 
                   ? 'border-[#e60012] bg-[#e60012]/10' 
@@ -377,7 +431,7 @@ export default function BookingForm({ service, brand, model, onComplete }) {
               </div>
             </div>
             <div 
-              onClick={() => setBookingFor('other')}
+              onClick={() => handleBookingForToggle('other')}
               className={`flex-1 p-4 rounded-lg cursor-pointer border flex items-center gap-2 transition-all ${
                 bookingFor === 'other' 
                   ? 'border-[#e60012] bg-[#e60012]/10' 
@@ -392,115 +446,141 @@ export default function BookingForm({ service, brand, model, onComplete }) {
             </div>
           </div>
         </div>
-      
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label htmlFor="name" className="block text-sm font-medium text-white">Full Name</label>
-            <input 
-              type="text" 
-              id="name" 
-              name="name" 
-              value={formData.name} 
-              onChange={handleChange}
-              placeholder="Enter full name"
-              className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-                errors.name ? 'border-red-600' : 'border-[#333]'
-              }`}
-              required
-            />
-            {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="phone" className="block text-sm font-medium text-white">Phone Number</label>
-            <input 
-              type="tel" 
-              id="phone" 
-              name="phone" 
-              value={formData.phone} 
-              onChange={handleChange}
-              placeholder="Enter 10-digit phone number"
-              className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-                errors.phone ? 'border-red-600' : 'border-[#333]'
-              }`}
-              required
-            />
-            {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
-          </div>
-
-          <div className="space-y-2 md:col-span-2">
-            <label htmlFor="email" className="block text-sm font-medium text-white">Email Address</label>
-            <input 
-              type="email" 
-              id="email" 
-              name="email" 
-              value={formData.email} 
-              onChange={handleChange}
-              placeholder="Enter email address"
-              className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-                errors.email ? 'border-red-600' : 'border-[#333]'
-              }`}
-              required
-            />
-            {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
-          </div>
-
-          <div className="space-y-2 md:col-span-2">
-            {/* Saved addresses selector */}
-            {currentUser && savedAddresses.length > 0 && (
-              <div className="mb-4">
-                <label htmlFor="savedAddress" className="block text-sm font-medium text-white mb-2">
-                  Use a saved address
-                </label>
-                <div className="flex gap-2">
-                  <select
-                    id="savedAddress"
-                    value={selectedSavedAddress}
-                    onChange={handleAddressSelect}
-                    className="flex-grow px-4 py-3 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012]"
-                  >
-                    <option value="">Select a saved address</option>
-                    {savedAddresses.map((addr) => (
-                      <option key={addr.id} value={addr.id}>
-                        {addr.name} - {addr.fullAddress.substring(0, 30)}...
-                      </option>
-                    ))}
-                  </select>
-                </div>
+        
+        {/* Customer Information Section */}
+        {bookingFor === 'self' ? (
+          <div className="bg-gradient-to-br from-[#1a1a1a] to-[#222] rounded-lg p-4 sm:p-5 mb-2 border border-[#333] shadow-md">
+            <h3 className="font-medium mb-4 text-white flex items-center gap-2">
+              <FiUser size={16} className="text-[#e60012]" />
+              Your Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-gray-400 mb-1">Full Name</p>
+                <p className="font-medium text-white">{formData.name || 'Not provided'}</p>
               </div>
-            )}
-
-            <div className="flex justify-between items-center">
-              <label htmlFor="address" className="block text-sm font-medium text-white">Service Address</label>
-              {/* Location detection button */}
-              {navigator.geolocation && (
-                <button 
-                  type="button"
-                  onClick={getCurrentLocation}
-                  className="text-xs flex items-center gap-1 text-[#e60012] hover:text-[#ff6b6b]"
-                  disabled={isLoadingLocation}
-                >
-                  <FiMapPin size={14} />
-                  {isLoadingLocation ? 'Detecting...' : 'Use my current location'}
-                </button>
-              )}
+              <div>
+                <p className="text-gray-400 mb-1">Phone Number</p>
+                <p className="font-medium text-white">{formData.phone || 'Not provided'}</p>
+              </div>
+              <div className="md:col-span-2">
+                <p className="text-gray-400 mb-1">Email Address</p>
+                <p className="font-medium text-white">{formData.email || 'Not provided'}</p>
+              </div>
             </div>
-            
-            <textarea 
-              id="address" 
-              name="address" 
-              value={formData.address} 
-              onChange={handleChange}
-              placeholder="Enter complete service address"
-              rows="3"
-              className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-                errors.address ? 'border-red-600' : 'border-[#333]'
-              }`}
-              required
-            ></textarea>
-            {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
           </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label htmlFor="name" className="block text-sm font-medium text-white">Full Name</label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                value={formData.name} 
+                onChange={handleChange}
+                placeholder="Enter full name"
+                className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
+                  errors.name ? 'border-red-600' : 'border-[#333]'
+                }`}
+                required
+              />
+              {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+            </div>
 
+            <div className="space-y-2">
+              <label htmlFor="phone" className="block text-sm font-medium text-white">Phone Number</label>
+              <input 
+                type="tel" 
+                id="phone" 
+                name="phone" 
+                value={formData.phone} 
+                onChange={handleChange}
+                placeholder="Enter 10-digit phone number"
+                className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
+                  errors.phone ? 'border-red-600' : 'border-[#333]'
+                }`}
+                required
+              />
+              {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <label htmlFor="email" className="block text-sm font-medium text-white">Email Address</label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                value={formData.email} 
+                onChange={handleChange}
+                placeholder="Enter email address"
+                className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
+                  errors.email ? 'border-red-600' : 'border-[#333]'
+                }`}
+                required
+              />
+              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-2 md:col-span-2">
+          {/* Saved addresses selector */}
+          {currentUser && savedAddresses.length > 0 && (
+            <div className="mb-4">
+              <label htmlFor="savedAddress" className="block text-sm font-medium text-white mb-2">
+                Use a saved address
+              </label>
+              <div className="flex gap-2">
+                <select
+                  id="savedAddress"
+                  value={selectedSavedAddress}
+                  onChange={handleAddressSelect}
+                  className="flex-grow px-4 py-3 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012]"
+                >
+                  <option value="">Select a saved address</option>
+                  {savedAddresses.map((addr) => (
+                    <option key={addr.id} value={addr.id}>
+                      {addr.name} - {addr.fullAddress.substring(0, 30)}...
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center">
+            <label htmlFor="address" className="block text-sm font-medium text-white">Service Address</label>
+            {/* Location detection button */}
+            {navigator.geolocation && (
+              <button 
+                type="button"
+                onClick={getCurrentLocation}
+                className="text-xs flex items-center gap-1 text-[#e60012] hover:text-[#ff6b6b]"
+                disabled={isLoadingLocation}
+              >
+                <FiMapPin size={14} />
+                {isLoadingLocation ? 'Detecting...' : 'Use my current location'}
+              </button>
+            )}
+          </div>
+          
+          <textarea 
+            id="address" 
+            name="address" 
+            value={formData.address} 
+            onChange={handleChange}
+            placeholder="Enter complete service address"
+            rows="3"
+            className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
+              errors.address ? 'border-red-600' : 'border-[#333]'
+            }`}
+            required
+          ></textarea>
+          {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label htmlFor="date" className="block text-sm font-medium text-white">Preferred Date</label>
             <input 
@@ -539,32 +619,32 @@ export default function BookingForm({ service, brand, model, onComplete }) {
             </select>
             {errors.time && <p className="text-xs text-red-500 mt-1">{errors.time}</p>}
           </div>
+        </div>
 
-          <div className="space-y-2 md:col-span-2">
-            <label htmlFor="issue" className="block text-sm font-medium text-white">Issue Description</label>
-            <textarea 
-              id="issue" 
-              name="issue" 
-              value={formData.issue} 
-              onChange={handleChange}
-              placeholder="Describe the issue you're experiencing"
-              rows="2"
-              className="w-full px-4 py-3 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
-            ></textarea>
-          </div>
+        <div className="space-y-2">
+          <label htmlFor="issue" className="block text-sm font-medium text-white">Issue Description</label>
+          <textarea 
+            id="issue" 
+            name="issue" 
+            value={formData.issue} 
+            onChange={handleChange}
+            placeholder="Describe the issue you're experiencing"
+            rows="2"
+            className="w-full px-4 py-3 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
+          ></textarea>
+        </div>
 
-          <div className="space-y-2 md:col-span-2">
-            <label htmlFor="additionalNotes" className="block text-sm font-medium text-white">Additional Notes (Optional)</label>
-            <textarea 
-              id="additionalNotes" 
-              name="additionalNotes" 
-              value={formData.additionalNotes} 
-              onChange={handleChange}
-              placeholder="Any additional information you want us to know"
-              rows="2"
-              className="w-full px-4 py-3 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
-            ></textarea>
-          </div>
+        <div className="space-y-2">
+          <label htmlFor="additionalNotes" className="block text-sm font-medium text-white">Additional Notes (Optional)</label>
+          <textarea 
+            id="additionalNotes" 
+            name="additionalNotes" 
+            value={formData.additionalNotes} 
+            onChange={handleChange}
+            placeholder="Any additional information you want us to know"
+            rows="2"
+            className="w-full px-4 py-3 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
+          ></textarea>
         </div>
 
         <div className="pt-4 border-t border-[#333]">
