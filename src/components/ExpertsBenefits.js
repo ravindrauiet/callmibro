@@ -29,28 +29,28 @@ export default function ExpertsBenefits() {
       title: "Certified Pros",
       description: "Our technicians undergo extensive training and certification to ensure top-quality repairs",
       icon: "/icons/certified.svg",
-      color: "from-[#ff4b4b] to-[#ff7676]"
+      color: "from-[#e60012] to-[#ff6b6b]"
     },
     {
       id: 2,
       title: "On-time Guarantee",
       description: "We guarantee punctual service with specific time slots and real-time technician tracking",
       icon: "/icons/ontime.svg",
-      color: "from-[#3366ff] to-[#5c8aff]"
+      color: "from-[#e60012] to-[#ff6b6b]"
     },
     {
       id: 3,
       title: "Transparent Pricing",
       description: "Get detailed cost breakdowns upfront with no hidden fees or surprise charges",
       icon: "/icons/pricing.svg",
-      color: "from-[#00ccb8] to-[#39e5d5]"
+      color: "from-[#e60012] to-[#ff6b6b]"
     },
     {
       id: 4,
       title: "Secure Payments",
       description: "Multiple payment options with state-of-the-art encryption for your financial security",
       icon: "/icons/secure.svg",
-      color: "from-[#6b46c1] to-[#8a63d2]"
+      color: "from-[#e60012] to-[#ff6b6b]"
     }
   ]
 
@@ -89,7 +89,7 @@ export default function ExpertsBenefits() {
               style={{ transitionDelay: `${index * 100 + 500}ms` }}
             >
               <div className={`w-16 h-16 mb-6 p-3 rounded-lg bg-gradient-to-br ${benefit.color} flex items-center justify-center transform hover:scale-110 transition-transform duration-300`}>
-                <div className="brightness-[10]">
+                <div className="brightness-0 invert">
                   <Image 
                     src={benefit.icon} 
                     alt={benefit.title} 

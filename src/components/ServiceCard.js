@@ -12,13 +12,13 @@ export default function ServiceCard({ title, description, icon, color = "from-[#
     <div className="group bg-[#111] rounded-xl h-full border border-[#222] hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all duration-300 overflow-hidden flex flex-col">
       <div className="p-4 sm:p-5 md:p-6 flex-1 flex flex-col">
         {/* Icon */}
-        <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mb-4 sm:mb-5 md:mb-6 p-2 sm:p-3 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}>
+        <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mb-4 sm:mb-5 md:mb-6 p-2 sm:p-3 rounded-lg bg-gradient-to-br  flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}>
           <Image 
             src={icon} 
             alt={`${title} icon`}
             width={30} 
             height={30}
-            className="brightness-[10]"
+            className="brightness-0 invert"
           />
         </div>
         

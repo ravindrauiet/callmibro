@@ -13,7 +13,7 @@ const servicesData = [
     icon: "/icons/mobile-screen.svg",
     category: "Mobile Phones",
     subCategory: "Screen Repair",
-    color: "from-[#ff4b4b] to-[#ff7676]"
+    color: "from-[#e60012] to-[#ff6b6b]"
   },
   {
     id: 2,
@@ -22,7 +22,7 @@ const servicesData = [
     icon: "/icons/tv.svg",
     category: "TVs",
     subCategory: "Diagnostics",
-    color: "from-[#3366ff] to-[#5c8aff]"
+    color: "from-[#e60012] to-[#ff6b6b]"
   },
   {
     id: 3,
@@ -31,7 +31,7 @@ const servicesData = [
     icon: "/icons/ac.svg",
     category: "ACs",
     subCategory: "Gas Refill",
-    color: "from-[#00ccb8] to-[#39e5d5]"
+    color: "from-[#e60012] to-[#ff6b6b]"
   },
   {
     id: 4,
@@ -40,7 +40,7 @@ const servicesData = [
     icon: "/icons/battery.svg",
     category: "Mobile Phones",
     subCategory: "Battery Replacement",
-    color: "from-[#ff4b4b] to-[#ff7676]"
+    color: "from-[#e60012] to-[#ff6b6b]"
   },
   {
     id: 5,
@@ -49,7 +49,7 @@ const servicesData = [
     icon: "/icons/battery2.svg",
     category: "Refrigerators",
     subCategory: "Repair",
-    color: "from-[#6b46c1] to-[#8a63d2]"
+    color: "from-[#e60012] to-[#ff6b6b]"
   },
   {
     id: 6,
@@ -58,7 +58,7 @@ const servicesData = [
     icon: "/icons/speaker.svg",
     category: "Audio",
     subCategory: "Speaker Repair",
-    color: "from-[#00ccb8] to-[#39e5d5]"
+    color: "from-[#e60012] to-[#ff6b6b]"
   }
 ]
 

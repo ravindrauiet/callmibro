@@ -5,6 +5,8 @@ import Footer from '../../components/Footer'
 import RepairServices from '../../components/RepairServices'
 import ExpertsBenefits from '../../components/ExpertsBenefits'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
 
 export default function ServicesPage() {
   const [isVisible, setIsVisible] = useState(false)
@@ -13,16 +15,29 @@ export default function ServicesPage() {
     setIsVisible(true)
   }, [])
 
+  // Popular service categories with icons
+  const popularCategories = [
+    { name: "Mobile Phones", icon: "/icons/mobile-screen.svg", color: "from-[#e60012] to-[#ff6b6b]" },
+    { name: "TVs", icon: "/icons/tv.svg", color: "from-[#e60012] to-[#ff6b6b]" },
+    { name: "ACs", icon: "/icons/ac.svg", color: "from-[#e60012] to-[#ff6b6b]" },
+    { name: "Refrigerators", icon: "/icons/battery2.svg", color: "from-[#e60012] to-[#ff6b6b]" },
+    { name: "Audio", icon: "/icons/speaker.svg", color: "from-[#e60012] to-[#ff6b6b]" }
+  ];
+
   return (
     <main className="min-h-screen bg-black text-white">
       <Header activePage="services" />
       
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-24 px-4 sm:px-8 overflow-hidden">
-        {/* Background Elements */}
+      {/* Hero Section with 3D elements and particles */}
+      <section className="relative pt-24 pb-32 px-4 sm:px-8 overflow-hidden">
+        {/* Animated background elements */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+          <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-[#e60012]/10 rounded-full blur-xl animate-pulse" style={{animationDelay: '1s'}}></div>
+          
+          {/* Grid pattern overlay */}
+          <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-center opacity-5"></div>
         </div>
         
         <div className="container mx-auto max-w-6xl">
@@ -31,40 +46,87 @@ export default function ServicesPage() {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
             }`}
           >
-            <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
-              <span className="text-[#e60012] text-sm font-medium">Expert Repair Solutions</span>
+            <div className="inline-block bg-gradient-to-r from-[#111] to-[#181818] px-4 py-1 rounded-full mb-4 border border-[#333] backdrop-blur-sm">
+              <span className="text-[#e60012] text-sm font-medium">Premium Repair Solutions</span>
             </div>
             
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-center">
-              Professional <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Repair Services</span>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-center leading-tight">
+              Professional <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b] relative">
+                Repair Services
+                <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] rounded-full opacity-50"></span>
+              </span>
             </h1>
             
-            <p className="text-gray-400 text-lg mb-8 text-center max-w-3xl">
-              Find the perfect repair service for your device and get it fixed by certified experts in your area
+            <p className="text-gray-400 text-lg mb-10 text-center max-w-3xl">
+              Find the perfect repair service for your device and get it fixed by certified experts in your area with our quick and reliable solutions
             </p>
             
-            <div className="flex flex-wrap justify-center gap-4">
-              <button className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white px-8 py-3 rounded-full font-medium hover:shadow-lg hover:shadow-[#e60012]/20 transition-all">
-                Book Now
-              </button>
-              <button className="bg-transparent border border-white/20 text-white px-8 py-3 rounded-full font-medium hover:border-[#e60012] transition-all">
-                View Pricing
-              </button>
+            {/* Enhanced CTA buttons with hover effects */}
+            <div className="flex flex-wrap justify-center gap-4 mb-16">
+              <Link href="/services/booking" className="relative overflow-hidden group">
+                <span className="absolute inset-0 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] rounded-full"></span>
+                <span className="relative block bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white px-8 py-4 rounded-full font-medium transform transition-all group-hover:shadow-lg group-hover:shadow-[#e60012]/20 group-hover:scale-[1.02]">
+                  <span className="flex items-center">
+                    Book Now
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 transform group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </span>
+                </span>
+              </Link>
+              
+              <Link href="#service-pricing" className="relative group">
+                <span className="absolute inset-0 bg-white/5 rounded-full transform transition-all group-hover:bg-white/10"></span>
+                <span className="relative block bg-transparent border border-white/20 text-white px-8 py-4 rounded-full font-medium transform transition-all group-hover:border-[#e60012]">
+                  View Pricing
+                </span>
+              </Link>
             </div>
             
-            {/* Floating Stats */}
+            {/* Popular Categories Carousel */}
+            <div className="w-full">
+              <h2 className="text-xl font-bold mb-6 text-center">Popular Service Categories</h2>
+              <div className="flex flex-wrap justify-center gap-4">
+                {popularCategories.map((category, index) => (
+                  <Link 
+                    key={index}
+                    href={`#${category.name.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="bg-gradient-to-br from-[#111] to-[#191919] border border-[#333] rounded-xl p-4 flex flex-col items-center transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 hover:scale-105 w-[120px] h-[120px]"
+                    style={{ transitionDelay: `${index * 50}ms` }}
+                  >
+                    <div className={`w-12 h-12 mb-3 rounded-lg bg-gradient-to-br ${category.color} flex items-center justify-center`}>
+                      <Image 
+                        src={category.icon} 
+                        alt={category.name} 
+                        width={24} 
+                        height={24}
+                        className="brightness-0 invert"
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-center">{category.name}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+            
+            {/* Floating Stats with enhanced design */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 w-full">
               {[
-                { number: "10K+", text: "Repairs Completed" },
-                { number: "500+", text: "Expert Technicians" },
-                { number: "50+", text: "Service Centers" },
-                { number: "4.8/5", text: "Customer Rating" },
+                { number: "10K+", text: "Repairs Completed", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
+                { number: "500+", text: "Expert Technicians", icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
+                { number: "50+", text: "Service Centers", icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" },
+                { number: "4.8/5", text: "Customer Rating", icon: "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" },
               ].map((stat, index) => (
                 <div 
                   key={index}
-                  className="bg-[#111] border border-[#222] rounded-xl p-4 text-center transform transition-all duration-700"
+                  className="bg-gradient-to-br from-[#111] to-[#191919] border border-[#222] rounded-xl p-5 text-center transform transition-all duration-700 hover:border-[#333] group"
                   style={{ transitionDelay: `${index * 100 + 500}ms` }}
                 >
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#e60012]/10 flex items-center justify-center group-hover:bg-[#e60012]/20 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={stat.icon} />
+                    </svg>
+                  </div>
                   <div className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">
                     {stat.number}
                   </div>
@@ -76,8 +138,185 @@ export default function ServicesPage() {
         </div>
       </section>
       
+      {/* Enhanced Service Finder Section */}
       <RepairServices />
+      
+      {/* Enhanced Benefits Section */}
       <ExpertsBenefits />
+      
+      {/* New Section: Service Process */}
+      <section className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden bg-gradient-to-b from-black to-[#111]">
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto max-w-6xl relative z-10">
+          <div className="text-center mb-16">
+            <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
+              <span className="text-[#e60012] text-sm font-medium">Simple & Fast</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+              How Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Service Works</span>
+            </h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">
+              We've simplified the repair process to get your devices fixed quickly and efficiently
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            {/* Connecting line */}
+            <div className="hidden md:block absolute top-24 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#e60012]/30 to-transparent"></div>
+            
+            {/* Step 1 */}
+            <div className="bg-[#111] border border-[#222] rounded-xl p-6 relative hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all group">
+              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white font-bold text-lg z-10">1</div>
+              <div className="pt-8 text-center">
+                <h3 className="text-xl font-bold mb-4">Book a Service</h3>
+                <p className="text-gray-400 mb-4">Select your device, issue, and preferred time slot for the service</p>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-[#e60012] opacity-75 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+            
+            {/* Step 2 */}
+            <div className="bg-[#111] border border-[#222] rounded-xl p-6 relative hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all group">
+              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white font-bold text-lg z-10">2</div>
+              <div className="pt-8 text-center">
+                <h3 className="text-xl font-bold mb-4">Expert Diagnosis</h3>
+                <p className="text-gray-400 mb-4">Our certified technician will diagnose the issue and provide a quote</p>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-[#e60012] opacity-75 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+              </div>
+            </div>
+            
+            {/* Step 3 */}
+            <div className="bg-[#111] border border-[#222] rounded-xl p-6 relative hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all group">
+              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white font-bold text-lg z-10">3</div>
+              <div className="pt-8 text-center">
+                <h3 className="text-xl font-bold mb-4">Quick Repair</h3>
+                <p className="text-gray-400 mb-4">Get your device fixed and back in your hands in no time</p>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-[#e60012] opacity-75 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          {/* CTA Button */}
+          <div className="mt-16 text-center">
+            <Link href="/services/booking" className="inline-block bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white px-8 py-4 rounded-full font-medium hover:shadow-lg hover:shadow-[#e60012]/20 transition-all transform hover:scale-[1.02]">
+              Get Started Now
+            </Link>
+          </div>
+        </div>
+      </section>
+      
+      {/* Testimonials Section */}
+      <section id="service-pricing" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden bg-[#111]">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <div className="inline-block bg-[#191919] px-4 py-1 rounded-full mb-4 border border-[#333]">
+              <span className="text-[#e60012] text-sm font-medium">Transparent Pricing</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+              Service <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Pricing</span>
+            </h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">
+              We offer competitive pricing with no hidden fees
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Basic Service */}
+            <div className="bg-gradient-to-br from-[#0d0d0d] to-[#151515] border border-[#222] rounded-xl overflow-hidden transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10">
+              <div className="p-6 border-b border-[#222]">
+                <h3 className="text-xl font-bold mb-2">Basic Diagnostics</h3>
+                <div className="flex items-end gap-2">
+                  <span className="text-3xl font-bold">₹499</span>
+                  <span className="text-gray-400 text-sm mb-1">onwards</span>
+                </div>
+                <p className="text-gray-400 text-sm mt-2">Perfect for simple issues and quick fixes</p>
+              </div>
+              <div className="p-6">
+                <ul className="space-y-3">
+                  {["Complete device inspection", "Software diagnostics", "Minor repairs", "30-day service warranty"].map((item, i) => (
+                    <li key={i} className="flex items-start">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#e60012] mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm text-gray-300">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/services/booking?plan=basic" className="mt-6 block w-full py-2 px-4 bg-transparent border border-[#e60012] text-[#e60012] rounded-lg text-center font-medium hover:bg-[#e60012] hover:text-white transition-colors">
+                  Book Service
+                </Link>
+              </div>
+            </div>
+            
+            {/* Standard Service */}
+            <div className="bg-gradient-to-br from-[#0d0d0d] to-[#151515] border border-[#e60012] rounded-xl overflow-hidden transition-all hover:shadow-lg hover:shadow-[#e60012]/20 relative transform hover:scale-[1.02]">
+              <div className="absolute top-0 right-0">
+                <div className="bg-[#e60012] text-white text-xs font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
+              </div>
+              <div className="p-6 border-b border-[#222]">
+                <h3 className="text-xl font-bold mb-2">Standard Repair</h3>
+                <div className="flex items-end gap-2">
+                  <span className="text-3xl font-bold">₹999</span>
+                  <span className="text-gray-400 text-sm mb-1">onwards</span>
+                </div>
+                <p className="text-gray-400 text-sm mt-2">Comprehensive repair for most common issues</p>
+              </div>
+              <div className="p-6">
+                <ul className="space-y-3">
+                  {["All Basic features", "Hardware repairs", "Component replacement", "90-day service warranty", "Free follow-up check"].map((item, i) => (
+                    <li key={i} className="flex items-start">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#e60012] mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm text-gray-300">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/services/booking?plan=standard" className="mt-6 block w-full py-2 px-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white rounded-lg text-center font-medium hover:shadow-lg hover:shadow-[#e60012]/20 transition-all">
+                  Book Service
+                </Link>
+              </div>
+            </div>
+            
+            {/* Premium Service */}
+            <div className="bg-gradient-to-br from-[#0d0d0d] to-[#151515] border border-[#222] rounded-xl overflow-hidden transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10">
+              <div className="p-6 border-b border-[#222]">
+                <h3 className="text-xl font-bold mb-2">Premium Service</h3>
+                <div className="flex items-end gap-2">
+                  <span className="text-3xl font-bold">₹1999</span>
+                  <span className="text-gray-400 text-sm mb-1">onwards</span>
+                </div>
+                <p className="text-gray-400 text-sm mt-2">Complete overhaul and advanced repairs</p>
+              </div>
+              <div className="p-6">
+                <ul className="space-y-3">
+                  {["All Standard features", "Advanced diagnostics", "Major component replacement", "Priority service", "1-year service warranty", "Free maintenance check-ups"].map((item, i) => (
+                    <li key={i} className="flex items-start">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#e60012] mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm text-gray-300">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/services/booking?plan=premium" className="mt-6 block w-full py-2 px-4 bg-transparent border border-[#e60012] text-[#e60012] rounded-lg text-center font-medium hover:bg-[#e60012] hover:text-white transition-colors">
+                  Book Service
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
       <Footer />
     </main>
   )
