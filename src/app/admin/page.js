@@ -14,7 +14,8 @@ export default function AdminDashboard() {
     totalTechnicians: 0,
     totalProducts: 0,
     totalOrders: 0,
-    revenue: 0
+    revenue: 0,
+    expressBookings: 0
   })
   
   const [recentBookings, setRecentBookings] = useState([])
@@ -37,6 +38,9 @@ export default function AdminDashboard() {
         const completedBookings = bookings.filter(booking => 
           booking.status === 'completed'
         )
+        
+        // Count express bookings
+        const expressBookings = bookings.filter(booking => booking.isExpressBooking === true)
         
         // Fetch recent bookings
         const recentBookingsQuery = query(
@@ -83,7 +87,8 @@ export default function AdminDashboard() {
           totalTechnicians: techniciansSnapshot.size,
           totalProducts: productsSnapshot.size,
           totalOrders: orders.length,
-          revenue
+          revenue,
+          expressBookings: expressBookings.length
         })
         
         setRecentBookings(recentBookingsData)
@@ -176,6 +181,13 @@ export default function AdminDashboard() {
           icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           color="from-emerald-500 to-emerald-600"
           link="/admin/orders"
+        />
+        <StatCard 
+          title="Express Bookings" 
+          value={stats.expressBookings} 
+          icon="M13 10V3L4 14h7v7l9-11h-7z"
+          color="from-red-500 to-[#e60012]"
+          link="/admin/express-bookings"
         />
       </div>
       
