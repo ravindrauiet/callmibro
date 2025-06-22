@@ -1,12 +1,152 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { db } from '@/firebase/config'
 
 export default function ModelSelection({ service, brand, onModelSelect }) {
-  const [selectedModelId, setSelectedModelId] = useState(null);
+  const [models, setModels] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selectedModelId, setSelectedModelId] = useState(null)
+  const [error, setError] = useState(null)
   
-  // Comprehensive data for models based on brand and service type
+  // Check if online
+  const checkNetwork = () => {
+    return navigator.onLine;
+  };
+  
+  // Fetch models from database based on selected brand
+  useEffect(() => {
+    const fetchModels = async () => {
+      // Reset error state on new fetch
+      setError(null);
+      
+      if (!brand || !brand.id) {
+        setLoading(false)
+        return
+      }
+      
+      // Check if we're online
+      if (!checkNetwork()) {
+        console.log('Network connection unavailable, using fallback models');
+        setModels(getModels());
+        setError('Network connection unavailable');
+        toast.error('Network connection unavailable. Using default models.');
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        setLoading(true)
+        
+        // Make sure we have a valid database reference
+        if (!db) {
+          console.error('Firestore database reference is not available');
+          throw new Error('Database connection not available');
+        }
+        
+        // Get models for the selected brand from the database
+        const modelsCollection = collection(db, 'brands', brand.id, 'models')
+        const modelsQuery = query(modelsCollection, where('isActive', '==', true))
+        
+        console.log('Executing Firestore query for models...');
+        const modelsSnapshot = await Promise.race([
+          getDocs(modelsQuery),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Database query timed out')), 10000)
+          )
+        ]);
+        
+        console.log('Query executed, results:', modelsSnapshot.size);
+        
+        const modelsData = modelsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          // Add price based on service if not already in the database
+          price: doc.data().price || getDefaultPrice(service, brand.id, doc.data().name)
+        }))
+        
+        if (modelsData.length === 0) {
+          // Fallback to hardcoded models if no models found in database
+          console.log('No models found in database, using fallback');
+          setModels(getModels())
+          if (brand.id !== 'default') {
+            toast.warning(`Using default models for ${brand.name}`)
+          }
+        } else {
+          console.log('Found models in database:', modelsData.length);
+          setModels(modelsData)
+        }
+      } catch (error) {
+        console.error('Error fetching models:', error)
+        console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error).reduce((obj, prop) => {
+          obj[prop] = error[prop];
+          return obj;
+        }, {})));
+        
+        // Set error state
+        setError(error.message || 'Failed to load models');
+        
+        // Fallback to hardcoded models on error
+        setModels(getModels())
+        
+        // Show more specific error message based on error type
+        if (error.name === 'FirebaseError') {
+          if (error.code === 'permission-denied') {
+            toast.error('Permission denied: Check Firebase rules');
+          } else if (error.code === 'unavailable') {
+            toast.error('Firebase service unavailable. Using default models.');
+          } else {
+            toast.error(`Firebase error (${error.code}): Using default models`);
+          }
+        } else if (error.message === 'Database query timed out') {
+          toast.error('Database query timed out. Using default models.');
+        } else {
+          toast.error('Failed to load models from database')
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchModels()
+  }, [brand, service])
+  
+  // Function to get default price based on service and model name
+  const getDefaultPrice = (service, brandId, modelName) => {
+    // Default pricing logic based on service type and model name
+    const normalizeServiceName = (name) => {
+      return name?.toLowerCase().replace(/[-\s]/g, '') || '';
+    };
+    
+    const normalizedService = normalizeServiceName(service);
+    
+    // Base price for different services
+    const basePrices = {
+      'mobilescreenrepair': '₹3,500',
+      'batteryreplacement': '₹1,500',
+      'tvdiagnostics': '₹1,000',
+      'acgasrefill': '₹2,000',
+      'speakerrepair': '₹1,200',
+      'laptoprepair': '₹2,500',
+      'refrigeratorrepair': '₹1,800'
+    };
+    
+    // Price adjustments based on model name patterns
+    let price = basePrices[normalizedService] || '₹1,500';
+    
+    // Higher price for premium models (containing "pro", "max", "ultra", etc.)
+    if (/pro|max|ultra|premium|plus\+?|elite|flagship/i.test(modelName)) {
+      // Increase price by ~30%
+      const numericPrice = parseInt(price.replace(/[^\d]/g, ''));
+      price = '₹' + Math.round(numericPrice * 1.3).toLocaleString('en-IN');
+    }
+    
+    return price;
+  };
+
+  // Comprehensive data for models based on brand and service type (fallback)
   const getModels = () => {
     // Normalize service name for comparison
     const normalizeServiceName = (name) => {
@@ -73,29 +213,7 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'galaxy-s20-ultra', name: 'Galaxy S20 Ultra', price: '₹10,500' },
         { id: 'galaxy-s20-plus', name: 'Galaxy S20+', price: '₹8,800' },
         { id: 'galaxy-s20', name: 'Galaxy S20', price: '₹7,200' },
-        { id: 'galaxy-s20-fe', name: 'Galaxy S20 FE', price: '₹6,500' },
-        { id: 'galaxy-z-fold-6', name: 'Galaxy Z Fold 6', price: '₹28,000' },
-        { id: 'galaxy-z-fold-5', name: 'Galaxy Z Fold 5', price: '₹26,000' },
-        { id: 'galaxy-z-fold-4', name: 'Galaxy Z Fold 4', price: '₹24,000' },
-        { id: 'galaxy-z-fold-3', name: 'Galaxy Z Fold 3', price: '₹22,000' },
-        { id: 'galaxy-z-flip-6', name: 'Galaxy Z Flip 6', price: '₹20,000' },
-        { id: 'galaxy-z-flip-5', name: 'Galaxy Z Flip 5', price: '₹18,000' },
-        { id: 'galaxy-z-flip-4', name: 'Galaxy Z Flip 4', price: '₹16,000' },
-        { id: 'galaxy-z-flip-3', name: 'Galaxy Z Flip 3', price: '₹14,000' },
-        { id: 'galaxy-a54', name: 'Galaxy A54', price: '₹5,500' },
-        { id: 'galaxy-a53', name: 'Galaxy A53', price: '₹5,200' },
-        { id: 'galaxy-a52', name: 'Galaxy A52', price: '₹4,800' },
-        { id: 'galaxy-a34', name: 'Galaxy A34', price: '₹4,500' },
-        { id: 'galaxy-a33', name: 'Galaxy A33', price: '₹4,200' },
-        { id: 'galaxy-a24', name: 'Galaxy A24', price: '₹3,800' },
-        { id: 'galaxy-a23', name: 'Galaxy A23', price: '₹3,500' },
-        { id: 'galaxy-a14', name: 'Galaxy A14', price: '₹3,200' },
-        { id: 'galaxy-a13', name: 'Galaxy A13', price: '₹3,000' },
-        { id: 'galaxy-m54', name: 'Galaxy M54', price: '₹4,800' },
-        { id: 'galaxy-m53', name: 'Galaxy M53', price: '₹4,500' },
-        { id: 'galaxy-m34', name: 'Galaxy M34', price: '₹4,200' },
-        { id: 'galaxy-m33', name: 'Galaxy M33', price: '₹3,800' },
-        { id: 'galaxy-m14', name: 'Galaxy M14', price: '₹3,500' }
+        { id: 'galaxy-s20-fe', name: 'Galaxy S20 FE', price: '₹6,500' }
       ];
     } else if (brand.id === 'lg' && normalizedService === 'tvdiagnostics') {
       return [
@@ -367,8 +485,6 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
     }
   };
 
-  const models = getModels();
-  
   const handleModelSelect = (model) => {
     try {
       setSelectedModelId(model.id);
@@ -389,67 +505,81 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
     }
   };
 
+  if (!brand || !brand.id) {
+    return (
+      <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">Select Model</h3>
+        <p className="text-gray-400">Please select a brand first</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">Select Model</h3>
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#e60012]"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (models.length === 0) {
+    return (
+      <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">Select Model</h3>
+        <p className="text-gray-400">No models available for {brand.name}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
-      <h2 className="text-2xl font-semibold mb-2 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Select Model</h2>
-      <p className="text-gray-400 mb-6">Selected Brand: <span className="font-medium text-white">{brand.name}</span></p>
+      <h3 className="text-xl font-semibold text-white mb-4">Select Model for {brand.name}</h3>
       
-      <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {models.map((model) => (
-          <div 
+          <div
             key={model.id}
-            className={`bg-gradient-to-br from-[#1a1a1a] to-[#222] border ${
-              selectedModelId === model.id 
-                ? 'border-[#e60012] shadow-lg shadow-[#e60012]/10' 
-                : 'border-[#333] hover:border-[#e60012]/70'
-            } rounded-lg p-4 transition-all duration-300 cursor-pointer transform hover:scale-[1.01]`}
             onClick={() => handleModelSelect(model)}
+            className={`flex flex-col p-4 rounded-lg cursor-pointer transition-all ${
+              selectedModelId === model.id
+                ? 'bg-[#e60012] border-2 border-[#ff6b6b]'
+                : 'bg-[#222] border border-[#333] hover:border-[#444] hover:bg-[#2a2a2a]'
+            }`}
           >
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className={`text-lg font-medium ${
-                  selectedModelId === model.id
-                    ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent'
-                    : 'text-white'
-                }`}>{model.name}</h3>
-                <p className="text-sm text-gray-400 mt-1">Service Price: <span className="font-medium text-white">{model.price}</span></p>
-              </div>
-              <div className={`${
-                selectedModelId === model.id
-                  ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]'
-                  : 'text-gray-500'
-              } rounded-full p-1.5 transition-all duration-300`}>
-                {selectedModelId === model.id ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                )}
-              </div>
+            <div className="flex items-center mb-3">
+              {model.photoURL ? (
+                <div className="w-12 h-12 mr-3 flex items-center justify-center">
+                  <img
+                    src={model.photoURL}
+                    alt={model.name}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+              ) : null}
+              
+              <h4 className={`font-medium ${
+                selectedModelId === model.id ? 'text-white' : 'text-gray-200'
+              }`}>
+                {model.name}
+              </h4>
+            </div>
+            
+            <div className="mt-auto pt-2 flex justify-between items-center">
+              <span className={`text-sm ${
+                selectedModelId === model.id ? 'text-white' : 'text-gray-400'
+              }`}>
+                {model.description || 'Standard repair'}
+              </span>
+              <span className="font-bold text-lg text-[#e60012]">
+                {model.price}
+              </span>
             </div>
           </div>
         ))}
       </div>
-      
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #222;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #444;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #555;
-        }
-      `}</style>
     </div>
-  )
+  );
 } 

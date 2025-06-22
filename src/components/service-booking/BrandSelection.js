@@ -1,10 +1,142 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { db } from '@/firebase/config'
 
 export default function BrandSelection({ service, onBrandSelect }) {
-  // Comprehensive brands based on the service type
+  const [brands, setBrands] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selectedBrandId, setSelectedBrandId] = useState(null)
+  const [error, setError] = useState(null)
+
+  // Check if online
+  const checkNetwork = () => {
+    return navigator.onLine;
+  };
+
+  // Fetch brands from database
+  useEffect(() => {
+    const fetchBrands = async () => {
+      // Reset error state on new fetch
+      setError(null);
+      
+      // Check if we're online
+      if (!checkNetwork()) {
+        console.log('Network connection unavailable, using fallback brands');
+        setBrands(getBrands());
+        setError('Network connection unavailable');
+        toast.error('Network connection unavailable. Using default brands.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true)
+        
+        // Normalize service name for comparison
+        const normalizeServiceName = (name) => {
+          return name?.toLowerCase().replace(/[-\s]/g, '') || '';
+        };
+        
+        const normalizedService = normalizeServiceName(service);
+        console.log('Fetching brands for service:', service, 'normalized:', normalizedService);
+        
+        // Map service to category
+        const serviceToCategory = {
+          'mobilescreenrepair': 'Mobile',
+          'batteryreplacement': 'Mobile',
+          'tvdiagnostics': 'TV',
+          'acgasrefill': 'AC',
+          'speakerrepair': 'Audio',
+          'laptoprepair': 'Laptop',
+          'refrigeratorrepair': 'Refrigerator'
+        };
+        
+        const category = serviceToCategory[normalizedService] || '';
+        console.log('Category mapped to:', category);
+        
+        // Make sure we have a valid database reference
+        if (!db) {
+          console.error('Firestore database reference is not available');
+          throw new Error('Database connection not available');
+        }
+        
+        // Query brands by category if available
+        let brandsQuery;
+        if (category) {
+          brandsQuery = query(
+            collection(db, 'brands'),
+            where('category', '==', category),
+            where('isActive', '==', true)
+          );
+        } else {
+          brandsQuery = query(
+            collection(db, 'brands'),
+            where('isActive', '==', true)
+          );
+        }
+        
+        console.log('Executing Firestore query for brands...');
+        const brandsSnapshot = await Promise.race([
+          getDocs(brandsQuery),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Database query timed out')), 10000)
+          )
+        ]);
+        
+        console.log('Query executed, results:', brandsSnapshot.size);
+        const brandsData = brandsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        if (brandsData.length === 0) {
+          // Fallback to hardcoded brands if no brands found in database
+          console.log('No brands found in database, using fallback');
+          setBrands(getBrands());
+          toast.warning('Using default brands for this service');
+        } else {
+          console.log('Found brands in database:', brandsData.length);
+          setBrands(brandsData);
+        }
+      } catch (error) {
+        console.error('Error fetching brands:', error);
+        console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error).reduce((obj, prop) => {
+          obj[prop] = error[prop];
+          return obj;
+        }, {})));
+        
+        // Set error state
+        setError(error.message || 'Failed to load brands');
+        
+        // Fallback to hardcoded brands on error
+        setBrands(getBrands());
+        
+        // Show more specific error message based on error type
+        if (error.name === 'FirebaseError') {
+          if (error.code === 'permission-denied') {
+            toast.error('Permission denied: Check Firebase rules');
+          } else if (error.code === 'unavailable') {
+            toast.error('Firebase service unavailable. Using default brands.');
+          } else {
+            toast.error(`Firebase error (${error.code}): Using default brands`);
+          }
+        } else if (error.message === 'Database query timed out') {
+          toast.error('Database query timed out. Using default brands.');
+        } else {
+          toast.error('Failed to load brands from database');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchBrands();
+  }, [service]);
+
+  // Fallback function for hardcoded brands
   const getBrands = () => {
     // Normalize service name for comparison
     const normalizeServiceName = (name) => {
@@ -223,9 +355,6 @@ export default function BrandSelection({ service, onBrandSelect }) {
     }
   };
 
-  const brands = getBrands();
-  const [selectedBrandId, setSelectedBrandId] = useState(null);
-
   const handleBrandSelect = (brand) => {
     try {
       setSelectedBrandId(brand.id);
@@ -246,36 +375,53 @@ export default function BrandSelection({ service, onBrandSelect }) {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">Select Brand</h3>
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#e60012]"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
-      <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Select Brand</h2>
+      <h3 className="text-xl font-semibold text-white mb-4">Select Brand</h3>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {brands.map((brand) => (
-          <div 
+          <div
             key={brand.id}
-            className={`bg-gradient-to-br from-[#1a1a1a] to-[#222] border ${
-              selectedBrandId === brand.id 
-                ? 'border-[#e60012] shadow-lg shadow-[#e60012]/10' 
-                : 'border-[#333] hover:border-[#e60012]/70'
-            } rounded-lg p-4 transition-all duration-300 cursor-pointer transform hover:scale-[1.02]`}
             onClick={() => handleBrandSelect(brand)}
-          >
-            <div className="aspect-square overflow-hidden rounded-lg mb-3 bg-[#222] flex items-center justify-center">
-              <span className={`text-2xl font-bold ${
-                selectedBrandId === brand.id
-                  ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent'
-                  : 'text-gray-500'
-              }`}>{brand.name.charAt(0)}</span>
-            </div>
-            <h3 className={`text-base font-medium text-center ${
+            className={`flex flex-col items-center justify-center p-3 rounded-lg cursor-pointer transition-all ${
               selectedBrandId === brand.id
-                ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent'
-                : 'text-white'
-            }`}>{brand.name}</h3>
+                ? 'bg-[#e60012] border-2 border-[#ff6b6b]'
+                : 'bg-[#222] border border-[#333] hover:border-[#444] hover:bg-[#2a2a2a]'
+            }`}
+          >
+            <div className="w-12 h-12 mb-2 flex items-center justify-center">
+              {brand.logo ? (
+                <img
+                  src={brand.logo}
+                  alt={brand.name}
+                  className="max-w-full max-h-full object-contain"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-[#333] flex items-center justify-center text-white text-lg font-medium">
+                  {brand.name?.charAt(0).toUpperCase() || 'B'}
+                </div>
+              )}
+            </div>
+            <span className={`text-sm font-medium text-center ${
+              selectedBrandId === brand.id ? 'text-white' : 'text-gray-300'
+            }`}>
+              {brand.name}
+            </span>
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
