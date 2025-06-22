@@ -16,6 +16,14 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
     return navigator.onLine;
   };
   
+  // Helper function to remove price from model data
+  const removePriceFromModels = (modelsData) => {
+    return modelsData.map(model => ({
+      ...model,
+      price: null
+    }));
+  };
+  
   // Fetch models from database based on selected brand
   useEffect(() => {
     const fetchModels = async () => {
@@ -30,7 +38,7 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
       // Check if we're online
       if (!checkNetwork()) {
         console.log('Network connection unavailable, using fallback models');
-        setModels(getModels());
+        setModels(removePriceFromModels(getModels()));
         setError('Network connection unavailable');
         toast.error('Network connection unavailable. Using default models.');
         setLoading(false);
@@ -80,11 +88,11 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
               const modelsData = legacyModelsSnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
-                // Add price based on service if not already in the database
-                price: doc.data().price || getDefaultPrice(service, brand.id, doc.data().name)
+                // Remove price data
+                price: null
               }));
               
-              setModels(modelsData);
+              setModels(removePriceFromModels(modelsData));
               toast.warning('Using legacy model data. Please run migration tool.');
               setLoading(false);
               return;
@@ -98,14 +106,14 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         const modelsData = modelsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          // Add price based on service if not already in the database
-          price: doc.data().price || getDefaultPrice(service, brand.id, doc.data().name)
+          // Remove price data
+          price: null
         }))
         
         if (modelsData.length === 0) {
           // Fallback to hardcoded models if no models found in database
           console.log('No models found in database, using fallback');
-          setModels(getModels())
+          setModels(removePriceFromModels(getModels()))
           if (brand.id !== 'default') {
             toast.warning(`Using default models for ${brand.name}`)
           }
@@ -124,7 +132,7 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         setError(error.message || 'Failed to load models');
         
         // Fallback to hardcoded models on error
-        setModels(getModels())
+        setModels(removePriceFromModels(getModels()))
         
         // Show more specific error message based on error type
         if (error.name === 'FirebaseError') {
@@ -150,6 +158,10 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
   
   // Function to get default price based on service and model name
   const getDefaultPrice = (service, brandId, modelName) => {
+    // Return null to avoid displaying prices
+    return null;
+    
+    /* Prices are no longer displayed in the frontend
     // Default pricing logic based on service type and model name
     const normalizeServiceName = (name) => {
       return name?.toLowerCase().replace(/[-\s]/g, '') || '';
@@ -179,6 +191,7 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
     }
     
     return price;
+    */
   };
 
   // Comprehensive data for models based on brand and service type (fallback)
@@ -602,16 +615,15 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
               </h4>
             </div>
             
-            <div className="mt-auto pt-2 flex justify-between items-center">
-              <span className={`text-sm ${
-                selectedModelId === model.id ? 'text-white' : 'text-gray-400'
-              }`}>
-                {model.description || 'Standard repair'}
-              </span>
-              <span className="font-bold text-lg text-[#e60012]">
-                {model.price}
-              </span>
-            </div>
+            {model.description && (
+              <div className="mt-auto pt-2">
+                <span className={`text-sm ${
+                  selectedModelId === model.id ? 'text-white' : 'text-gray-400'
+                }`}>
+                  {model.description}
+                </span>
+              </div>
+            )}
           </div>
         ))}
       </div>

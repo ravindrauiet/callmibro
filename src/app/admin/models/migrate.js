@@ -2,8 +2,8 @@
 'use client'
 
 import { useState } from 'react'
-import { collection, getDocs, doc, addDoc, serverTimestamp, query, where } from 'firebase/firestore'
-import { db } from '@/firebase/config'
+// import { collection, getDocs, doc, addDoc, serverTimestamp, query, where } from 'firebase/firestore'
+// import { db } from '@/firebase/config'
 import { toast } from 'react-hot-toast'
 
 export default function MigrateModels() {
@@ -12,6 +12,13 @@ export default function MigrateModels() {
   const [migrationComplete, setMigrationComplete] = useState(false)
 
   const runMigration = async () => {
+    // Migration functionality disabled
+    toast.error('Migration functionality has been disabled by administrator')
+    
+    /* 
+    Migration code has been commented out as requested by the administrator.
+    This feature is not intended to be used in the current version.
+    
     if (loading) return
     if (migrationComplete) {
       toast.error('Migration has already been completed')
@@ -98,6 +105,7 @@ export default function MigrateModels() {
     } finally {
       setLoading(false)
     }
+    */
   }
   
   const addLog = (message, isError = false) => {
@@ -118,83 +126,25 @@ export default function MigrateModels() {
         <div className="mb-6">
           <h3 className="text-lg font-medium text-white mb-2">Data Migration Tool</h3>
           <p className="text-gray-300 mb-4">
-            This utility will migrate model data from brand subcollections to the new standalone models collection.
-            This is a one-time operation and should only be run once.
+            This utility has been disabled by the administrator.
           </p>
           
           <div className="bg-[#222] border border-[#333] rounded-md p-4 mb-4">
-            <h4 className="text-md font-medium text-white mb-2">Important Notes:</h4>
+            <h4 className="text-md font-medium text-white mb-2">Notice:</h4>
             <ul className="list-disc list-inside text-gray-300 space-y-1">
-              <li>This migration will copy data to the new structure without removing the old data.</li>
-              <li>Make sure you have a backup of your database before proceeding.</li>
-              <li>The migration may take some time depending on the amount of data.</li>
-              <li>Do not refresh or close this page during migration.</li>
+              <li>The migration functionality has been disabled.</li>
+              <li>Please contact system administrator for more information.</li>
             </ul>
           </div>
           
           <button
             onClick={runMigration}
-            disabled={loading || migrationComplete}
-            className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
-              ${loading 
-                ? 'bg-gray-600 cursor-not-allowed' 
-                : migrationComplete 
-                  ? 'bg-green-600 hover:bg-green-700'
-                  : 'bg-[#e60012] hover:bg-[#d40010]'
-              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e60012]`}
+            disabled={true}
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 cursor-not-allowed focus:outline-none"
           >
-            {loading ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Running Migration...
-              </>
-            ) : migrationComplete ? (
-              'Migration Completed'
-            ) : (
-              'Start Migration'
-            )}
+            Migration Disabled
           </button>
         </div>
-        
-        {results && (
-          <div className="border-t border-[#333] pt-4">
-            <h3 className="text-lg font-medium text-white mb-2">Migration Results</h3>
-            
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-[#222] border border-[#333] rounded-md p-4">
-                <div className="text-2xl font-bold text-white">{results.migrated}</div>
-                <div className="text-sm text-gray-400">Models Migrated</div>
-              </div>
-              
-              <div className="bg-[#222] border border-[#333] rounded-md p-4">
-                <div className={`text-2xl font-bold ${results.errors > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                  {results.errors}
-                </div>
-                <div className="text-sm text-gray-400">Errors</div>
-              </div>
-            </div>
-            
-            <div className="bg-[#222] border border-[#333] rounded-md p-4 mt-4">
-              <h4 className="text-md font-medium text-white mb-2">Migration Log:</h4>
-              <div className="max-h-80 overflow-y-auto font-mono text-sm">
-                {results.logs.map((log, index) => (
-                  <div 
-                    key={index} 
-                    className={`py-1 border-b border-[#333] last:border-b-0 ${log.isError ? 'text-red-400' : 'text-gray-300'}`}
-                  >
-                    <span className="text-gray-500">
-                      [{log.timestamp.toLocaleTimeString()}]
-                    </span>{' '}
-                    {log.message}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
