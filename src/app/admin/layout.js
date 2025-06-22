@@ -9,7 +9,7 @@ import { db } from '@/firebase/config'
 import { toast } from 'react-hot-toast'
 
 export default function AdminLayout({ children }) {
-  const { user, loading: authLoading } = useAuth()
+  const { currentUser, loading: authLoading } = useAuth()
   const [isAdmin, setIsAdmin] = useState(false)
   const [adminLoading, setAdminLoading] = useState(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -19,14 +19,14 @@ export default function AdminLayout({ children }) {
   // Check if user is admin
   useEffect(() => {
     const checkAdmin = async () => {
-      if (!user) {
+      if (!currentUser) {
         setAdminLoading(false)
         return
       }
 
       try {
         const adminsRef = collection(db, 'admins')
-        const q = query(adminsRef, where('email', '==', user.email))
+        const q = query(adminsRef, where('email', '==', currentUser.email))
         const querySnapshot = await getDocs(q)
 
         if (!querySnapshot.empty) {
@@ -52,14 +52,14 @@ export default function AdminLayout({ children }) {
     if (!authLoading) {
       checkAdmin()
     }
-  }, [user, authLoading, router, pathname])
+  }, [currentUser, authLoading, router, pathname])
 
   // If not logged in, redirect to login
   useEffect(() => {
-    if (!authLoading && !user && pathname !== '/admin/login') {
+    if (!authLoading && !currentUser && pathname !== '/admin/login') {
       router.push('/admin/login')
     }
-  }, [user, authLoading, pathname, router])
+  }, [currentUser, authLoading, pathname, router])
 
   // Skip layout on login page
   if (pathname === '/admin/login') {
@@ -154,7 +154,7 @@ export default function AdminLayout({ children }) {
           </div>
           {isSidebarOpen && (
             <div className="ml-3">
-              <p className="text-sm font-medium text-white">{user?.displayName || user?.email}</p>
+              <p className="text-sm font-medium text-white">{currentUser?.displayName || currentUser?.email}</p>
               <p className="text-xs text-gray-400">Admin</p>
             </div>
           )}

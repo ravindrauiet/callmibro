@@ -266,33 +266,197 @@ export function AuthProvider({ children }) {
     setAuthError(null);
     setAuthInProgress(true);
     try {
-      if (!currentUser) throw new Error('No user logged in');
+      // Update the Firestore document
+      await setDoc(doc(db, 'users', currentUser.uid), {
+        ...data,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
       
-      // Update auth profile
+      // Update user display name in Firebase Auth if provided
       if (data.displayName) {
-        await updateAuthProfile(auth.currentUser, {
+        await updateAuthProfile(currentUser, {
           displayName: data.displayName
         });
       }
       
-      // Update Firestore user document
-      const userRef = doc(db, 'users', currentUser.uid);
-      const updateData = {
-        ...data,
-        updatedAt: serverTimestamp()
-      };
-      
-      await setDoc(userRef, updateData, { merge: true });
-      
-      // Update local state
+      // Update userProfile state
       setUserProfile(prev => ({
         ...prev,
         ...data
       }));
       
-      toast.success('Profile updated successfully!');
       return true;
     } catch (error) {
+      handleAuthError(error);
+      throw error;
+    } finally {
+      setAuthInProgress(false);
+    }
+  };
+
+  // Add a function to save a new address for the user
+  const saveUserAddress = async (addressData) => {
+    setAuthError(null);
+    setAuthInProgress(true);
+    try {
+      // Get current user data
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      
+      if (!userDoc.exists()) {
+        throw new Error('User profile not found');
+      }
+      
+      const userData = userDoc.data();
+      let savedAddresses = userData.savedAddresses || [];
+      
+      // Create a unique ID for this address
+      const addressId = `addr_${Date.now()}`;
+      
+      // Format the new address
+      const newAddress = {
+        id: addressId,
+        name: addressData.name || 'Home',
+        fullAddress: addressData.fullAddress,
+        coordinates: addressData.coordinates || null,
+        isDefault: addressData.isDefault || false,
+        createdAt: new Date().toISOString()
+      };
+      
+      // If this is set as default, unset any other default addresses
+      if (newAddress.isDefault) {
+        savedAddresses = savedAddresses.map(addr => ({
+          ...addr,
+          isDefault: false
+        }));
+      }
+      
+      // If this is the first address, make it default
+      if (savedAddresses.length === 0) {
+        newAddress.isDefault = true;
+      }
+      
+      // Add new address to the array
+      savedAddresses.push(newAddress);
+      
+      // Update user profile with the new address
+      await setDoc(doc(db, 'users', currentUser.uid), {
+        savedAddresses,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      
+      // Update local state
+      setUserProfile(prev => ({
+        ...prev,
+        savedAddresses
+      }));
+      
+      return addressId;
+    } catch (error) {
+      console.error('Error saving address:', error);
+      handleAuthError(error);
+      throw error;
+    } finally {
+      setAuthInProgress(false);
+    }
+  };
+
+  // Function to update an existing address
+  const updateUserAddress = async (addressId, addressData) => {
+    setAuthError(null);
+    setAuthInProgress(true);
+    try {
+      // Get current user data
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      
+      if (!userDoc.exists()) {
+        throw new Error('User profile not found');
+      }
+      
+      const userData = userDoc.data();
+      let savedAddresses = userData.savedAddresses || [];
+      
+      // Find the address to update
+      const addressIndex = savedAddresses.findIndex(addr => addr.id === addressId);
+      
+      if (addressIndex === -1) {
+        throw new Error('Address not found');
+      }
+      
+      // If this is being set as default, unset any other default addresses
+      if (addressData.isDefault) {
+        savedAddresses = savedAddresses.map(addr => ({
+          ...addr,
+          isDefault: false
+        }));
+      }
+      
+      // Update the address
+      savedAddresses[addressIndex] = {
+        ...savedAddresses[addressIndex],
+        ...addressData,
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Update user profile with the updated address
+      await setDoc(doc(db, 'users', currentUser.uid), {
+        savedAddresses,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      
+      // Update local state
+      setUserProfile(prev => ({
+        ...prev,
+        savedAddresses
+      }));
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating address:', error);
+      handleAuthError(error);
+      throw error;
+    } finally {
+      setAuthInProgress(false);
+    }
+  };
+
+  // Function to delete an address
+  const deleteUserAddress = async (addressId) => {
+    setAuthError(null);
+    setAuthInProgress(true);
+    try {
+      // Get current user data
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      
+      if (!userDoc.exists()) {
+        throw new Error('User profile not found');
+      }
+      
+      const userData = userDoc.data();
+      let savedAddresses = userData.savedAddresses || [];
+      
+      // Filter out the address to delete
+      savedAddresses = savedAddresses.filter(addr => addr.id !== addressId);
+      
+      // If we deleted the default address and have other addresses, make the first one default
+      if (savedAddresses.length > 0 && !savedAddresses.some(addr => addr.isDefault)) {
+        savedAddresses[0].isDefault = true;
+      }
+      
+      // Update user profile with the filtered addresses
+      await setDoc(doc(db, 'users', currentUser.uid), {
+        savedAddresses,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      
+      // Update local state
+      setUserProfile(prev => ({
+        ...prev,
+        savedAddresses
+      }));
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting address:', error);
       handleAuthError(error);
       throw error;
     } finally {
@@ -317,19 +481,23 @@ export function AuthProvider({ children }) {
 
   // Context value
   const value = {
-    user: currentUser,
     currentUser,
     userProfile,
     loading,
     authError,
+    setAuthError,
     authInProgress,
-    signup,
     login,
+    signup,
     logout,
+    resetPassword,
     googleSignIn,
     facebookSignIn,
-    resetPassword,
-    updateUserProfile
+    updateUserProfile,
+    saveUserAddress,
+    updateUserAddress,
+    deleteUserAddress,
+    getIdToken: () => currentUser?.getIdToken()
   };
 
   return (

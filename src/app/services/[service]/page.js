@@ -9,6 +9,7 @@ import ModelSelection from '../../../components/service-booking/ModelSelection'
 import BookingForm from '../../../components/service-booking/BookingForm'
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function ServiceDetailPage({ params }) {
   const [step, setStep] = useState('brands')
@@ -19,6 +20,7 @@ export default function ServiceDetailPage({ params }) {
   const [error, setError] = useState(null)
   const [isVisible, setIsVisible] = useState(false)
   const router = useRouter()
+  const { currentUser } = useAuth()
 
   useEffect(() => {
     // Set visibility for animations
@@ -85,6 +87,31 @@ export default function ServiceDetailPage({ params }) {
     toast.success('Your booking has been successfully created!')
     // Navigate to a confirmation page with the booking ID
     router.push(`/services/booking-confirmation?bookingId=${bookingId}`)
+  }
+
+  const handleExpressBooking = () => {
+    // Skip to booking form with default brand and model
+    if (!currentUser) {
+      toast.error('You need to log in to use express booking')
+      document.getElementById('login-btn')?.click()
+      return
+    }
+
+    // Set default brand and model
+    const defaultBrand = { id: 'express-default', name: 'Any Brand' }
+    const defaultModel = { 
+      id: 'express-default', 
+      name: 'Standard Service', 
+      price: null 
+    }
+    
+    setSelectedBrand(defaultBrand)
+    setSelectedModel(defaultModel)
+    setStep('booking')
+    
+    // Scroll to top
+    window.scrollTo(0, 0)
+    toast.success('Quick booking activated. Complete your details to proceed.')
   }
 
   if (loading) {
@@ -174,9 +201,23 @@ export default function ServiceDetailPage({ params }) {
               </span>
             </h1>
             
-            <p className="text-gray-400 max-w-2xl mx-auto">
+            <p className="text-gray-400 max-w-2xl mx-auto mb-8">
               Follow the steps below to book your {selectedService.toLowerCase()} service with one of our certified technicians
             </p>
+            
+            {/* Express Booking Option */}
+            <div className="max-w-md mx-auto">
+              <button 
+                onClick={handleExpressBooking}
+                className="w-full py-4 px-6 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#d40010] hover:to-[#e55b5b] text-white font-medium text-lg rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Continue to Book Your Service
+              </button>
+              <p className="text-gray-500 text-sm mt-2">Skip brand & model selection for faster booking</p>
+            </div>
           </div>
 
           {/* Progress steps */}

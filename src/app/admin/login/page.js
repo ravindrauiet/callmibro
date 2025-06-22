@@ -15,16 +15,16 @@ export default function AdminLogin() {
   const [checkingAuth, setCheckingAuth] = useState(true)
   
   const router = useRouter()
-  const { login, user } = useAuth()
+  const { login, currentUser } = useAuth()
 
   // Check if user is already logged in and is an admin
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (user) {
+      if (currentUser) {
         try {
           const adminQuery = query(
             collection(db, 'admins'),
-            where('email', '==', user.email)
+            where('email', '==', currentUser.email)
           )
           
           const querySnapshot = await getDocs(adminQuery)
@@ -42,7 +42,7 @@ export default function AdminLogin() {
     }
 
     checkAdminStatus()
-  }, [user, router])
+  }, [currentUser, router])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
