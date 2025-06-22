@@ -19,6 +19,8 @@ export default function BookingForm({ service, brand, model, onComplete }) {
   const [userCoordinates, setUserCoordinates] = useState(null)
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
   const [userProfile, setUserProfile] = useState(null)
+  const [showPhoneNumberModal, setShowPhoneNumberModal] = useState(false)
+  const [tempPhoneNumber, setTempPhoneNumber] = useState('')
   
   const [formData, setFormData] = useState({
     name: currentUser?.displayName || '',
@@ -280,6 +282,7 @@ export default function BookingForm({ service, brand, model, onComplete }) {
         status: 'scheduled',
         paymentStatus: 'pending',
         orderType: 'service',
+        isExpressBooking: false, // Flag to identify regular bookings
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       }
@@ -305,12 +308,25 @@ export default function BookingForm({ service, brand, model, onComplete }) {
   }
 
   const handleExpressBooking = () => {
-    // Skip form filling and go to confirmation immediately
+    // Check if user is logged in
     if (!currentUser) {
       toast.error('You must be logged in to use express booking')
       return
     }
     
+    // Check if user has a phone number
+    if (!formData.phone || formData.phone.trim() === '') {
+      // Show phone number collection modal
+      setShowPhoneNumberModal(true)
+      return
+    }
+    
+    // User has phone number, proceed with express booking
+    proceedWithExpressBooking()
+  }
+
+  // Function to process express booking after validating phone number
+  const proceedWithExpressBooking = () => {
     // Set default values for quick booking
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
@@ -322,8 +338,93 @@ export default function BookingForm({ service, brand, model, onComplete }) {
       time: '09:00 AM - 11:00 AM',
     }))
     
-    // Submit the form with defaults
-    handleSubmit({ preventDefault: () => {} })
+    // Create a modified submit function for express booking
+    submitExpressBooking()
+  }
+
+  // Function to handle phone number submission and proceed with booking
+  const handlePhoneNumberSubmit = (e) => {
+    e.preventDefault()
+    
+    // Validate phone number
+    const phoneError = validatePhone(tempPhoneNumber)
+    if (phoneError) {
+      toast.error(phoneError)
+      return
+    }
+    
+    // Update form data with the provided phone number
+    setFormData(prev => ({
+      ...prev,
+      phone: tempPhoneNumber
+    }))
+    
+    // Close modal and proceed with booking
+    setShowPhoneNumberModal(false)
+    proceedWithExpressBooking()
+  }
+
+  // Function to submit an express booking
+  const submitExpressBooking = async () => {
+    if (!currentUser) {
+      toast.error('You must be logged in to book a service')
+      return
+    }
+    
+    setLoading(true)
+    
+    try {
+      // Default address if none is provided
+      const address = formData.address || "Will call to confirm address"
+      
+      // Save booking to Firestore with express booking flag
+      const bookingData = {
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        serviceName: service,
+        serviceType: model.name,
+        brandName: brand.name,
+        price: model.price,
+        schedule: {
+          date: formData.date,
+          timeSlot: formData.time
+        },
+        contactInfo: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          address: address,
+          bookingFor: bookingFor
+        },
+        coordinates: userCoordinates,
+        issue: formData.issue || "Express booking - details to be confirmed",
+        additionalNotes: formData.additionalNotes,
+        status: 'scheduled',
+        paymentStatus: 'pending',
+        orderType: 'service',
+        isExpressBooking: true, // Flag for express booking
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }
+      
+      const docRef = await addDoc(collection(db, 'bookings'), bookingData)
+      
+      toast.success('Express booking created successfully!')
+      
+      // Call the onComplete callback if provided
+      if (typeof onComplete === 'function') {
+        onComplete(docRef.id);
+      }
+      
+      // Redirect to booking confirmation page
+      const confirmationUrl = `/services/booking-confirmation?bookingId=${docRef.id}&serviceName=${encodeURIComponent(service)}&serviceType=${encodeURIComponent(model.name)}&date=${encodeURIComponent(formData.date)}&timeSlot=${encodeURIComponent(formData.time)}&express=true`;
+      router.push(confirmationUrl);
+      
+    } catch (error) {
+      toast.error('Failed to create booking. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Save form data to localStorage to prevent data loss
@@ -858,6 +959,47 @@ export default function BookingForm({ service, brand, model, onComplete }) {
           </div>
         </div>
       </form>
+
+      {/* Phone Number Collection Modal */}
+      {showPhoneNumberModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
+          <div className="bg-[#111] border border-[#333] rounded-xl p-6 max-w-md w-full shadow-2xl animate-fadeIn">
+            <h3 className="text-xl font-bold mb-4 text-white">One More Step</h3>
+            <p className="text-gray-300 mb-4">We need your phone number to complete your express booking.</p>
+            
+            <form onSubmit={handlePhoneNumberSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-white mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  value={tempPhoneNumber}
+                  onChange={(e) => setTempPhoneNumber(e.target.value)}
+                  placeholder="Enter your 10-digit phone number"
+                  className="w-full px-4 py-3 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012]"
+                  required
+                />
+              </div>
+              
+              <div className="flex space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPhoneNumberModal(false)}
+                  className="flex-1 py-3 px-4 border border-[#333] text-white rounded-lg hover:bg-[#222] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 px-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white font-medium rounded-lg hover:from-[#d40010] hover:to-[#e55b5b] transition-colors"
+                >
+                  Continue
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 
