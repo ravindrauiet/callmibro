@@ -7,11 +7,13 @@ import Footer from '../../../components/Footer'
 import { useAuth } from '@/contexts/AuthContext'
 import { db } from '@/firebase/config'
 import { collection, doc, getDoc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function BookingConfirmationPage() {
   const router = useRouter()
   const { currentUser } = useAuth()
   const searchParams = useSearchParams()
+  const { isDarkMode } = useTheme()
   const [loading, setLoading] = useState(true)
   const [bookingDetails, setBookingDetails] = useState(null)
   const [error, setError] = useState(null)
@@ -143,11 +145,14 @@ export default function BookingConfirmationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-black to-[#111] text-white">
+      <div className="min-h-screen" style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>
         <Header activePage="services" />
         
         <main className="py-10 px-4 max-w-6xl mx-auto">
-          <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] border border-[#222] rounded-xl p-6 md:p-12 max-w-3xl mx-auto text-center shadow-lg">
+          <div className="border rounded-xl p-6 md:p-12 max-w-3xl mx-auto text-center shadow-lg" style={{ 
+            background: 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))',
+            borderColor: 'var(--border-color)'
+          }}>
             <div className="animate-spin w-12 h-12 border-4 border-t-transparent rounded-full mx-auto mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b]"></div>
             <p className="text-xl">Processing your booking...</p>
           </div>
@@ -160,11 +165,14 @@ export default function BookingConfirmationPage() {
   
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-black to-[#111] text-white">
+      <div className="min-h-screen" style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>
         <Header activePage="services" />
         
         <main className="py-10 px-4 max-w-6xl mx-auto">
-          <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] border border-[#222] rounded-xl p-6 md:p-12 max-w-3xl mx-auto text-center shadow-lg">
+          <div className="border rounded-xl p-6 md:p-12 max-w-3xl mx-auto text-center shadow-lg" style={{ 
+            background: 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))',
+            borderColor: 'var(--border-color)'
+          }}>
             <div className="w-20 h-20 rounded-full bg-gradient-to-r from-red-900 to-red-800 mx-auto flex items-center justify-center mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -172,7 +180,7 @@ export default function BookingConfirmationPage() {
             </div>
             
             <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Booking Error</h1>
-            <p className="text-gray-400 mb-8">{error}</p>
+            <p style={{ color: 'var(--text-secondary)' }} className="mb-8">{error}</p>
             
             <button 
               onClick={() => router.push('/services')}
@@ -189,7 +197,7 @@ export default function BookingConfirmationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-[#111] text-white">
+    <div className="min-h-screen" style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>
       <Header activePage="services" />
       
       <main className="py-10 px-4 max-w-6xl mx-auto">
@@ -200,38 +208,41 @@ export default function BookingConfirmationPage() {
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-600 to-green-700 flex items-center justify-center shadow-md">
                 <span className="text-white">✓</span>
               </div>
-              <span className="text-sm mt-2 text-gray-400">Select Service</span>
+              <span className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>Select Service</span>
             </div>
             
             <div className="flex flex-col items-center z-10">
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-600 to-green-700 flex items-center justify-center shadow-md">
                 <span className="text-white">✓</span>
               </div>
-              <span className="text-sm mt-2 text-gray-400">Choose Technician</span>
+              <span className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>Choose Technician</span>
             </div>
             
             <div className="flex flex-col items-center z-10">
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-600 to-green-700 flex items-center justify-center shadow-md">
                 <span className="text-white">✓</span>
               </div>
-              <span className="text-sm mt-2 text-gray-400">Schedule & Address</span>
+              <span className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>Schedule & Address</span>
             </div>
             
             <div className="flex flex-col items-center z-10">
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] flex items-center justify-center shadow-md">
                 <span className="text-white">4</span>
               </div>
-              <span className="text-sm mt-2 text-white font-medium">Confirmation</span>
+              <span className="text-sm mt-2 font-medium">Confirmation</span>
             </div>
             
             {/* Progress Line */}
-            <div className="absolute top-5 left-0 w-full h-1 bg-gray-700 -z-0">
+            <div className="absolute top-5 left-0 w-full h-1 -z-0" style={{ background: 'var(--border-color)' }}>
               <div className="h-full bg-gradient-to-r from-green-600 to-green-700" style={{width: '100%'}}></div>
             </div>
           </div>
         </div>
       
-        <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] border border-[#222] rounded-xl p-6 md:p-12 max-w-3xl mx-auto shadow-lg">
+        <div className="border rounded-xl p-6 md:p-12 max-w-3xl mx-auto shadow-lg" style={{ 
+          background: 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))',
+          borderColor: 'var(--border-color)'
+        }}>
           <div className="w-20 h-20 rounded-full bg-gradient-to-r from-green-700 to-green-800 mx-auto flex items-center justify-center mb-6 shadow-lg">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -242,7 +253,7 @@ export default function BookingConfirmationPage() {
             {isReschedule ? 'Booking Rescheduled!' : 'Booking Confirmed!'}
           </h1>
           
-          <p className="text-gray-400 mb-8 text-center">
+          <p style={{ color: 'var(--text-secondary)' }} className="mb-8 text-center">
             Your {bookingDetails?.serviceName} service has been successfully {isReschedule ? 'rescheduled' : 'confirmed'}.
             {currentUser?.email && ' We have sent the booking details to your email.'}
           </p>

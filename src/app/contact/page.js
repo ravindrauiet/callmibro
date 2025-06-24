@@ -7,20 +7,28 @@ import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import ContactForm from '../../components/ContactForm'
 import ContactInfo from '../../components/ContactInfo'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ContactPage() {
   const [isVisible, setIsVisible] = useState(false);
+  const { isDarkMode } = useTheme();
   
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen">
       <Header activePage="contact" />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-black to-[#111] py-12 md:py-16 px-4 md:px-8 relative overflow-hidden">
+      <section className="py-12 md:py-16 px-4 md:px-8 relative overflow-hidden" 
+        style={{ 
+          background: isDarkMode 
+            ? 'linear-gradient(to bottom, var(--bg-color), var(--panel-dark))' 
+            : 'linear-gradient(to bottom, var(--bg-color), var(--panel-charcoal))'
+        }}
+      >
         {/* Background elements */}
         <div className="absolute inset-0 z-0">
           <div className="absolute top-20 left-10 w-40 h-40 rounded-full bg-[#e60012]/10 blur-3xl"></div>
@@ -31,7 +39,12 @@ export default function ContactPage() {
           <div className={`text-center transform transition-all duration-700 ${
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
           }`}>
-            <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
+            <div className="inline-block px-4 py-1 rounded-full mb-4 border" 
+              style={{ 
+                background: 'var(--panel-dark)', 
+                borderColor: 'var(--border-color)' 
+              }}
+            >
               <span className="text-[#e60012] text-sm font-medium">Get In Touch</span>
             </div>
             
@@ -39,7 +52,7 @@ export default function ContactPage() {
               Contact <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Our Team</span>
             </h1>
             
-            <p className="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
               Have questions or need assistance? Our customer support team is here to help with all your repair service needs
             </p>
           </div>
@@ -47,7 +60,7 @@ export default function ContactPage() {
       </section>
       
       {/* Contact Section */}
-      <section className="py-12 md:py-16 px-4 md:px-8 bg-[#111]">
+      <section className="py-12 md:py-16 px-4 md:px-8" style={{ backgroundColor: 'var(--panel-dark)' }}>
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <ContactInfo />
@@ -57,18 +70,18 @@ export default function ContactPage() {
       </section>
       
       {/* Map Section */}
-      <section className="py-12 md:py-16 px-4 md:px-8 bg-black">
+      <section className="py-12 md:py-16 px-4 md:px-8" style={{ backgroundColor: 'var(--bg-color)' }}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4">
               Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Location</span>
             </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
+            <p style={{ color: 'var(--text-secondary)' }} className="max-w-2xl mx-auto">
               Visit our office in Faridabad, Haryana for in-person assistance
             </p>
           </div>
           
-          <div className="h-[400px] rounded-xl overflow-hidden border border-[#333]">
+          <div className="h-[400px] rounded-xl overflow-hidden border" style={{ borderColor: 'var(--border-color)' }}>
             <iframe 
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d112173.30646932511!2d77.2139621!3d28.4120348!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cdc15f5a424b1%3A0xe4f50576c850e0f2!2sFaridabad%2C%20Haryana!5e0!3m2!1sen!2sin!4v1654321234567!5m2!1sen!2sin" 
               width="100%" 

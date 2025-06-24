@@ -7,9 +7,11 @@ import { useAuth } from '@/contexts/AuthContext'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function AdminLayout({ children }) {
   const { currentUser, loading: authLoading } = useAuth()
+  const { isDarkMode, toggleTheme } = useTheme()
   const [isAdmin, setIsAdmin] = useState(false)
   const [adminLoading, setAdminLoading] = useState(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -69,7 +71,7 @@ export default function AdminLayout({ children }) {
   // Show loading while checking admin status
   if (authLoading || adminLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#121212]">
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#e60012]"></div>
       </div>
     )
@@ -97,11 +99,13 @@ export default function AdminLayout({ children }) {
   ]
 
   return (
-    <div className="flex h-screen bg-[#121212] text-white">
+    <div className="flex h-screen" style={{ backgroundColor: 'var(--bg-color)', color: 'var(--text-main)' }}>
       {/* Sidebar */}
-      <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300 bg-[#1a1a1a] border-r border-[#333] flex flex-col`}>
+      <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300 border-r flex flex-col`} 
+        style={{ backgroundColor: 'var(--panel-charcoal)', borderColor: 'var(--border-color)' }}
+      >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-[#333]">
+        <div className="h-16 flex items-center justify-between px-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
           {isSidebarOpen ? (
             <Link href="/" className="text-xl font-bold text-[#e60012]">CallMiBro Admin</Link>
           ) : (
@@ -109,7 +113,7 @@ export default function AdminLayout({ children }) {
           )}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-1 rounded-md hover:bg-[#333]"
+            className="p-1 rounded-md hover:bg-opacity-20 hover:bg-gray-600"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {isSidebarOpen ? (
@@ -133,8 +137,9 @@ export default function AdminLayout({ children }) {
                     className={`flex items-center px-4 py-3 rounded-md ${
                       isActive 
                         ? 'bg-[#e60012] text-white' 
-                        : 'hover:bg-[#333] text-gray-300'
+                        : 'hover:bg-opacity-20 hover:bg-gray-600'
                     }`}
+                    style={{ color: isActive ? '#ffffff' : 'var(--text-secondary)' }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${isSidebarOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
@@ -148,16 +153,16 @@ export default function AdminLayout({ children }) {
         </nav>
         
         {/* User info */}
-        <div className="p-4 border-t border-[#333] flex items-center">
-          <div className="h-8 w-8 rounded-full bg-[#333] flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="p-4 border-t flex items-center" style={{ borderColor: 'var(--border-color)' }}>
+          <div className="h-8 w-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--panel-gray)' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--text-secondary)' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
           {isSidebarOpen && (
             <div className="ml-3">
-              <p className="text-sm font-medium text-white">{currentUser?.displayName || currentUser?.email}</p>
-              <p className="text-xs text-gray-400">Admin</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-main)' }}>{currentUser?.displayName || currentUser?.email}</p>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Admin</p>
             </div>
           )}
         </div>
@@ -166,14 +171,33 @@ export default function AdminLayout({ children }) {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="h-16 bg-[#1a1a1a] border-b border-[#333] flex items-center justify-between px-6">
+        <header className="h-16 border-b flex items-center justify-between px-6" 
+          style={{ backgroundColor: 'var(--panel-charcoal)', borderColor: 'var(--border-color)' }}
+        >
           <div className="flex items-center">
-            <h1 className="text-xl font-semibold text-white">
+            <h1 className="text-xl font-semibold" style={{ color: 'var(--text-main)' }}>
               {navItems.find(item => pathname === item.href || pathname.startsWith(`${item.href}/`))?.name || 'Admin Panel'}
             </h1>
           </div>
           <div className="flex items-center space-x-4">
-            <Link href="/" className="text-gray-300 hover:text-white">
+            {/* Theme Toggle Button */}
+            <button 
+              onClick={toggleTheme}
+              className="p-2 rounded-md transition-colors"
+              style={{ backgroundColor: 'var(--panel-gray)' }}
+              title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDarkMode ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
+            <Link href="/" style={{ color: 'var(--text-secondary)', hover: { color: 'var(--text-main)' } }}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
@@ -182,7 +206,7 @@ export default function AdminLayout({ children }) {
         </header>
         
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6" style={{ backgroundColor: 'var(--bg-color)' }}>
           {children}
         </main>
       </div>

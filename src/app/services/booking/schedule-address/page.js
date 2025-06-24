@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { db, auth } from '@/firebase/config';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection } from 'firebase/firestore';
 import { FiCalendar, FiClock, FiMapPin, FiArrowLeft, FiArrowRight, FiInfo } from 'react-icons/fi';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Available time slots
 const timeSlots = [
@@ -18,6 +19,7 @@ const timeSlots = [
 export default function ScheduleAddressPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isDarkMode } = useTheme();
   
   // Get query parameters
   const bookingId = searchParams.get('bookingId');
@@ -197,9 +199,9 @@ export default function ScheduleAddressPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen" style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>
       {/* Progress Indicator */}
-      <div className="bg-[#111] py-4 border-b border-[#333]">
+      <div className="py-4 border-b" style={{ background: 'var(--panel-dark)', borderColor: 'var(--border-color)' }}>
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto mb-10">
             <div className="flex justify-between relative">
@@ -207,32 +209,32 @@ export default function ScheduleAddressPage() {
                 <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
                   <span className="text-white">✓</span>
                 </div>
-                <span className="text-sm mt-2 text-gray-400">Select Service</span>
+                <span className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>Select Service</span>
               </div>
               
               <div className="flex flex-col items-center z-10">
                 <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
                   <span className="text-white">✓</span>
                 </div>
-                <span className="text-sm mt-2 text-gray-400">Search Technician</span>
+                <span className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>Search Technician</span>
               </div>
               
               <div className="flex flex-col items-center z-10">
                 <div className="w-10 h-10 rounded-full bg-[#e60012] flex items-center justify-center">
                   <span className="text-white">3</span>
                 </div>
-                <span className="text-sm mt-2 text-white font-medium">Schedule & Address</span>
+                <span className="text-sm mt-2 font-medium">Schedule & Address</span>
               </div>
               
               <div className="flex flex-col items-center z-10">
-                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--panel-dark)' }}>
                   <span className="text-white">4</span>
                 </div>
-                <span className="text-sm mt-2 text-gray-500">Confirmation</span>
+                <span className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>Confirmation</span>
               </div>
               
               {/* Progress Line */}
-              <div className="absolute top-5 left-0 w-full h-1 bg-gray-700 -z-0">
+              <div className="absolute top-5 left-0 w-full h-1 -z-0" style={{ background: 'var(--border-color)' }}>
                 <div className="h-full bg-green-600" style={{width: '66%'}}></div>
               </div>
             </div>
@@ -242,7 +244,7 @@ export default function ScheduleAddressPage() {
 
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl md:text-4xl font-bold text-center mb-2">Schedule & Address</h1>
-        <p className="text-gray-400 text-center mb-8">Choose a convenient time and provide your address</p>
+        <p style={{ color: 'var(--text-secondary)' }} className="text-center mb-8">Choose a convenient time and provide your address</p>
         
         {error && (
           <div className="bg-red-900/50 text-red-200 p-4 rounded-lg mb-6 max-w-3xl mx-auto">
@@ -253,14 +255,14 @@ export default function ScheduleAddressPage() {
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Schedule Panel */}
-            <div className="bg-[#1a1a1a] rounded-lg p-6">
+            <div className="rounded-lg p-6" style={{ background: 'var(--panel-dark)' }}>
               <h2 className="text-xl font-semibold mb-4 flex items-center">
                 <FiCalendar className="mr-2" /> Select Date & Time
               </h2>
               
               {/* Date Selection */}
               <div className="mb-6">
-                <label className="block text-gray-400 mb-2">Select Date</label>
+                <label className="block mb-2" style={{ color: 'var(--text-secondary)' }}>Select Date</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {availableDates.map((date) => {
                     const formattedDate = new Date(date).toLocaleDateString('en-US', {
@@ -276,8 +278,12 @@ export default function ScheduleAddressPage() {
                         className={`py-3 px-2 rounded-md text-center ${
                           selectedDate === date
                             ? 'bg-red-600 text-white'
-                            : 'bg-[#222] text-white hover:bg-[#333]'
+                            : 'hover:bg-[#333]'
                         }`}
+                        style={{ 
+                          background: selectedDate === date ? undefined : 'var(--panel-charcoal)',
+                          color: 'var(--text-main)'
+                        }}
                         onClick={() => setSelectedDate(date)}
                       >
                         {formattedDate}
@@ -289,12 +295,17 @@ export default function ScheduleAddressPage() {
               
               {/* Time Selection */}
               <div>
-                <label className="block text-gray-400 mb-2">Select Time Slot</label>
+                <label className="block mb-2" style={{ color: 'var(--text-secondary)' }}>Select Time Slot</label>
                 <div className="relative">
                   <select
                     value={selectedTimeSlot}
                     onChange={(e) => setSelectedTimeSlot(e.target.value)}
-                    className="w-full bg-[#222] border border-[#333] rounded-md py-3 px-4 text-white appearance-none"
+                    className="w-full rounded-md py-3 px-4 appearance-none border"
+                    style={{ 
+                      background: 'var(--panel-charcoal)', 
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)'
+                    }}
                     required
                   >
                     <option value="">Select a time slot</option>
@@ -312,7 +323,7 @@ export default function ScheduleAddressPage() {
             </div>
 
             {/* Address Panel */}
-            <div className="bg-[#111] rounded-lg p-6">
+            <div className="rounded-lg p-6" style={{ background: 'var(--panel-dark)' }}>
               <h2 className="text-xl font-semibold mb-4 flex items-center">
                 <FiMapPin className="mr-2" /> Your Address
               </h2>
@@ -321,7 +332,12 @@ export default function ScheduleAddressPage() {
               <button
                 type="button"
                 onClick={getCurrentLocation}
-                className="w-full mb-4 bg-[#222] hover:bg-[#333] text-white py-2 px-4 rounded-md flex items-center justify-center"
+                className="w-full mb-4 py-2 px-4 rounded-md flex items-center justify-center border"
+                style={{ 
+                  background: 'var(--panel-charcoal)',
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
               >
                 <span className="mr-2">📍</span> Use My Current Location
               </button>
@@ -329,69 +345,94 @@ export default function ScheduleAddressPage() {
               {/* Address Form */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-gray-400 mb-1">Street Address*</label>
+                  <label className="block mb-1" style={{ color: 'var(--text-secondary)' }}>Street Address*</label>
                   <input
                     type="text"
                     name="street"
                     value={address.street}
                     onChange={handleAddressChange}
-                    className="w-full bg-[#222] border border-[#333] rounded-md py-2 px-4 text-white"
+                    className="w-full rounded-md py-2 px-4 border"
+                    style={{ 
+                      background: 'var(--panel-charcoal)', 
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)'
+                    }}
                     required
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-gray-400 mb-1">City*</label>
+                    <label className="block mb-1" style={{ color: 'var(--text-secondary)' }}>City*</label>
                     <input
                       type="text"
                       name="city"
                       value={address.city}
                       onChange={handleAddressChange}
-                      className="w-full bg-[#222] border border-[#333] rounded-md py-2 px-4 text-white"
+                      className="w-full rounded-md py-2 px-4 border"
+                      style={{ 
+                        background: 'var(--panel-charcoal)', 
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-400 mb-1">ZIP Code*</label>
+                    <label className="block mb-1" style={{ color: 'var(--text-secondary)' }}>ZIP Code*</label>
                     <input
                       type="text"
                       name="zipCode"
                       value={address.zipCode}
                       onChange={handleAddressChange}
-                      className="w-full bg-[#222] border border-[#333] rounded-md py-2 px-4 text-white"
+                      className="w-full rounded-md py-2 px-4 border"
+                      style={{ 
+                        background: 'var(--panel-charcoal)', 
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
                       required
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-gray-400 mb-1">State/Province*</label>
+                  <label className="block mb-1" style={{ color: 'var(--text-secondary)' }}>State/Province*</label>
                   <input
                     type="text"
                     name="state"
                     value={address.state}
                     onChange={handleAddressChange}
-                    className="w-full bg-[#222] border border-[#333] rounded-md py-2 px-4 text-white"
+                    className="w-full rounded-md py-2 px-4 border"
+                    style={{ 
+                      background: 'var(--panel-charcoal)', 
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)'
+                    }}
                     required
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-gray-400 mb-1">Landmark (Optional)</label>
+                  <label className="block mb-1" style={{ color: 'var(--text-secondary)' }}>Landmark (Optional)</label>
                   <input
                     type="text"
                     name="landmark"
                     value={address.landmark}
                     onChange={handleAddressChange}
-                    className="w-full bg-[#222] border border-[#333] rounded-md py-2 px-4 text-white"
+                    className="w-full rounded-md py-2 px-4 border"
+                    style={{ 
+                      background: 'var(--panel-charcoal)', 
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)'
+                    }}
                   />
                 </div>
               </div>
 
               {/* Map Preview (placeholder) */}
-              <div className="mt-4 bg-[#222] h-48 rounded-md flex items-center justify-center">
-                <span className="text-gray-400">Map preview will appear here</span>
+              <div className="mt-4 h-48 rounded-md flex items-center justify-center" style={{ background: 'var(--panel-charcoal)' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Map preview will appear here</span>
               </div>
             </div>
           </div>
@@ -401,7 +442,11 @@ export default function ScheduleAddressPage() {
             <button
               type="button"
               onClick={handleBack}
-              className="py-3 px-8 border border-white text-white rounded-md hover:bg-white hover:text-black transition-colors"
+              className="py-3 px-8 border rounded-md hover:bg-white hover:text-black transition-colors"
+              style={{ 
+                borderColor: 'var(--text-main)',
+                color: 'var(--text-main)'
+              }}
             >
               <FiArrowLeft className="inline mr-2" /> Back
             </button>
@@ -409,7 +454,11 @@ export default function ScheduleAddressPage() {
               type="button"
               onClick={handleNext}
               disabled={loading}
-              className="py-3 px-8 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center"
+              className="py-3 px-8 text-white rounded-md transition-colors flex items-center"
+              style={{
+                background: 'var(--accent-color)',
+                boxShadow: '0 4px 6px rgba(230, 0, 18, 0.25)'
+              }}
             >
               {loading ? 'Processing...' : 'Next: Confirmation'} <FiArrowRight className="ml-2" />
             </button>

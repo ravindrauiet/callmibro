@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { db } from '@/firebase/config'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function BrandSelection({ service, onBrandSelect }) {
   const [brands, setBrands] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedBrandId, setSelectedBrandId] = useState(null)
   const [error, setError] = useState(null)
+  const { isDarkMode } = useTheme()
 
   // Check if online
   const checkNetwork = () => {
@@ -377,8 +379,11 @@ export default function BrandSelection({ service, onBrandSelect }) {
 
   // Render brand cards
   return (
-    <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
-      <h2 className="text-xl font-medium text-white mb-4">Select Brand</h2>
+    <div className="border rounded-lg p-6 shadow-lg" style={{ 
+      background: 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))',
+      borderColor: 'var(--border-color)'
+    }}>
+      <h2 className="text-xl font-medium mb-4">Select Brand</h2>
       
       {loading ? (
         <div className="flex justify-center py-8">
@@ -393,8 +398,12 @@ export default function BrandSelection({ service, onBrandSelect }) {
               className={`border rounded-lg p-3 flex flex-col items-center justify-center cursor-pointer transition-all ${
                 selectedBrandId === brand.id 
                   ? 'bg-[#e60012] border-[#ff6b6b]' 
-                  : 'bg-[#222] border-[#333] hover:border-[#e60012]'
+                  : 'hover:border-[#e60012]'
               }`}
+              style={{ 
+                backgroundColor: selectedBrandId === brand.id ? undefined : 'var(--panel-charcoal)',
+                borderColor: selectedBrandId === brand.id ? undefined : 'var(--border-color)' 
+              }}
             >
               {brand.logo ? (
                 <img 
@@ -403,18 +412,22 @@ export default function BrandSelection({ service, onBrandSelect }) {
                   className="h-12 w-12 object-contain mb-2" 
                 />
               ) : (
-                <div className="h-12 w-12 flex items-center justify-center bg-[#333] rounded-full mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="h-12 w-12 flex items-center justify-center rounded-full mb-2" style={{ background: 'var(--panel-dark)' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" style={{ color: 'var(--text-secondary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
               )}
               <div className="text-center">
-                <div className={`font-medium ${selectedBrandId === brand.id ? 'text-white' : 'text-gray-300'}`}>
+                <div className={`font-medium ${selectedBrandId === brand.id ? 'text-white' : ''}`} style={{ 
+                  color: selectedBrandId === brand.id ? undefined : 'var(--text-main)' 
+                }}>
                   {brand.name}
                 </div>
                 {brand.category && (
-                  <div className={`text-xs ${selectedBrandId === brand.id ? 'text-gray-200' : 'text-gray-500'}`}>
+                  <div className={`text-xs ${selectedBrandId === brand.id ? 'text-gray-200' : ''}`} style={{ 
+                    color: selectedBrandId === brand.id ? undefined : 'var(--text-secondary)' 
+                  }}>
                     {brand.category}
                   </div>
                 )}

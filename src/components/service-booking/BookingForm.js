@@ -7,10 +7,12 @@ import { toast } from 'react-hot-toast'
 import { db } from '@/firebase/config'
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore'
 import { FiMapPin, FiUser, FiUserPlus, FiLock } from 'react-icons/fi'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function BookingForm({ service, brand, model, onComplete }) {
   const { currentUser } = useAuth()
   const router = useRouter()
+  const { isDarkMode } = useTheme()
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
   const [bookingFor, setBookingFor] = useState('self') // 'self' or 'other'
@@ -457,18 +459,24 @@ export default function BookingForm({ service, brand, model, onComplete }) {
   }, [formData.address, formData.issue, formData.additionalNotes]);
 
   return (
-    <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-xl p-6 sm:p-8 shadow-2xl">
+    <div className="border rounded-xl p-6 sm:p-8 shadow-2xl" style={{ 
+      background: 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))',
+      borderColor: 'var(--border-color)'
+    }}>
       <div className="mb-8">
         <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Book Your Service</h2>
-        <p className="text-gray-400">Complete your booking details for {service} service</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Complete your booking details for {service} service</p>
       </div>
       
       {/* Express booking option - UPDATED DESIGN */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#2a1a1a] to-[#331a1a] rounded-xl p-6 mb-8 border border-[#e60012]/30 shadow-lg transform hover:scale-[1.01] transition-all duration-300">
+      <div className="relative overflow-hidden rounded-xl p-6 mb-8 border shadow-lg transform hover:scale-[1.01] transition-all duration-300" style={{
+        background: 'linear-gradient(to bottom right, var(--panel-dark-accent), var(--panel-charcoal-accent))',
+        borderColor: 'var(--accent-transparent)'
+      }}>
         <div className="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 opacity-20">
           <div className="absolute transform rotate-12 w-full h-full bg-[#e60012] rounded-full"></div>
         </div>
-        <h3 className="text-xl font-bold mb-3 text-white flex items-center">
+        <h3 className="text-xl font-bold mb-3 flex items-center">
           <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#e60012]">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -476,7 +484,7 @@ export default function BookingForm({ service, brand, model, onComplete }) {
           </span>
           Express Booking
         </h3>
-        <p className="text-gray-300 mb-4">Skip the details and get instant service with our express booking option. We'll use your saved information.</p>
+        <p style={{ color: 'var(--text-secondary)' }} className="mb-4">Skip the details and get instant service with our express booking option. We'll use your saved information.</p>
         <button
           type="button"
           onClick={handleExpressBooking}
@@ -497,9 +505,12 @@ export default function BookingForm({ service, brand, model, onComplete }) {
       </div>
       
       {/* Service Summary - UPDATED DESIGN */}
-      <div className="bg-gradient-to-br from-[#1a1a1a] to-[#222] rounded-xl p-6 mb-8 border border-[#333] shadow-lg">
-        <h3 className="text-xl font-bold mb-4 text-white flex items-center">
-          <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#333]">
+      <div className="rounded-xl p-6 mb-8 border shadow-lg" style={{
+        background: 'linear-gradient(to bottom right, var(--panel-dark), var(--panel-charcoal))',
+        borderColor: 'var(--border-color)'
+      }}>
+        <h3 className="text-xl font-bold mb-4 flex items-center">
+          <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full" style={{ background: 'var(--panel-dark)' }}>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -507,17 +518,26 @@ export default function BookingForm({ service, brand, model, onComplete }) {
           Your Service Details
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-[#111] p-4 rounded-lg border border-[#333] hover:border-[#444] transition-colors">
-            <p className="text-gray-400 text-sm mb-1">Service Type</p>
-            <p className="font-bold text-lg text-white">{service}</p>
+          <div className="p-4 rounded-lg border hover:border-[#444] transition-colors" style={{
+            background: 'var(--panel-dark)',
+            borderColor: 'var(--border-color)'
+          }}>
+            <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">Service Type</p>
+            <p className="font-bold text-lg">{service}</p>
           </div>
-          <div className="bg-[#111] p-4 rounded-lg border border-[#333] hover:border-[#444] transition-colors">
-            <p className="text-gray-400 text-sm mb-1">Selected Brand</p>
-            <p className="font-bold text-lg text-white">{brand.name}</p>
+          <div className="p-4 rounded-lg border hover:border-[#444] transition-colors" style={{
+            background: 'var(--panel-dark)',
+            borderColor: 'var(--border-color)'
+          }}>
+            <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">Selected Brand</p>
+            <p className="font-bold text-lg">{brand.name}</p>
           </div>
-          <div className="bg-[#111] p-4 rounded-lg border border-[#333] hover:border-[#444] transition-colors">
-            <p className="text-gray-400 text-sm mb-1">Device Model</p>
-            <p className="font-bold text-lg text-white">{model.name}</p>
+          <div className="p-4 rounded-lg border hover:border-[#444] transition-colors" style={{
+            background: 'var(--panel-dark)',
+            borderColor: 'var(--border-color)'
+          }}>
+            <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">Device Model</p>
+            <p className="font-bold text-lg">{model.name}</p>
           </div>
         </div>
       </div>
@@ -548,24 +568,32 @@ export default function BookingForm({ service, brand, model, onComplete }) {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Booking for self or other - UPDATED DESIGN */}
         <div className="space-y-4 mb-2">
-          <label className="block text-lg font-bold text-white">Who needs this service?</label>
+          <label className="block text-lg font-bold">Who needs this service?</label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div 
               onClick={() => handleBookingForToggle('self')}
               className={`p-5 rounded-xl cursor-pointer border-2 flex items-center gap-4 transition-all ${
                 bookingFor === 'self' 
                   ? 'border-[#e60012] bg-gradient-to-br from-[#e60012]/10 to-[#e60012]/5' 
-                  : 'border-[#333] hover:border-gray-600 bg-[#1a1a1a]'
+                  : 'hover:border-gray-600'
               }`}
+              style={{ 
+                borderColor: bookingFor === 'self' ? undefined : 'var(--border-color)',
+                background: bookingFor === 'self' ? undefined : 'var(--panel-charcoal)'
+              }}
             >
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                bookingFor === 'self' ? 'bg-[#e60012]' : 'bg-[#333]'
-              }`}>
+                bookingFor === 'self' ? 'bg-[#e60012]' : ''
+              }`} style={{ 
+                background: bookingFor === 'self' ? undefined : 'var(--panel-dark)'
+              }}>
                 <FiUser size={24} className="text-white" />
               </div>
               <div>
-                <p className={`font-bold text-lg ${bookingFor === 'self' ? 'text-white' : 'text-gray-300'}`}>For Myself</p>
-                <p className="text-sm text-gray-400">We'll use your profile information</p>
+                <p className={`font-bold text-lg ${bookingFor === 'self' ? 'text-white' : ''}`} style={{ 
+                  color: bookingFor === 'self' ? undefined : 'var(--text-main)'
+                }}>For Myself</p>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>We'll use your profile information</p>
               </div>
               {bookingFor === 'self' && (
                 <div className="ml-auto">
@@ -582,17 +610,25 @@ export default function BookingForm({ service, brand, model, onComplete }) {
               className={`p-5 rounded-xl cursor-pointer border-2 flex items-center gap-4 transition-all ${
                 bookingFor === 'other' 
                   ? 'border-[#e60012] bg-gradient-to-br from-[#e60012]/10 to-[#e60012]/5' 
-                  : 'border-[#333] hover:border-gray-600 bg-[#1a1a1a]'
+                  : 'hover:border-gray-600'
               }`}
+              style={{ 
+                borderColor: bookingFor === 'other' ? undefined : 'var(--border-color)',
+                background: bookingFor === 'other' ? undefined : 'var(--panel-charcoal)'
+              }}
             >
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                bookingFor === 'other' ? 'bg-[#e60012]' : 'bg-[#333]'
-              }`}>
+                bookingFor === 'other' ? 'bg-[#e60012]' : ''
+              }`} style={{ 
+                background: bookingFor === 'other' ? undefined : 'var(--panel-dark)'
+              }}>
                 <FiUserPlus size={24} className="text-white" />
               </div>
               <div>
-                <p className={`font-bold text-lg ${bookingFor === 'other' ? 'text-white' : 'text-gray-300'}`}>For Someone Else</p>
-                <p className="text-sm text-gray-400">Enter their contact details</p>
+                <p className={`font-bold text-lg ${bookingFor === 'other' ? 'text-white' : ''}`} style={{ 
+                  color: bookingFor === 'other' ? undefined : 'var(--text-main)'
+                }}>For Someone Else</p>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Enter their contact details</p>
               </div>
               {bookingFor === 'other' && (
                 <div className="ml-auto">
@@ -609,32 +645,35 @@ export default function BookingForm({ service, brand, model, onComplete }) {
         
         {/* Customer Information Section - UPDATED */}
         {bookingFor === 'self' ? (
-          <div className="bg-[#111] rounded-xl p-6 border border-[#333] shadow-lg">
-            <h3 className="text-xl font-bold mb-4 text-white flex items-center">
-              <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#333]">
+          <div className="rounded-xl p-6 border shadow-lg" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
+            <h3 className="text-xl font-bold mb-4 flex items-center">
+              <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full" style={{ background: 'var(--panel-charcoal)' }}>
                 <FiUser className="h-4 w-4 text-[#e60012]" />
               </span>
               Your Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-[#1a1a1a] p-4 rounded-lg">
-                <p className="text-gray-400 text-sm mb-1">Full Name</p>
-                <p className="font-bold text-white">{formData.name || 'Not provided'}</p>
+              <div className="p-4 rounded-lg" style={{ background: 'var(--panel-charcoal)' }}>
+                <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">Full Name</p>
+                <p className="font-bold">{formData.name || 'Not provided'}</p>
               </div>
-              <div className="bg-[#1a1a1a] p-4 rounded-lg">
-                <p className="text-gray-400 text-sm mb-1">Phone Number</p>
-                <p className="font-bold text-white">{formData.phone || 'Not provided'}</p>
+              <div className="p-4 rounded-lg" style={{ background: 'var(--panel-charcoal)' }}>
+                <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">Phone Number</p>
+                <p className="font-bold">{formData.phone || 'Not provided'}</p>
               </div>
-              <div className="bg-[#1a1a1a] p-4 rounded-lg md:col-span-2">
-                <p className="text-gray-400 text-sm mb-1">Email Address</p>
-                <p className="font-bold text-white">{formData.email || 'Not provided'}</p>
+              <div className="p-4 rounded-lg md:col-span-2" style={{ background: 'var(--panel-charcoal)' }}>
+                <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">Email Address</p>
+                <p className="font-bold">{formData.email || 'Not provided'}</p>
               </div>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label htmlFor="name" className="block text-sm font-medium text-white">Full Name</label>
+              <label htmlFor="name" className="block text-sm font-medium">Full Name</label>
               <input 
                 type="text" 
                 id="name" 
@@ -642,16 +681,21 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                 value={formData.name} 
                 onChange={handleChange}
                 placeholder="Enter full name"
-                className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-                  errors.name ? 'border-red-600' : 'border-[#333]'
+                className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
+                  errors.name ? 'border-red-600' : ''
                 }`}
+                style={{ 
+                  background: 'var(--panel-charcoal)', 
+                  borderColor: errors.name ? undefined : 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
                 required
               />
               {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="phone" className="block text-sm font-medium text-white">Phone Number</label>
+              <label htmlFor="phone" className="block text-sm font-medium">Phone Number</label>
               <input 
                 type="tel" 
                 id="phone" 
@@ -659,16 +703,21 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                 value={formData.phone} 
                 onChange={handleChange}
                 placeholder="Enter 10-digit phone number"
-                className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-                  errors.phone ? 'border-red-600' : 'border-[#333]'
+                className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
+                  errors.phone ? 'border-red-600' : ''
                 }`}
+                style={{ 
+                  background: 'var(--panel-charcoal)', 
+                  borderColor: errors.phone ? undefined : 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
                 required
               />
               {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <label htmlFor="email" className="block text-sm font-medium text-white">Email Address</label>
+              <label htmlFor="email" className="block text-sm font-medium">Email Address</label>
               <input 
                 type="email" 
                 id="email" 
@@ -676,9 +725,14 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                 value={formData.email} 
                 onChange={handleChange}
                 placeholder="Enter email address"
-                className={`w-full px-4 py-3 bg-[#222] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-                  errors.email ? 'border-red-600' : 'border-[#333]'
+                className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
+                  errors.email ? 'border-red-600' : ''
                 }`}
+                style={{ 
+                  background: 'var(--panel-charcoal)', 
+                  borderColor: errors.email ? undefined : 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
                 required
               />
               {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
@@ -688,18 +742,21 @@ export default function BookingForm({ service, brand, model, onComplete }) {
 
         {/* Address Section - UPDATED DESIGN */}
         <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 text-white flex items-center">
-            <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#333]">
+          <h3 className="text-xl font-bold mb-4 flex items-center">
+            <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full" style={{ background: 'var(--panel-charcoal)' }}>
               <FiMapPin className="h-4 w-4 text-[#e60012]" />
             </span>
             Service Location
           </h3>
           
-          <div className="bg-[#111] p-6 rounded-xl border border-[#333]">
+          <div className="p-6 rounded-xl border" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
             {/* Saved addresses selector - only show if user has saved addresses */}
             {currentUser && savedAddresses.length > 0 && (
               <div className="mb-6">
-                <label className="block text-base font-medium text-white mb-3">
+                <label className="block text-base font-medium mb-3">
                   Select a Saved Address
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -716,8 +773,12 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                       className={`cursor-pointer p-3 rounded-lg border ${
                         selectedSavedAddress === addr.id
                           ? 'border-[#e60012] bg-[#e60012]/10'
-                          : 'border-[#333] hover:border-gray-600'
+                          : 'hover:border-gray-600'
                       }`}
+                      style={{ 
+                        borderColor: selectedSavedAddress === addr.id ? undefined : 'var(--border-color)',
+                        background: selectedSavedAddress === addr.id ? undefined : 'var(--panel-charcoal)'
+                      }}
                     >
                       <div className="flex items-start">
                         <div className="mr-3">
@@ -728,12 +789,12 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                               </svg>
                             </div>
                           ) : (
-                            <div className="w-5 h-5 rounded-full border border-gray-500"></div>
+                            <div className="w-5 h-5 rounded-full border" style={{ borderColor: 'var(--border-color)' }}></div>
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-white">{addr.name}</p>
-                          <p className="text-sm text-gray-400">{addr.fullAddress.substring(0, 50)}...</p>
+                          <p className="font-medium">{addr.name}</p>
+                          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{addr.fullAddress.substring(0, 50)}...</p>
                         </div>
                       </div>
                     </div>
@@ -747,7 +808,12 @@ export default function BookingForm({ service, brand, model, onComplete }) {
               <button 
                 type="button"
                 onClick={getCurrentLocation}
-                className="w-full mb-4 bg-[#222] hover:bg-[#333] text-white py-3 px-4 rounded-lg border border-[#333] hover:border-gray-600 flex items-center justify-center transition-all group"
+                className="w-full mb-4 py-3 px-4 rounded-lg border hover:border-gray-600 flex items-center justify-center transition-all group"
+                style={{ 
+                  background: 'var(--panel-charcoal)', 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
                 disabled={isLoadingLocation}
               >
                 {isLoadingLocation ? (
@@ -766,7 +832,7 @@ export default function BookingForm({ service, brand, model, onComplete }) {
             
             {/* Address textarea */}
             <div>
-              <label htmlFor="address" className="block text-base font-medium text-white mb-3">
+              <label htmlFor="address" className="block text-base font-medium mb-3">
                 Service Address
               </label>
               <textarea 
@@ -776,14 +842,19 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                 onChange={handleChange}
                 placeholder="Enter your complete address for service"
                 rows="3"
-                className={`w-full px-4 py-3 bg-[#1a1a1a] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-                  errors.address ? 'border-red-600' : 'border-[#333]'
+                className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
+                  errors.address ? 'border-red-600' : ''
                 }`}
+                style={{ 
+                  background: 'var(--panel-charcoal)', 
+                  borderColor: errors.address ? undefined : 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
                 required
               ></textarea>
               {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
               
-              <p className="text-xs text-gray-400 mt-2">
+              <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>
                 Please provide a complete address including landmarks to help our technician locate you easily.
               </p>
             </div>
@@ -792,8 +863,8 @@ export default function BookingForm({ service, brand, model, onComplete }) {
 
         {/* Modern Date & Time Selector */}
         <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 text-white flex items-center">
-            <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#333]">
+          <h3 className="text-xl font-bold mb-4 flex items-center">
+            <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full" style={{ background: 'var(--panel-charcoal)' }}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -801,10 +872,13 @@ export default function BookingForm({ service, brand, model, onComplete }) {
             Schedule Service
           </h3>
           
-          <div className="bg-[#111] p-6 rounded-xl border border-[#333]">
+          <div className="p-6 rounded-xl border" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
             {/* Date selector */}
             <div className="mb-6">
-              <label htmlFor="date" className="block text-base font-medium text-white mb-3">Select Date</label>
+              <label htmlFor="date" className="block text-base font-medium mb-3">Select Date</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {Array.from({ length: 4 }).map((_, dayOffset) => {
                   const date = new Date();
@@ -822,15 +896,19 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                       className={`relative overflow-hidden rounded-lg cursor-pointer transition-all border-2 ${
                         isSelected 
                           ? 'border-[#e60012] bg-gradient-to-b from-[#e60012]/10 to-[#e60012]/5' 
-                          : 'border-[#222] bg-[#1a1a1a] hover:border-gray-600'
+                          : 'hover:border-gray-600'
                       }`}
+                      style={{ 
+                        borderColor: isSelected ? undefined : 'var(--border-color)',
+                        background: isSelected ? undefined : 'var(--panel-charcoal)'
+                      }}
                     >
                       <div className="px-2 py-1 text-center">
-                        <p className="text-xs text-gray-400">{date.toLocaleDateString('en-US', {weekday: 'short'})}</p>
-                        <p className={`text-2xl font-bold ${isSelected ? 'text-white' : 'text-gray-200'}`}>
+                        <p style={{ color: 'var(--text-secondary)' }} className="text-xs">{date.toLocaleDateString('en-US', {weekday: 'short'})}</p>
+                        <p className={`text-2xl font-bold ${isSelected ? 'text-white' : ''}`} style={{ color: isSelected ? undefined : 'var(--text-main)' }}>
                           {date.getDate()}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p style={{ color: 'var(--text-secondary)' }} className="text-xs">
                           {date.toLocaleDateString('en-US', {month: 'short'})}
                         </p>
                       </div>
@@ -846,7 +924,7 @@ export default function BookingForm({ service, brand, model, onComplete }) {
             
             {/* Time selector */}
             <div>
-              <label className="block text-base font-medium text-white mb-3">Select Time Slot</label>
+              <label className="block text-base font-medium mb-3">Select Time Slot</label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {['09:00 AM - 11:00 AM', '11:00 AM - 01:00 PM', '01:00 PM - 03:00 PM', 
                  '03:00 PM - 05:00 PM', '05:00 PM - 07:00 PM'].map((timeSlot) => {
@@ -862,18 +940,22 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                       className={`relative rounded-lg cursor-pointer transition-all border ${
                         isSelected 
                           ? 'border-[#e60012] bg-[#e60012]/10' 
-                          : 'border-[#333] bg-[#222] hover:border-gray-600'
+                          : 'hover:border-gray-600'
                       } p-3`}
+                      style={{ 
+                        borderColor: isSelected ? undefined : 'var(--border-color)',
+                        background: isSelected ? undefined : 'var(--panel-charcoal)'
+                      }}
                     >
                       <div className="flex items-center">
-                        <div className={`w-4 h-4 rounded-full mr-2 ${isSelected ? 'bg-[#e60012]' : 'border border-gray-500'}`}>
+                        <div className={`w-4 h-4 rounded-full mr-2 ${isSelected ? 'bg-[#e60012]' : 'border'}`} style={{ borderColor: isSelected ? undefined : 'var(--border-color)' }}>
                           {isSelected && (
                             <div className="w-full h-full flex items-center justify-center">
                               <div className="w-2 h-2 bg-white rounded-full"></div>
                             </div>
                           )}
                         </div>
-                        <span className={isSelected ? 'text-white' : 'text-gray-300'}>
+                        <span className={isSelected ? 'text-white' : ''} style={{ color: isSelected ? undefined : 'var(--text-main)' }}>
                           {timeSlot}
                         </span>
                       </div>
@@ -888,8 +970,8 @@ export default function BookingForm({ service, brand, model, onComplete }) {
 
         {/* Issue Description - UPDATED DESIGN */}
         <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 text-white flex items-center">
-            <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full bg-[#333]">
+          <h3 className="text-xl font-bold mb-4 flex items-center">
+            <span className="inline-flex items-center justify-center w-8 h-8 mr-2 rounded-full" style={{ background: 'var(--panel-dark)' }}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
@@ -897,10 +979,13 @@ export default function BookingForm({ service, brand, model, onComplete }) {
             Problem Details
           </h3>
           
-          <div className="bg-[#111] p-6 rounded-xl border border-[#333]">
+          <div className="p-6 rounded-xl border" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
             {/* Issue description textarea */}
             <div className="mb-6">
-              <label htmlFor="issue" className="block text-base font-medium text-white mb-3">
+              <label htmlFor="issue" className="block text-base font-medium mb-3">
                 Describe the issue you're experiencing
               </label>
               <textarea 
@@ -910,13 +995,18 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                 onChange={handleChange}
                 placeholder="Example: My phone screen is cracked and unresponsive on the right side..."
                 rows="3"
-                className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
+                className="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
+                style={{ 
+                  background: 'var(--panel-charcoal)', 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
               ></textarea>
             </div>
             
             {/* Additional notes textarea */}
             <div>
-              <label htmlFor="additionalNotes" className="block text-base font-medium text-white mb-3">
+              <label htmlFor="additionalNotes" className="block text-base font-medium mb-3">
                 Additional Notes (Optional)
               </label>
               <textarea 
@@ -926,13 +1016,18 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                 onChange={handleChange}
                 placeholder="Example: The security code to enter the building is 2580..."
                 rows="2"
-                className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
+                className="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors"
+                style={{ 
+                  background: 'var(--panel-charcoal)', 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
               ></textarea>
             </div>
           </div>
         </div>
 
-        <div className="pt-6 border-t border-[#333]">
+        <div className="pt-6 border-t" style={{ borderColor: 'var(--border-color)' }}>
           <div className="flex flex-col items-center">
             <button
               type="submit"
@@ -953,7 +1048,7 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                 </div>
               )}
             </button>
-            <p className="text-gray-400 text-sm mt-3 text-center">
+            <p style={{ color: 'var(--text-secondary)' }} className="text-sm mt-3 text-center">
               By completing this booking, you agree to our <span className="text-[#e60012] cursor-pointer">Terms of Service</span>
             </p>
           </div>
@@ -963,20 +1058,28 @@ export default function BookingForm({ service, brand, model, onComplete }) {
       {/* Phone Number Collection Modal */}
       {showPhoneNumberModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
-          <div className="bg-[#111] border border-[#333] rounded-xl p-6 max-w-md w-full shadow-2xl animate-fadeIn">
-            <h3 className="text-xl font-bold mb-4 text-white">One More Step</h3>
-            <p className="text-gray-300 mb-4">We need your phone number to complete your express booking.</p>
+          <div className="border rounded-xl p-6 max-w-md w-full shadow-2xl animate-fadeIn" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
+            <h3 className="text-xl font-bold mb-4">One More Step</h3>
+            <p style={{ color: 'var(--text-secondary)' }} className="mb-4">We need your phone number to complete your express booking.</p>
             
             <form onSubmit={handlePhoneNumberSubmit} className="space-y-4">
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-white mb-1">Phone Number</label>
+                <label htmlFor="phoneNumber" className="block text-sm font-medium mb-1">Phone Number</label>
                 <input
                   type="tel"
                   id="phoneNumber"
                   value={tempPhoneNumber}
                   onChange={(e) => setTempPhoneNumber(e.target.value)}
                   placeholder="Enter your 10-digit phone number"
-                  className="w-full px-4 py-3 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012]"
+                  className="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012]"
+                  style={{ 
+                    background: 'var(--panel-charcoal)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                   required
                 />
               </div>
@@ -985,7 +1088,12 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                 <button
                   type="button"
                   onClick={() => setShowPhoneNumberModal(false)}
-                  className="flex-1 py-3 px-4 border border-[#333] text-white rounded-lg hover:bg-[#222] transition-colors"
+                  className="flex-1 py-3 px-4 border rounded-lg transition-colors"
+                  style={{ 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)',
+                    background: 'var(--panel-charcoal)'
+                  }}
                 >
                   Cancel
                 </button>

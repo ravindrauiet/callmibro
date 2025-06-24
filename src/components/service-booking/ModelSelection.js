@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { db } from '@/firebase/config'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ModelSelection({ service, brand, onModelSelect }) {
   const [models, setModels] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedModelId, setSelectedModelId] = useState(null)
   const [error, setError] = useState(null)
+  const { isDarkMode } = useTheme()
   
   // Check if online
   const checkNetwork = () => {
@@ -555,17 +557,23 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
 
   if (!brand || !brand.id) {
     return (
-      <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
-        <h3 className="text-xl font-semibold text-white mb-4">Select Model</h3>
-        <p className="text-gray-400">Please select a brand first</p>
+      <div className="border rounded-lg p-6 shadow-lg" style={{ 
+        background: 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))',
+        borderColor: 'var(--border-color)'
+      }}>
+        <h3 className="text-xl font-semibold mb-4">Select Model</h3>
+        <p style={{ color: 'var(--text-secondary)' }}>Please select a brand first</p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
-        <h3 className="text-xl font-semibold text-white mb-4">Select Model</h3>
+      <div className="border rounded-lg p-6 shadow-lg" style={{ 
+        background: 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))',
+        borderColor: 'var(--border-color)'
+      }}>
+        <h3 className="text-xl font-semibold mb-4">Select Model</h3>
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#e60012]"></div>
         </div>
@@ -575,16 +583,22 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
 
   if (models.length === 0) {
     return (
-      <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
-        <h3 className="text-xl font-semibold text-white mb-4">Select Model</h3>
-        <p className="text-gray-400">No models available for {brand.name}</p>
+      <div className="border rounded-lg p-6 shadow-lg" style={{ 
+        background: 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))',
+        borderColor: 'var(--border-color)'
+      }}>
+        <h3 className="text-xl font-semibold mb-4">Select Model</h3>
+        <p style={{ color: 'var(--text-secondary)' }}>No models available for {brand.name}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-b from-[#111] to-[#191919] border border-[#333] rounded-lg p-6 shadow-lg">
-      <h3 className="text-xl font-semibold text-white mb-4">Select Model for {brand.name}</h3>
+    <div className="border rounded-lg p-6 shadow-lg" style={{ 
+      background: 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))',
+      borderColor: 'var(--border-color)'
+    }}>
+      <h3 className="text-xl font-semibold mb-4">Select Model for {brand.name}</h3>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {models.map((model) => (
@@ -594,8 +608,12 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
             className={`flex flex-col p-4 rounded-lg cursor-pointer transition-all ${
               selectedModelId === model.id
                 ? 'bg-[#e60012] border-2 border-[#ff6b6b]'
-                : 'bg-[#222] border border-[#333] hover:border-[#444] hover:bg-[#2a2a2a]'
+                : 'border hover:border-[#444]'
             }`}
+            style={{ 
+              backgroundColor: selectedModelId === model.id ? undefined : 'var(--panel-charcoal)',
+              borderColor: selectedModelId === model.id ? undefined : 'var(--border-color)'
+            }}
           >
             <div className="flex items-center mb-3">
               {model.photoURL ? (
@@ -609,8 +627,10 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
               ) : null}
               
               <h4 className={`font-medium ${
-                selectedModelId === model.id ? 'text-white' : 'text-gray-200'
-              }`}>
+                selectedModelId === model.id ? 'text-white' : ''
+              }`} style={{ 
+                color: selectedModelId === model.id ? undefined : 'var(--text-main)'
+              }}>
                 {model.name}
               </h4>
             </div>
@@ -618,8 +638,10 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
             {model.description && (
               <div className="mt-auto pt-2">
                 <span className={`text-sm ${
-                  selectedModelId === model.id ? 'text-white' : 'text-gray-400'
-                }`}>
+                  selectedModelId === model.id ? 'text-white' : ''
+                }`} style={{ 
+                  color: selectedModelId === model.id ? undefined : 'var(--text-secondary)'
+                }}>
                   {model.description}
                 </span>
               </div>

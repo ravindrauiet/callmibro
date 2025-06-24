@@ -10,6 +10,7 @@ import BookingForm from '../../../components/service-booking/BookingForm'
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ServiceDetailPage({ params }) {
   const [step, setStep] = useState('brands')
@@ -21,6 +22,7 @@ export default function ServiceDetailPage({ params }) {
   const [isVisible, setIsVisible] = useState(false)
   const router = useRouter()
   const { currentUser } = useAuth()
+  const { isDarkMode } = useTheme()
 
   useEffect(() => {
     // Set visibility for animations
@@ -116,7 +118,7 @@ export default function ServiceDetailPage({ params }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen" style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>
         <Header activePage="services" />
         
         <main className="relative py-16 px-4">
@@ -128,8 +130,8 @@ export default function ServiceDetailPage({ params }) {
           
           <div className="max-w-6xl mx-auto text-center">
             <div className="w-16 h-16 border-4 border-t-transparent border-[#e60012] rounded-full animate-spin mx-auto mb-6"></div>
-            <h2 className="text-2xl font-bold text-white mb-2">Loading Service Details</h2>
-            <p className="text-gray-400">Please wait while we prepare your booking experience</p>
+            <h2 className="text-2xl font-bold mb-2">Loading Service Details</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>Please wait while we prepare your booking experience</p>
           </div>
         </main>
         
@@ -140,7 +142,7 @@ export default function ServiceDetailPage({ params }) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen" style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>
         <Header activePage="services" />
         
         <main className="relative py-16 px-4">
@@ -151,13 +153,16 @@ export default function ServiceDetailPage({ params }) {
           </div>
           
           <div className="max-w-3xl mx-auto">
-            <div className="bg-[#111] border border-[#333] rounded-xl p-8 text-center">
+            <div className="rounded-xl p-8 text-center border" style={{ 
+              background: 'var(--panel-dark)', 
+              borderColor: 'var(--border-color)' 
+            }}>
               <div className="w-16 h-16 rounded-full bg-[#e60012]/20 flex items-center justify-center mx-auto mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-4">{error}</h2>
+              <h2 className="text-2xl font-bold mb-4">{error}</h2>
               <button
                 onClick={() => router.push('/services')}
                 className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white px-6 py-3 rounded-lg hover:shadow-lg hover:shadow-[#e60012]/20 transition-all"
@@ -174,7 +179,7 @@ export default function ServiceDetailPage({ params }) {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen" style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>
       <Header activePage="services" />
       
       <main className="relative py-16 px-4">
@@ -191,7 +196,10 @@ export default function ServiceDetailPage({ params }) {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
             }`}
           >
-            <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
+            <div className="inline-block px-4 py-1 rounded-full mb-4 border" style={{ 
+              background: 'var(--panel-dark)', 
+              borderColor: 'var(--border-color)' 
+            }}>
               <span className="text-[#e60012] text-sm font-medium">Professional Service</span>
             </div>
             
@@ -201,7 +209,7 @@ export default function ServiceDetailPage({ params }) {
               </span>
             </h1>
             
-            <p className="text-gray-400 max-w-2xl mx-auto mb-8">
+            <p style={{ color: 'var(--text-secondary)' }} className="max-w-2xl mx-auto mb-8">
               Follow the steps below to book your {selectedService.toLowerCase()} service with one of our certified technicians
             </p>
             
@@ -216,7 +224,7 @@ export default function ServiceDetailPage({ params }) {
                 </svg>
                 Continue to Book Your Service
               </button>
-              <p className="text-gray-500 text-sm mt-2">Skip brand & model selection for faster booking</p>
+              <p style={{ color: 'var(--text-secondary)' }} className="text-sm mt-2">Skip brand & model selection for faster booking</p>
             </div>
           </div>
 
@@ -237,7 +245,9 @@ export default function ServiceDetailPage({ params }) {
                 }`}>
                   <span className="text-white font-medium">{step === 'brands' ? '1' : '✓'}</span>
                 </div>
-                <span className={`text-sm mt-2 ${step === 'brands' ? 'text-white font-medium' : 'text-gray-400'}`}>Select Brand</span>
+                <span className={`text-sm mt-2 ${step === 'brands' ? 'font-medium' : ''}`} style={{ 
+                  color: step === 'brands' ? 'var(--text-main)' : 'var(--text-secondary)' 
+                }}>Select Brand</span>
               </div>
               
               <div className="flex flex-col items-center z-10">
@@ -246,35 +256,44 @@ export default function ServiceDetailPage({ params }) {
                     ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' 
                     : step === 'booking' 
                       ? 'bg-gradient-to-r from-[#22c55e] to-[#16a34a]' 
-                      : 'bg-[#222]'
+                      : 'bg-opacity-20'
                 } flex items-center justify-center shadow-lg ${
                   step === 'models' ? 'animate-pulse-slow' : ''
-                }`}>
-                  <span className="text-white font-medium">{step === 'models' ? '2' : step === 'booking' ? '✓' : '2'}</span>
+                }`} style={{ 
+                  backgroundColor: step !== 'models' && step !== 'booking' ? 'var(--panel-dark)' : undefined 
+                }}>
+                  <span className="text-white font-medium">
+                    {step === 'brands' ? '2' : step === 'models' ? '2' : '✓'}
+                  </span>
                 </div>
-                <span className={`text-sm mt-2 ${step === 'models' ? 'text-white font-medium' : step === 'booking' ? 'text-gray-400' : 'text-gray-500'}`}>Select Model</span>
+                <span className={`text-sm mt-2 ${step === 'models' ? 'font-medium' : ''}`} style={{ 
+                  color: step === 'models' ? 'var(--text-main)' : 'var(--text-secondary)' 
+                }}>Select Model</span>
               </div>
               
               <div className="flex flex-col items-center z-10">
                 <div className={`w-12 h-12 rounded-full ${
                   step === 'booking' 
                     ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' 
-                    : 'bg-[#222]'
+                    : 'bg-opacity-20'
                 } flex items-center justify-center shadow-lg ${
                   step === 'booking' ? 'animate-pulse-slow' : ''
-                }`}>
+                }`} style={{ 
+                  backgroundColor: step !== 'booking' ? 'var(--panel-dark)' : undefined 
+                }}>
                   <span className="text-white font-medium">3</span>
                 </div>
-                <span className={`text-sm mt-2 ${step === 'booking' ? 'text-white font-medium' : 'text-gray-500'}`}>Book Service</span>
+                <span className={`text-sm mt-2 ${step === 'booking' ? 'font-medium' : ''}`} style={{ 
+                  color: step === 'booking' ? 'var(--text-main)' : 'var(--text-secondary)' 
+                }}>Book Service</span>
               </div>
               
-              {/* Progress Line */}
-              <div className="absolute top-6 left-0 w-full h-1 bg-[#222] -z-0">
+              {/* Progress bar */}
+              <div className="absolute top-6 left-0 w-full h-0.5 -z-0" style={{ backgroundColor: 'var(--border-color)' }}>
                 <div 
-                  className="h-full bg-gradient-to-r from-[#22c55e] to-[#16a34a]"
-                  style={{
-                    width: step === 'brands' ? '0%' : step === 'models' ? '50%' : '100%',
-                    transition: 'width 0.5s ease-in-out'
+                  className="h-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] transition-all duration-500"
+                  style={{ 
+                    width: step === 'brands' ? '0%' : step === 'models' ? '50%' : '100%' 
                   }}
                 ></div>
               </div>
@@ -290,9 +309,11 @@ export default function ServiceDetailPage({ params }) {
             >
               <button 
                 onClick={handleGoBack}
-                className="flex items-center text-gray-400 hover:text-white transition-colors group"
+                className="flex items-center hover:text-[#e60012] transition-colors group"
+                style={{ color: 'var(--text-secondary)' }}
               >
-                <div className="w-8 h-8 rounded-full border border-[#333] flex items-center justify-center mr-2 group-hover:border-[#e60012] transition-colors">
+                <div className="w-8 h-8 rounded-full border flex items-center justify-center mr-2 group-hover:border-[#e60012] transition-colors"
+                  style={{ borderColor: 'var(--border-color)' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
                   </svg>
@@ -304,9 +325,13 @@ export default function ServiceDetailPage({ params }) {
 
           {/* Content based on current step */}
           <div 
-            className={`bg-[#111] border border-[#222] rounded-xl p-6 md:p-8 shadow-xl max-w-3xl mx-auto transform transition-all duration-1000 delay-500 ${
+            className={`border rounded-xl p-6 md:p-8 shadow-xl max-w-3xl mx-auto transform transition-all duration-1000 delay-500 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
             }`}
+            style={{ 
+              background: 'var(--panel-dark)', 
+              borderColor: 'var(--border-color)' 
+            }}
           >
             {step === 'brands' && (
               <BrandSelection 
@@ -371,15 +396,19 @@ export default function ServiceDetailPage({ params }) {
               ].map((benefit, index) => (
                 <div 
                   key={index} 
-                  className="bg-[#111] border border-[#222] rounded-lg p-4 flex items-start"
-                  style={{ transitionDelay: `${index * 100 + 800}ms` }}
+                  className="border rounded-lg p-4 flex items-start"
+                  style={{ 
+                    background: 'var(--panel-dark)', 
+                    borderColor: 'var(--border-color)',
+                    transitionDelay: `${index * 100 + 800}ms` 
+                  }}
                 >
                   <div className="mr-4 rounded-full bg-[#e60012]/10 p-3 text-[#e60012]">
                     {benefit.icon}
                   </div>
                   <div>
-                    <h3 className="text-white font-medium mb-1">{benefit.title}</h3>
-                    <p className="text-gray-400 text-sm">{benefit.description}</p>
+                    <h3 className="font-medium mb-1">{benefit.title}</h3>
+                    <p style={{ color: 'var(--text-secondary)' }} className="text-sm">{benefit.description}</p>
                   </div>
                 </div>
               ))}

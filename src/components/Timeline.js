@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function Timeline() {
   const [isVisible, setIsVisible] = useState(false)
+  const { isDarkMode } = useTheme()
   
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -70,7 +72,11 @@ export default function Timeline() {
   ]
 
   return (
-    <section id="timeline-section" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden bg-gradient-to-b from-[#111] to-black">
+    <section id="timeline-section" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden" style={{ 
+      background: isDarkMode 
+        ? 'linear-gradient(to bottom, var(--panel-dark), var(--bg-color))' 
+        : 'linear-gradient(to bottom, var(--panel-charcoal), var(--bg-color))'
+    }}>
       {/* Background blur elements */}
       <div className="absolute top-0 left-1/4 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
@@ -82,13 +88,16 @@ export default function Timeline() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
+          <div className="inline-block px-4 py-1 rounded-full mb-4 border" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
             <span className="text-[#e60012] text-sm font-medium">Simple Process</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             How It <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Works</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p style={{ color: 'var(--text-secondary)' }} className="max-w-2xl mx-auto">
             Our streamlined booking process makes getting expert repairs quick and easy
           </p>
         </div>
@@ -105,7 +114,9 @@ export default function Timeline() {
             >
               {/* Connection Line */}
               {index < steps.length - 1 && (
-                <div className="absolute top-8 left-[60%] right-0 h-0.5 bg-gradient-to-r from-[#e60012] to-[#333]"></div>
+                <div className="absolute top-8 left-[60%] right-0 h-0.5 bg-gradient-to-r from-[#e60012]" style={{ 
+                  backgroundImage: `linear-gradient(to right, #e60012, var(--border-color))` 
+                }}></div>
               )}
               
               {/* Step Content */}
@@ -115,7 +126,9 @@ export default function Timeline() {
                   {/* Outer Circle */}
                   <div className="absolute inset-0 rounded-full bg-[#e60012]/20 scale-125"></div>
                   {/* Inner Circle */}
-                  <div className={`w-16 h-16 ${step.primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} rounded-full flex items-center justify-center z-10 shadow-lg`}>
+                  <div className={`w-16 h-16 ${step.primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : ''} rounded-full flex items-center justify-center z-10 shadow-lg`}
+                    style={!step.primary ? { background: 'var(--panel-gray)' } : {}}
+                  >
                     {step.icon}
                   </div>
                   {/* Number Badge */}
@@ -126,7 +139,7 @@ export default function Timeline() {
                 
                 {/* Text Content */}
                 <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                <p className="text-gray-400 text-sm px-4">{step.description}</p>
+                <p style={{ color: 'var(--text-secondary)' }} className="text-sm px-4">{step.description}</p>
               </div>
             </div>
           ))}
@@ -144,13 +157,17 @@ export default function Timeline() {
             >
               {/* Vertical line connecting steps */}
               {index < steps.length - 1 && (
-                <div className="absolute top-16 left-8 w-0.5 h-[calc(100%+12px)] bg-gradient-to-b from-[#e60012] to-[#333]"></div>
+                <div className="absolute top-16 left-8 w-0.5 h-[calc(100%+12px)]" style={{ 
+                  backgroundImage: `linear-gradient(to bottom, #e60012, var(--border-color))` 
+                }}></div>
               )}
               
               {/* Step Content */}
               <div className="flex flex-col items-center mr-6 relative">
                 {/* Circle */}
-                <div className={`w-16 h-16 ${step.primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} rounded-full flex items-center justify-center z-10 mb-2 shadow-lg`}>
+                <div className={`w-16 h-16 ${step.primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : ''} rounded-full flex items-center justify-center z-10 mb-2 shadow-lg`}
+                  style={!step.primary ? { background: 'var(--panel-gray)' } : {}}
+                >
                   {step.icon}
                   
                   {/* Number Badge */}
@@ -163,7 +180,7 @@ export default function Timeline() {
               {/* Text Content */}
               <div className="flex-1 pt-2">
                 <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                <p className="text-gray-400 text-sm">{step.description}</p>
+                <p style={{ color: 'var(--text-secondary)' }} className="text-sm">{step.description}</p>
               </div>
             </div>
           ))}

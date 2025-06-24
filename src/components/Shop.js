@@ -3,9 +3,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function Shop() {
   const [isVisible, setIsVisible] = useState(false)
+  const { isDarkMode } = useTheme()
   
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -59,7 +61,11 @@ export default function Shop() {
   return (
     <section id="shop-section" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden">
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#111] to-black -z-10"></div>
+      <div className="absolute inset-0 -z-10" style={{ 
+        background: isDarkMode 
+          ? 'linear-gradient(to bottom, var(--panel-dark), var(--bg-color))' 
+          : 'linear-gradient(to bottom, var(--panel-charcoal), var(--bg-color))'
+      }}></div>
       <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
       <div className="absolute -bottom-32 -right-32 w-72 h-72 bg-[#e60012]/5 rounded-full blur-3xl"></div>
       
@@ -70,13 +76,16 @@ export default function Shop() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
+          <div className="inline-block px-4 py-1 rounded-full mb-4 border" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
             <span className="text-[#e60012] text-sm font-medium">Quality Parts</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             Genuine <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Spare Parts</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p style={{ color: 'var(--text-secondary)' }} className="max-w-2xl mx-auto">
             Original components with warranty for all your device repair needs
           </p>
         </div>
@@ -87,11 +96,18 @@ export default function Shop() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="bg-[#111] rounded-xl p-6 mb-8 border border-[#222] shadow-lg">
+          <div className="rounded-xl p-6 mb-8 border shadow-lg" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
             <div className="flex flex-col sm:flex-row gap-4 justify-between">
               <div className="flex-1">
-                <label className="block text-sm text-gray-400 mb-2 font-medium">Device Category</label>
-                <select className="w-full bg-black text-white p-2.5 border border-[#333] rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]">
+                <label style={{ color: 'var(--text-secondary)' }} className="block text-sm mb-2 font-medium">Device Category</label>
+                <select className="w-full p-2.5 border rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]" style={{ 
+                  background: 'var(--bg-color)', 
+                  color: 'var(--text-main)',
+                  borderColor: 'var(--border-color)' 
+                }}>
                   <option>All Categories</option>
                   <option>Phones</option>
                   <option>Laptops</option>
@@ -100,8 +116,12 @@ export default function Shop() {
               </div>
               
               <div className="flex-1">
-                <label className="block text-sm text-gray-400 mb-2 font-medium">Brand</label>
-                <select className="w-full bg-black text-white p-2.5 border border-[#333] rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]">
+                <label style={{ color: 'var(--text-secondary)' }} className="block text-sm mb-2 font-medium">Brand</label>
+                <select className="w-full p-2.5 border rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]" style={{ 
+                  background: 'var(--bg-color)', 
+                  color: 'var(--text-main)',
+                  borderColor: 'var(--border-color)' 
+                }}>
                   <option>All Brands</option>
                   <option>Apple</option>
                   <option>Samsung</option>
@@ -110,8 +130,12 @@ export default function Shop() {
               </div>
               
               <div className="flex-1">
-                <label className="block text-sm text-gray-400 mb-2 font-medium">Model</label>
-                <select className="w-full bg-black text-white p-2.5 border border-[#333] rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]">
+                <label style={{ color: 'var(--text-secondary)' }} className="block text-sm mb-2 font-medium">Model</label>
+                <select className="w-full p-2.5 border rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]" style={{ 
+                  background: 'var(--bg-color)', 
+                  color: 'var(--text-main)',
+                  borderColor: 'var(--border-color)' 
+                }}>
                   <option>All Models</option>
                   <option>iPhone 14</option>
                   <option>Galaxy S22</option>
@@ -128,10 +152,14 @@ export default function Shop() {
             <Link 
               href={product.url}
               key={index} 
-              className={`group bg-[#111] border border-[#222] rounded-xl overflow-hidden transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transform ${
+              className={`group rounded-xl overflow-hidden transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transform ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-              } transition-all duration-700`}
-              style={{ transitionDelay: `${index * 100 + 400}ms` }}
+              } transition-all duration-700 border`}
+              style={{ 
+                transitionDelay: `${index * 100 + 400}ms`,
+                background: 'var(--panel-dark)',
+                borderColor: 'var(--border-color)'
+              }}
             >
               {/* Image Container */}
               <div className="relative overflow-hidden aspect-[4/3]">
@@ -169,14 +197,16 @@ export default function Shop() {
                     </svg>
                     <span className="ml-1">{product.rating}</span>
                   </div>
-                  <span className="text-gray-500 mx-2">•</span>
-                  <span className="text-gray-500">{product.reviews} reviews</span>
+                  <span style={{ color: 'var(--text-secondary)' }} className="mx-2">•</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{product.reviews} reviews</span>
                 </div>
                 
                 <h3 className="text-lg font-bold mb-1 group-hover:text-[#e60012] transition-colors">{product.name}</h3>
                 <div className="text-[#e60012] font-medium mb-4">₹{product.price.toLocaleString()}</div>
                 
-                <div className={`mt-2 py-2 px-4 rounded-lg text-center text-white ${product.featured ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} opacity-80 group-hover:opacity-100 transition-opacity`}>
+                <div className={`mt-2 py-2 px-4 rounded-lg text-center text-white ${product.featured ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : ''} opacity-80 group-hover:opacity-100 transition-opacity`}
+                  style={!product.featured ? { background: 'var(--panel-gray)' } : {}}
+                >
                   View Details
                 </div>
               </div>
@@ -188,7 +218,8 @@ export default function Shop() {
         <div className="mt-12 text-center">
           <Link 
             href="/spare-parts" 
-            className="inline-block bg-transparent border-2 border-[#e60012] text-white hover:bg-[#e60012] px-6 py-3 rounded-full transition-colors duration-300"
+            className="inline-block bg-transparent border-2 border-[#e60012] hover:bg-[#e60012] px-6 py-3 rounded-full transition-colors duration-300"
+            style={{ color: 'var(--text-main)' }}
           >
             Browse All Spare Parts
           </Link>

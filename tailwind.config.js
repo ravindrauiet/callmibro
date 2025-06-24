@@ -8,9 +8,13 @@ module.exports = {
     extend: {
       colors: {
         'accent': '#e60012',
-        'panel-dark': '#111',
-        'panel-charcoal': '#1a1a1a',
-        'panel-gray': '#222',
+        'panel-dark': 'var(--panel-dark)',
+        'panel-charcoal': 'var(--panel-charcoal)',
+        'panel-gray': 'var(--panel-gray)',
+        'text-main': 'var(--text-main)',
+        'text-secondary': 'var(--text-secondary)',
+        'bg-color': 'var(--bg-color)',
+        'border-color': 'var(--border-color)',
       },
     },
   },

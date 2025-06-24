@@ -3,9 +3,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false)
+  const { isDarkMode } = useTheme()
   
   useEffect(() => {
     setIsVisible(true)
@@ -18,7 +20,9 @@ export default function Hero() {
   ]
 
   return (
-    <section className="min-h-[90vh] bg-gradient-to-r from-black to-[#111] relative overflow-hidden">
+    <section className="min-h-[90vh] relative overflow-hidden" style={{ 
+      background: isDarkMode ? 'linear-gradient(to right, var(--bg-color), var(--panel-dark))' : 'linear-gradient(to right, var(--bg-color), var(--panel-charcoal))'
+    }}>
       {/* Animated background elements */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-20 left-10 w-40 h-40 rounded-full bg-[#e60012]/10 blur-3xl"></div>
@@ -39,12 +43,12 @@ export default function Hero() {
           </div>
           
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-            <span className="text-white">Expert Tech Repair</span>
+            <span>Expert Tech Repair</span>
             <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">At Your Doorstep</span>
           </h1>
           
-          <p className="text-gray-300 mb-8 text-base sm:text-lg max-w-lg">
+          <p className="mb-8 text-base sm:text-lg max-w-lg" style={{ color: 'var(--text-secondary)' }}>
             Book certified technicians for same-day repairs or browse our catalog of genuine spare parts with guaranteed quality and fast delivery.
           </p>
           
@@ -61,7 +65,15 @@ export default function Hero() {
             
             <Link 
               href="/spare-parts" 
-              className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-full hover:bg-white hover:text-[#e60012] transition-colors duration-300 font-medium text-base"
+              className="bg-transparent border-2 px-8 py-3 rounded-full transition-colors duration-300 font-medium text-base"
+              style={{ 
+                borderColor: 'var(--text-main)', 
+                color: 'var(--text-main)',
+                ':hover': {
+                  backgroundColor: 'var(--text-main)',
+                  color: isDarkMode ? 'var(--bg-color)' : 'var(--text-main)'
+                }
+              }}
             >
               Browse Parts
             </Link>
@@ -71,13 +83,15 @@ export default function Hero() {
           <div className="mt-10 flex items-center">
             <div className="mr-4 flex -space-x-2">
               {[1, 2, 3, 4].map((item) => (
-                <div key={item} className="w-8 h-8 rounded-full bg-[#e60012] border-2 border-black flex items-center justify-center text-xs font-bold text-white">
+                <div key={item} className="w-8 h-8 rounded-full bg-[#e60012] border-2 flex items-center justify-center text-xs font-bold text-white"
+                  style={{ borderColor: 'var(--bg-color)' }}
+                >
                   {item}
                 </div>
               ))}
             </div>
-            <p className="text-gray-400 text-sm">
-              <span className="text-white font-medium">500+</span> expert technicians available
+            <p style={{ color: 'var(--text-secondary)' }} className="text-sm">
+              <span style={{ color: 'var(--text-main)' }} className="font-medium">500+</span> expert technicians available
             </p>
           </div>
         </div>
@@ -144,10 +158,15 @@ export default function Hero() {
       </div>
       
       {/* Bottom scrolling cities bar */}
-      <div className="absolute bottom-0 left-0 right-0 bg-[#111] bg-opacity-80 backdrop-blur-sm border-t border-[#222] py-3">
+      <div className="absolute bottom-0 left-0 right-0 backdrop-blur-sm border-t py-3" 
+        style={{ 
+          backgroundColor: 'var(--panel-dark)', 
+          borderColor: 'var(--border-color)'
+        }}
+      >
         <div className="flex space-x-8 animate-scroll">
           {[...cities, ...cities].map((city, index) => (
-            <span key={index} className="text-gray-400 text-sm whitespace-nowrap font-medium">
+            <span key={index} style={{ color: 'var(--text-secondary)' }} className="text-sm whitespace-nowrap font-medium">
               <span className="text-[#e60012]">•</span> Available in {city}
             </span>
           ))}

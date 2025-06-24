@@ -2,9 +2,11 @@
 
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ExpertsBenefits() {
   const [isVisible, setIsVisible] = useState(false)
+  const { isDarkMode } = useTheme()
   
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -57,7 +59,11 @@ export default function ExpertsBenefits() {
   return (
     <section id="experts-benefits" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden">
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#111] to-black -z-10"></div>
+      <div className="absolute inset-0 -z-10" style={{ 
+        background: isDarkMode 
+          ? 'linear-gradient(to bottom, var(--panel-dark), var(--bg-color))' 
+          : 'linear-gradient(to bottom, var(--panel-charcoal), var(--bg-color))'
+      }}></div>
       <div className="absolute top-0 right-1/4 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
       
@@ -68,13 +74,16 @@ export default function ExpertsBenefits() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
+          <div className="inline-block px-4 py-1 rounded-full mb-4 border" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
             <span className="text-[#e60012] text-sm font-medium">Service Excellence</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             Why Choose Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Experts</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p style={{ color: 'var(--text-secondary)' }} className="max-w-2xl mx-auto">
             Experience premium service quality with our team of experienced technicians and industry-leading standards
           </p>
         </div>
@@ -83,10 +92,14 @@ export default function ExpertsBenefits() {
           {benefits.map((benefit, index) => (
             <div 
               key={benefit.id} 
-              className={`bg-[#111] border border-[#222] rounded-xl p-6 transform transition-all duration-700 hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 ${
+              className={`rounded-xl p-6 transform transition-all duration-700 hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-              }`}
-              style={{ transitionDelay: `${index * 100 + 500}ms` }}
+              } border`}
+              style={{ 
+                transitionDelay: `${index * 100 + 500}ms`,
+                background: 'var(--panel-dark)',
+                borderColor: 'var(--border-color)'
+              }}
             >
               <div className={`w-16 h-16 mb-6 p-3 rounded-lg bg-gradient-to-br ${benefit.color} flex items-center justify-center transform hover:scale-110 transition-transform duration-300`}>
                 <div className="brightness-0 invert">
@@ -101,7 +114,7 @@ export default function ExpertsBenefits() {
               </div>
               
               <h3 className="text-xl font-bold mb-3">{benefit.title}</h3>
-              <p className="text-gray-400 text-sm">{benefit.description}</p>
+              <p style={{ color: 'var(--text-secondary)' }} className="text-sm">{benefit.description}</p>
             </div>
           ))}
         </div>

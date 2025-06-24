@@ -3,9 +3,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function Services() {
   const [isVisible, setIsVisible] = useState(false)
+  const { isDarkMode } = useTheme()
   
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -58,7 +60,11 @@ export default function Services() {
   return (
     <section id="services-section" className="relative py-20 sm:py-28 px-4 sm:px-8 overflow-hidden">
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black to-[#111] -z-10"></div>
+      <div className="absolute inset-0 -z-10" style={{ 
+        background: isDarkMode 
+          ? 'linear-gradient(to bottom, var(--bg-color), var(--panel-dark))' 
+          : 'linear-gradient(to bottom, var(--bg-color), var(--panel-charcoal))'
+      }}></div>
       <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
       <div className="absolute -bottom-32 -left-32 w-72 h-72 bg-[#e60012]/5 rounded-full blur-3xl"></div>
       
@@ -69,13 +75,16 @@ export default function Services() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
+          <div className="inline-block px-4 py-1 rounded-full mb-4 border" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
             <span className="text-[#e60012] text-sm font-medium">Expert Solutions</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             Our Premium <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Repair Categories</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p style={{ color: 'var(--text-secondary)' }} className="max-w-2xl mx-auto">
             Choose from our wide range of professional repair services designed for quality and reliability
           </p>
         </div>
@@ -86,12 +95,18 @@ export default function Services() {
             <Link 
               href={service.url} 
               key={index}
-              className={`group bg-[#111] border border-[#222] hover:border-[#e60012] p-6 rounded-xl transition-all hover:shadow-lg hover:shadow-[#e60012]/10 transform ${
+              className={`group p-6 rounded-xl transition-all hover:shadow-lg hover:shadow-[#e60012]/10 transform ${
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-              } transition-all duration-700 delay-${index * 100}`}
-              style={{ transitionDelay: `${index * 100}ms` }}
+              } transition-all duration-700 border hover:border-[#e60012]`}
+              style={{ 
+                transitionDelay: `${index * 100}ms`,
+                background: 'var(--panel-dark)',
+                borderColor: 'var(--border-color)'
+              }}
             >
-              <div className={`w-16 h-16 mb-6 p-3 rounded-lg ${service.primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}>
+              <div className={`w-16 h-16 mb-6 p-3 rounded-lg ${service.primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : ''} flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}
+                style={!service.primary ? { background: 'var(--panel-gray)' } : {}}
+              >
                 <Image 
                   src={service.icon} 
                   alt={service.title} 
@@ -101,7 +116,7 @@ export default function Services() {
                 />
               </div>
               <h3 className="text-xl font-bold mb-2 group-hover:text-[#e60012] transition-colors">{service.title}</h3>
-              <p className="text-gray-400 text-sm">{service.description}</p>
+              <p style={{ color: 'var(--text-secondary)' }} className="text-sm">{service.description}</p>
               
               <div className="mt-6 flex items-center text-sm text-[#e60012] font-medium opacity-0 group-hover:opacity-100 transform group-hover:translate-x-0 -translate-x-2 transition-all duration-300">
                 <span>Learn more</span>

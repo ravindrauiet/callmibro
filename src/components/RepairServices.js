@@ -3,6 +3,7 @@
 import ServiceCard from './ServiceCard'
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import { useTheme } from '@/contexts/ThemeContext'
 
 // Service card data - moved outside the component to prevent recreation on each render
 const servicesData = [
@@ -68,6 +69,7 @@ export default function RepairServices() {
   const [location, setLocation] = useState('Location')
   const [filteredServices, setFilteredServices] = useState([])
   const [isVisible, setIsVisible] = useState(false)
+  const { isDarkMode } = useTheme()
   
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -119,7 +121,11 @@ export default function RepairServices() {
   return (
     <section id="repair-services-section" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden">
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black to-[#111] -z-10"></div>
+      <div className="absolute inset-0 -z-10" style={{ 
+        background: isDarkMode 
+          ? 'linear-gradient(to bottom, var(--bg-color), var(--panel-dark))' 
+          : 'linear-gradient(to bottom, var(--bg-color), var(--panel-charcoal))'
+      }}></div>
       <div className="absolute top-0 left-1/4 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
       
@@ -133,23 +139,32 @@ export default function RepairServices() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             Find Your <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Repair Service</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p style={{ color: 'var(--text-secondary)' }} className="max-w-2xl mx-auto">
             Select your device category and get connected with our professional technicians
           </p>
         </div>
 
         {/* Filter Section */}
         <div 
-          className={`bg-[#111] rounded-xl p-6 md:p-8 mb-12 border border-[#222] shadow-lg transform transition-all duration-700 delay-300 ${
+          className={`rounded-xl p-6 md:p-8 mb-12 border shadow-lg transform transition-all duration-700 delay-300 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
+          style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex flex-col">
-              <label className="text-sm text-gray-400 mb-2 font-medium">Device Category</label>
+              <label style={{ color: 'var(--text-secondary)' }} className="text-sm mb-2 font-medium">Device Category</label>
               <div className="relative">
                 <select 
-                  className="w-full appearance-none bg-black border border-[#333] rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012]"
+                  className="w-full appearance-none border rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012]"
+                  style={{ 
+                    background: 'var(--bg-color)', 
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)' 
+                  }}
                   value={deviceCategory}
                   onChange={handleCategoryChange}
                 >
@@ -157,7 +172,7 @@ export default function RepairServices() {
                     <option key={index} value={category}>{category}</option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3" style={{ color: 'var(--text-secondary)' }}>
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path>
                   </svg>
@@ -166,10 +181,15 @@ export default function RepairServices() {
             </div>
 
             <div className="flex flex-col">
-              <label className="text-sm text-gray-400 mb-2 font-medium">Service Type</label>
+              <label style={{ color: 'var(--text-secondary)' }} className="text-sm mb-2 font-medium">Service Type</label>
               <div className="relative">
                 <select 
-                  className="w-full appearance-none bg-black border border-[#333] rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012]"
+                  className="w-full appearance-none border rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012]"
+                  style={{ 
+                    background: 'var(--bg-color)', 
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)' 
+                  }}
                   value={subCategory}
                   onChange={(e) => setSubCategory(e.target.value)}
                 >
@@ -177,7 +197,7 @@ export default function RepairServices() {
                     <option key={index} value={subCat}>{subCat}</option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3" style={{ color: 'var(--text-secondary)' }}>
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path>
                   </svg>
@@ -186,10 +206,15 @@ export default function RepairServices() {
             </div>
 
             <div className="flex flex-col">
-              <label className="text-sm text-gray-400 mb-2 font-medium">Your Location</label>
+              <label style={{ color: 'var(--text-secondary)' }} className="text-sm mb-2 font-medium">Your Location</label>
               <div className="relative">
                 <select 
-                  className="w-full appearance-none bg-black border border-[#333] rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012]"
+                  className="w-full appearance-none border rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012]"
+                  style={{ 
+                    background: 'var(--bg-color)', 
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)' 
+                  }}
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                 >
@@ -200,7 +225,7 @@ export default function RepairServices() {
                   <option>Hyderabad</option>
                   <option>Chennai</option>
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3" style={{ color: 'var(--text-secondary)' }}>
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path>
                   </svg>
@@ -231,14 +256,18 @@ export default function RepairServices() {
             ))
           ) : (
             <div 
-              className={`col-span-1 sm:col-span-2 lg:col-span-3 bg-[#111] border border-[#222] rounded-xl p-12 text-center transform transition-all duration-700 delay-600 ${
+              className={`col-span-1 sm:col-span-2 lg:col-span-3 rounded-xl p-12 text-center transform transition-all duration-700 delay-600 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-              }`}
+              } border`}
+              style={{ 
+                background: 'var(--panel-dark)', 
+                borderColor: 'var(--border-color)' 
+              }}
             >
-              <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg style={{ color: 'var(--text-secondary)' }} className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              <p className="text-gray-400 text-lg mb-4">No services match your filter criteria.</p>
+              <p style={{ color: 'var(--text-secondary)' }} className="text-lg mb-4">No services match your filter criteria.</p>
               <button 
                 onClick={() => {
                   setDeviceCategory('Device Category');
@@ -250,6 +279,18 @@ export default function RepairServices() {
               </button>
             </div>
           )}
+        </div>
+
+        {/* View All Button */}
+        <div className={`mt-12 text-center transform transition-all duration-700 delay-1000 ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
+          <Link 
+            href="/services" 
+            className="inline-block bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white px-8 py-3 rounded-full hover:shadow-lg hover:shadow-[#e60012]/20 transition-all font-medium"
+          >
+            View All Services
+          </Link>
         </div>
       </div>
     </section>

@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function Testimonial() {
   const [isVisible, setIsVisible] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [animating, setAnimating] = useState(false)
   const intervalRef = useRef(null)
+  const { isDarkMode } = useTheme()
   
   // Enhanced testimonials with ratings, profile images, and service types
   const testimonials = [
@@ -127,7 +129,7 @@ export default function Testimonial() {
     const emptyStars = 5 - Math.ceil(rating)
     for (let i = 0; i < emptyStars; i++) {
       stars.push(
-        <svg key={`empty-star-${i}`} className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+        <svg key={`empty-star-${i}`} className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} fill="currentColor" viewBox="0 0 20 20">
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path>
         </svg>
       )
@@ -139,7 +141,11 @@ export default function Testimonial() {
   return (
     <section id="testimonials-section" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden">
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black to-[#111] -z-10"></div>
+      <div className="absolute inset-0 -z-10" style={{ 
+        background: isDarkMode 
+          ? 'linear-gradient(to bottom, var(--bg-color), var(--panel-dark))' 
+          : 'linear-gradient(to bottom, var(--bg-color), var(--panel-charcoal))'
+      }}></div>
       <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
       <div className="absolute -bottom-32 -left-32 w-72 h-72 bg-[#e60012]/5 rounded-full blur-3xl"></div>
       
@@ -150,13 +156,16 @@ export default function Testimonial() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
+          <div className="inline-block px-4 py-1 rounded-full mb-4 border" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
             <span className="text-[#e60012] text-sm font-medium">Testimonials</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             What Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Customers Say</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p style={{ color: 'var(--text-secondary)' }} className="max-w-2xl mx-auto">
             Don't just take our word for it — hear from our satisfied customers across India
           </p>
         </div>
@@ -168,7 +177,10 @@ export default function Testimonial() {
           }`}
         >
           {/* Main Testimonial Card */}
-          <div className="bg-[#111] border border-[#222] rounded-xl overflow-hidden shadow-xl transition-all">
+          <div className="rounded-xl overflow-hidden shadow-xl transition-all border" style={{ 
+            background: 'var(--panel-dark)', 
+            borderColor: 'var(--border-color)' 
+          }}>
             <div className="relative">
               {/* Background Gradient */}
               <div className="absolute inset-0 bg-gradient-to-r from-[#e60012]/10 to-[#ff6b6b]/10"></div>
@@ -178,8 +190,10 @@ export default function Testimonial() {
                 <div className="md:flex items-center gap-8">
                   {/* Profile Section */}
                   <div className="mb-8 md:mb-0 flex flex-col items-center md:items-start">
-                    <div className={`w-20 h-20 rounded-full ${testimonials[activeIndex].primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} p-1 mb-4`}>
-                      <div className="bg-black rounded-full w-full h-full flex items-center justify-center overflow-hidden">
+                    <div className={`w-20 h-20 rounded-full ${testimonials[activeIndex].primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : ''} p-1 mb-4`}
+                      style={!testimonials[activeIndex].primary ? { background: 'var(--panel-gray)' } : {}}
+                    >
+                      <div className="rounded-full w-full h-full flex items-center justify-center overflow-hidden" style={{ background: 'var(--bg-color)' }}>
                         <Image 
                           src={testimonials[activeIndex].image} 
                           alt={testimonials[activeIndex].name}
@@ -190,7 +204,7 @@ export default function Testimonial() {
                       </div>
                     </div>
                     <h4 className="text-xl font-bold">{testimonials[activeIndex].name}</h4>
-                    <p className="text-gray-400 text-sm">{testimonials[activeIndex].location}</p>
+                    <p style={{ color: 'var(--text-secondary)' }} className="text-sm">{testimonials[activeIndex].location}</p>
                     
                     <div className="flex mt-3">
                       {renderRating(testimonials[activeIndex].rating)}
@@ -209,7 +223,7 @@ export default function Testimonial() {
                       {testimonials[activeIndex].text}
                     </div>
                     
-                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#222] text-sm">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full text-sm" style={{ background: 'var(--panel-gray)' }}>
                       <span className="inline-block w-2 h-2 rounded-full bg-[#e60012] mr-2"></span>
                       {testimonials[activeIndex].serviceName}
                     </div>
@@ -228,7 +242,8 @@ export default function Testimonial() {
                   <button
                     key={index}
                     onClick={() => setActiveIndex(index)}
-                    className={`transition-all ${index === activeIndex ? 'w-8 h-2 bg-[#e60012]' : 'w-2 h-2 bg-[#444]'} rounded-full`}
+                    className={`transition-all ${index === activeIndex ? 'w-8 h-2 bg-[#e60012]' : 'w-2 h-2'} rounded-full`}
+                    style={index !== activeIndex ? { background: 'var(--panel-gray)' } : {}}
                     aria-label={`View testimonial ${index + 1}`}
                   />
                 ))}
@@ -238,7 +253,11 @@ export default function Testimonial() {
             <div className="flex gap-3">
               <button 
                 onClick={prevTestimonial}
-                className="w-10 h-10 rounded-full border border-[#333] flex items-center justify-center text-gray-400 hover:border-[#e60012] hover:text-[#e60012] transition-colors"
+                className="w-10 h-10 rounded-full border flex items-center justify-center hover:border-[#e60012] hover:text-[#e60012] transition-colors"
+                style={{ 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-secondary)'
+                }}
                 aria-label="Previous testimonial"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -247,7 +266,11 @@ export default function Testimonial() {
               </button>
               <button 
                 onClick={nextTestimonial}
-                className="w-10 h-10 rounded-full border border-[#333] flex items-center justify-center text-gray-400 hover:border-[#e60012] hover:text-[#e60012] transition-colors"
+                className="w-10 h-10 rounded-full border flex items-center justify-center hover:border-[#e60012] hover:text-[#e60012] transition-colors"
+                style={{ 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-secondary)'
+                }}
                 aria-label="Next testimonial"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

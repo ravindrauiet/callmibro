@@ -2,17 +2,24 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ServiceCard({ title, description, icon, color = "from-[#e60012] to-[#ff6b6b]" }) {
   // Create URL-friendly version of title for the link
   const urlTitle = title.toLowerCase().replace(/ /g, '-')
   const targetUrl = `/services/${urlTitle}`
+  const { isDarkMode } = useTheme()
   
   return (
-    <div className="group bg-[#111] rounded-xl h-full border border-[#222] hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all duration-300 overflow-hidden flex flex-col">
+    <div className="group rounded-xl h-full border hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all duration-300 overflow-hidden flex flex-col"
+      style={{ 
+        background: 'var(--panel-dark)',
+        borderColor: 'var(--border-color)'
+      }}
+    >
       <div className="p-4 sm:p-5 md:p-6 flex-1 flex flex-col">
         {/* Icon */}
-        <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mb-4 sm:mb-5 md:mb-6 p-2 sm:p-3 rounded-lg bg-gradient-to-br  flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}>
+        <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mb-4 sm:mb-5 md:mb-6 p-2 sm:p-3 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}>
           <Image 
             src={icon} 
             alt={`${title} icon`}
@@ -26,14 +33,17 @@ export default function ServiceCard({ title, description, icon, color = "from-[#
         <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-[#e60012] transition-colors">
           {title}
         </h3>
-        <p className="text-sm text-gray-400 mb-4 sm:mb-6 flex-1">
+        <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-4 sm:mb-6 flex-1">
           {description}
         </p>
         
         {/* Action Button - Link component with improved accessibility */}
         <Link 
           href={targetUrl}
-          className={`mt-auto bg-gradient-to-r ${color} text-white px-4 py-3 rounded-lg font-medium transform transition-all opacity-90 hover:opacity-100 focus:opacity-100 hover:shadow-lg focus:shadow-lg hover:shadow-[#e60012]/20 focus:shadow-[#e60012]/20 w-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 focus:ring-offset-[#111]`}
+          className={`mt-auto bg-gradient-to-r ${color} text-white px-4 py-3 rounded-lg font-medium transform transition-all opacity-90 hover:opacity-100 focus:opacity-100 hover:shadow-lg focus:shadow-lg hover:shadow-[#e60012]/20 focus:shadow-[#e60012]/20 w-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2`}
+          style={{ 
+            '--tw-ring-offset-color': isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)'
+          }}
           aria-label={`Book ${title} service`}
         >
           <span>Book Service</span>

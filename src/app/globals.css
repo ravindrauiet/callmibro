@@ -13,9 +13,41 @@
   --transition: 0.3s;
 }
 
+/* Dark mode - default */
+.dark-mode {
+  --bg-color: #000;
+  --accent-color: #e60012;
+  --text-main: #fff;
+  --text-secondary: #aaa;
+  --panel-dark: #111;
+  --panel-charcoal: #1a1a1a;
+  --panel-gray: #222;
+  --border-color: #333;
+  --panel-dark-accent: #2a1a1a;
+  --panel-charcoal-accent: #331a1a;
+  --accent-transparent: rgba(230, 0, 18, 0.3);
+}
+
+/* Light mode */
+.light-mode {
+  --bg-color: #f5f5f5;
+  --accent-color: #e60012;
+  --text-main: #333;
+  --text-secondary: #666;
+  --panel-dark: #fff;
+  --panel-charcoal: #f0f0f0;
+  --panel-gray: #e0e0e0;
+  --border-color: #ddd;
+  --panel-dark-accent: #fff0f0;
+  --panel-charcoal-accent: #ffeeee;
+  --accent-transparent: rgba(230, 0, 18, 0.15);
+}
+
 @layer base {
   body {
-    @apply bg-black text-white;
+    @apply transition-colors duration-300;
+    background-color: var(--bg-color);
+    color: var(--text-main);
   }
   
   a {

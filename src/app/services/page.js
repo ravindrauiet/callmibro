@@ -7,9 +7,11 @@ import ExpertsBenefits from '../../components/ExpertsBenefits'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ServicesPage() {
   const [isVisible, setIsVisible] = useState(false)
+  const { isDarkMode } = useTheme()
   
   useEffect(() => {
     setIsVisible(true)
@@ -25,11 +27,11 @@ export default function ServicesPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen">
       <Header activePage="services" />
       
       {/* Hero Section with 3D elements and particles */}
-      <section className="relative pt-24 pb-32 px-4 sm:px-8 overflow-hidden">
+      <section className="relative pt-24 pb-32 px-4 sm:px-8 overflow-hidden" style={{ background: 'var(--bg-color)' }}>
         {/* Animated background elements */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[#e60012]/5 rounded-full blur-3xl animate-pulse"></div>
@@ -46,7 +48,12 @@ export default function ServicesPage() {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
             }`}
           >
-            <div className="inline-block bg-gradient-to-r from-[#111] to-[#181818] px-4 py-1 rounded-full mb-4 border border-[#333] backdrop-blur-sm">
+            <div className="inline-block px-4 py-1 rounded-full mb-4 border backdrop-blur-sm" 
+              style={{ 
+                background: isDarkMode ? 'linear-gradient(to right, var(--panel-dark), var(--panel-charcoal))' : 'var(--panel-charcoal)',
+                borderColor: 'var(--border-color)' 
+              }}
+            >
               <span className="text-[#e60012] text-sm font-medium">Premium Repair Solutions</span>
             </div>
             
@@ -57,7 +64,7 @@ export default function ServicesPage() {
               </span>
             </h1>
             
-            <p className="text-gray-400 text-lg mb-10 text-center max-w-3xl">
+            <p className="text-lg mb-10 text-center max-w-3xl" style={{ color: 'var(--text-secondary)' }}>
               Find the perfect repair service for your device and get it fixed by certified experts in your area with our quick and reliable solutions
             </p>
             
@@ -76,8 +83,19 @@ export default function ServicesPage() {
               </Link>
               
               <Link href="#service-pricing" className="relative group">
-                <span className="absolute inset-0 bg-white/5 rounded-full transform transition-all group-hover:bg-white/10"></span>
-                <span className="relative block bg-transparent border border-white/20 text-white px-8 py-4 rounded-full font-medium transform transition-all group-hover:border-[#e60012]">
+                <span className="absolute inset-0 rounded-full transform transition-all" 
+                  style={{ 
+                    backgroundColor: 'var(--text-main)', 
+                    opacity: isDarkMode ? 0.05 : 0.1
+                  }}
+                ></span>
+                <span className="relative block border px-8 py-4 rounded-full font-medium transform transition-all"
+                  style={{ 
+                    borderColor: 'var(--text-main)',
+                    opacity: 0.8,
+                    color: 'var(--text-main)'
+                  }}
+                >
                   View Pricing
                 </span>
               </Link>
@@ -91,8 +109,14 @@ export default function ServicesPage() {
                   <Link 
                     key={index}
                     href={`#${category.name.toLowerCase().replace(/\s+/g, '-')}`}
-                    className="bg-gradient-to-br from-[#111] to-[#191919] border border-[#333] rounded-xl p-4 flex flex-col items-center transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 hover:scale-105 w-[120px] h-[120px]"
-                    style={{ transitionDelay: `${index * 50}ms` }}
+                    className="border rounded-xl p-4 flex flex-col items-center transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 hover:scale-105 w-[120px] h-[120px]"
+                    style={{ 
+                      background: isDarkMode 
+                        ? 'linear-gradient(to bottom right, var(--panel-dark), var(--panel-charcoal))' 
+                        : 'linear-gradient(to bottom right, var(--panel-charcoal), var(--panel-gray))',
+                      borderColor: 'var(--border-color)',
+                      transitionDelay: `${index * 50}ms`
+                    }}
                   >
                     <div className={`w-12 h-12 mb-3 rounded-lg bg-gradient-to-br ${category.color} flex items-center justify-center`}>
                       <Image 
@@ -119,8 +143,12 @@ export default function ServicesPage() {
               ].map((stat, index) => (
                 <div 
                   key={index}
-                  className="bg-gradient-to-br from-[#111] to-[#191919] border border-[#222] rounded-xl p-5 text-center transform transition-all duration-700 hover:border-[#333] group"
-                  style={{ transitionDelay: `${index * 100 + 500}ms` }}
+                  className="rounded-xl p-5 text-center transform transition-all duration-700 hover:border-[#333] group border"
+                  style={{ 
+                    background: 'linear-gradient(to bottom right, var(--panel-dark), var(--panel-charcoal))',
+                    borderColor: 'var(--border-color)',
+                    transitionDelay: `${index * 100 + 500}ms` 
+                  }}
                 >
                   <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#e60012]/10 flex items-center justify-center group-hover:bg-[#e60012]/20 transition-all">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -130,7 +158,7 @@ export default function ServicesPage() {
                   <div className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">
                     {stat.number}
                   </div>
-                  <div className="text-gray-400 text-sm mt-1">{stat.text}</div>
+                  <div style={{ color: 'var(--text-secondary)' }} className="text-sm mt-1">{stat.text}</div>
                 </div>
               ))}
             </div>
@@ -145,7 +173,11 @@ export default function ServicesPage() {
       <ExpertsBenefits />
       
       {/* New Section: Service Process */}
-      <section className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden bg-gradient-to-b from-black to-[#111]">
+      <section className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden" style={{ 
+        background: isDarkMode 
+          ? 'linear-gradient(to bottom, var(--bg-color), var(--panel-dark))' 
+          : 'linear-gradient(to bottom, var(--bg-color), var(--panel-charcoal))'
+      }}>
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-[#e60012]/5 rounded-full blur-3xl"></div>
@@ -153,13 +185,16 @@ export default function ServicesPage() {
         
         <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center mb-16">
-            <div className="inline-block bg-[#111] px-4 py-1 rounded-full mb-4 border border-[#333]">
+            <div className="inline-block px-4 py-1 rounded-full mb-4 border" style={{ 
+              background: 'var(--panel-dark)', 
+              borderColor: 'var(--border-color)' 
+            }}>
               <span className="text-[#e60012] text-sm font-medium">Simple & Fast</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
               How Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Service Works</span>
             </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
+            <p style={{ color: 'var(--text-secondary)' }} className="max-w-2xl mx-auto">
               We've simplified the repair process to get your devices fixed quickly and efficiently
             </p>
           </div>
@@ -169,11 +204,14 @@ export default function ServicesPage() {
             <div className="hidden md:block absolute top-24 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#e60012]/30 to-transparent"></div>
             
             {/* Step 1 */}
-            <div className="bg-[#111] border border-[#222] rounded-xl p-6 relative hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all group">
+            <div className="rounded-xl p-6 relative hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all group border" style={{ 
+              background: 'var(--panel-dark)', 
+              borderColor: 'var(--border-color)' 
+            }}>
               <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white font-bold text-lg z-10">1</div>
               <div className="pt-8 text-center">
                 <h3 className="text-xl font-bold mb-4">Book a Service</h3>
-                <p className="text-gray-400 mb-4">Select your device, issue, and preferred time slot for the service</p>
+                <p style={{ color: 'var(--text-secondary)' }} className="mb-4">Select your device, issue, and preferred time slot for the service</p>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-[#e60012] opacity-75 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -181,11 +219,14 @@ export default function ServicesPage() {
             </div>
             
             {/* Step 2 */}
-            <div className="bg-[#111] border border-[#222] rounded-xl p-6 relative hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all group">
+            <div className="rounded-xl p-6 relative hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all group border" style={{ 
+              background: 'var(--panel-dark)', 
+              borderColor: 'var(--border-color)' 
+            }}>
               <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white font-bold text-lg z-10">2</div>
               <div className="pt-8 text-center">
                 <h3 className="text-xl font-bold mb-4">Expert Diagnosis</h3>
-                <p className="text-gray-400 mb-4">Our certified technician will diagnose the issue and provide a quote</p>
+                <p style={{ color: 'var(--text-secondary)' }} className="mb-4">Our certified technician will diagnose the issue and provide a quote</p>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-[#e60012] opacity-75 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
@@ -193,11 +234,14 @@ export default function ServicesPage() {
             </div>
             
             {/* Step 3 */}
-            <div className="bg-[#111] border border-[#222] rounded-xl p-6 relative hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all group">
+            <div className="rounded-xl p-6 relative hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transition-all group border" style={{ 
+              background: 'var(--panel-dark)', 
+              borderColor: 'var(--border-color)' 
+            }}>
               <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white font-bold text-lg z-10">3</div>
               <div className="pt-8 text-center">
                 <h3 className="text-xl font-bold mb-4">Quick Repair</h3>
-                <p className="text-gray-400 mb-4">Get your device fixed and back in your hands in no time</p>
+                <p style={{ color: 'var(--text-secondary)' }} className="mb-4">Get your device fixed and back in your hands in no time</p>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-[#e60012] opacity-75 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
                 </svg>
@@ -215,30 +259,36 @@ export default function ServicesPage() {
       </section>
       
       {/* Testimonials Section */}
-      <section id="service-pricing" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden bg-[#111]">
+      <section id="service-pricing" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden" style={{ background: 'var(--bg-color)' }}>
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <div className="inline-block bg-[#191919] px-4 py-1 rounded-full mb-4 border border-[#333]">
+            <div className="inline-block px-4 py-1 rounded-full mb-4 border" style={{ 
+              background: 'var(--panel-dark)', 
+              borderColor: 'var(--border-color)' 
+            }}>
               <span className="text-[#e60012] text-sm font-medium">Transparent Pricing</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
               Service <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b]">Pricing</span>
             </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
+            <p style={{ color: 'var(--text-secondary)' }} className="max-w-2xl mx-auto">
               We offer competitive pricing with no hidden fees
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Basic Service */}
-            <div className="bg-gradient-to-br from-[#0d0d0d] to-[#151515] border border-[#222] rounded-xl overflow-hidden transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10">
-              <div className="p-6 border-b border-[#222]">
+            <div className="border rounded-xl overflow-hidden transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10" style={{ 
+              background: 'linear-gradient(to bottom right, var(--panel-dark), var(--panel-charcoal))',
+              borderColor: 'var(--border-color)'
+            }}>
+              <div className="p-6 border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <h3 className="text-xl font-bold mb-2">Basic Diagnostics</h3>
                 <div className="flex items-end gap-2">
                   <span className="text-3xl font-bold">₹499</span>
-                  <span className="text-gray-400 text-sm mb-1">onwards</span>
+                  <span style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">onwards</span>
                 </div>
-                <p className="text-gray-400 text-sm mt-2">Perfect for simple issues and quick fixes</p>
+                <p style={{ color: 'var(--text-secondary)' }} className="text-sm mt-2">Perfect for simple issues and quick fixes</p>
               </div>
               <div className="p-6">
                 <ul className="space-y-3">
@@ -247,7 +297,7 @@ export default function ServicesPage() {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#e60012] mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
-                      <span className="text-sm text-gray-300">{item}</span>
+                      <span className="text-sm" style={{ color: 'var(--text-main)' }}>{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -258,17 +308,19 @@ export default function ServicesPage() {
             </div>
             
             {/* Standard Service */}
-            <div className="bg-gradient-to-br from-[#0d0d0d] to-[#151515] border border-[#e60012] rounded-xl overflow-hidden transition-all hover:shadow-lg hover:shadow-[#e60012]/20 relative transform hover:scale-[1.02]">
+            <div className="border border-[#e60012] rounded-xl overflow-hidden transition-all hover:shadow-lg hover:shadow-[#e60012]/20 relative transform hover:scale-[1.02]" style={{ 
+              background: 'linear-gradient(to bottom right, var(--panel-dark), var(--panel-charcoal))'
+            }}>
               <div className="absolute top-0 right-0">
                 <div className="bg-[#e60012] text-white text-xs font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
               </div>
-              <div className="p-6 border-b border-[#222]">
+              <div className="p-6 border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <h3 className="text-xl font-bold mb-2">Standard Repair</h3>
                 <div className="flex items-end gap-2">
                   <span className="text-3xl font-bold">₹999</span>
-                  <span className="text-gray-400 text-sm mb-1">onwards</span>
+                  <span style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">onwards</span>
                 </div>
-                <p className="text-gray-400 text-sm mt-2">Comprehensive repair for most common issues</p>
+                <p style={{ color: 'var(--text-secondary)' }} className="text-sm mt-2">Comprehensive repair for most common issues</p>
               </div>
               <div className="p-6">
                 <ul className="space-y-3">
@@ -277,7 +329,7 @@ export default function ServicesPage() {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#e60012] mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
-                      <span className="text-sm text-gray-300">{item}</span>
+                      <span className="text-sm" style={{ color: 'var(--text-main)' }}>{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -288,14 +340,17 @@ export default function ServicesPage() {
             </div>
             
             {/* Premium Service */}
-            <div className="bg-gradient-to-br from-[#0d0d0d] to-[#151515] border border-[#222] rounded-xl overflow-hidden transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10">
-              <div className="p-6 border-b border-[#222]">
+            <div className="border rounded-xl overflow-hidden transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10" style={{ 
+              background: 'linear-gradient(to bottom right, var(--panel-dark), var(--panel-charcoal))',
+              borderColor: 'var(--border-color)'
+            }}>
+              <div className="p-6 border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <h3 className="text-xl font-bold mb-2">Premium Service</h3>
                 <div className="flex items-end gap-2">
                   <span className="text-3xl font-bold">₹1999</span>
-                  <span className="text-gray-400 text-sm mb-1">onwards</span>
+                  <span style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">onwards</span>
                 </div>
-                <p className="text-gray-400 text-sm mt-2">Complete overhaul and advanced repairs</p>
+                <p style={{ color: 'var(--text-secondary)' }} className="text-sm mt-2">Complete overhaul and advanced repairs</p>
               </div>
               <div className="p-6">
                 <ul className="space-y-3">
@@ -304,7 +359,7 @@ export default function ServicesPage() {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#e60012] mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
-                      <span className="text-sm text-gray-300">{item}</span>
+                      <span className="text-sm" style={{ color: 'var(--text-main)' }}>{item}</span>
                     </li>
                   ))}
                 </ul>

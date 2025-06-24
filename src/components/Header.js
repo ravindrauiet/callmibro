@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import AuthModal from './AuthModal'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { toast } from 'react-hot-toast'
 
 export default function Header({ activePage }) {
@@ -13,6 +14,7 @@ export default function Header({ activePage }) {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   
   const { currentUser, logout, userProfile } = useAuth()
+  const { isDarkMode, toggleTheme } = useTheme()
   
   const userMenuRef = useRef(null)
   const mobileMenuRef = useRef(null)
@@ -116,7 +118,8 @@ export default function Header({ activePage }) {
   return (
     <>
       <header 
-        className={`sticky top-0 w-full bg-black/95 backdrop-blur-sm flex items-center justify-between px-4 md:px-6 lg:px-8 py-3 z-50 transition-all duration-300 ${scrolled ? 'shadow-lg shadow-black/20' : ''}`}
+        className={`sticky top-0 w-full backdrop-blur-sm flex items-center justify-between px-4 md:px-6 lg:px-8 py-3 z-50 transition-all duration-300 ${scrolled ? 'shadow-lg shadow-black/20' : ''}`}
+        style={{ backgroundColor: 'var(--bg-color)', color: 'var(--text-main)' }}
         role="banner"
       >
         <div className="logo flex items-center">
@@ -159,6 +162,23 @@ export default function Header({ activePage }) {
         </nav>
         
         <div className="flex items-center space-x-4">
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 focus:ring-offset-black"
+            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDarkMode ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
+          
           {/* Login button or User menu */}
           {currentUser ? (
             <div className="relative hidden md:block" ref={userMenuRef}>
@@ -176,10 +196,11 @@ export default function Header({ activePage }) {
                   {getUserDisplayName()}
                 </span>
                 <svg 
-                  className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} 
+                  className={`h-4 w-4 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
                   viewBox="0 0 24 24" 
                   stroke="currentColor"
+                  style={{ color: 'var(--text-secondary)' }}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
@@ -188,17 +209,26 @@ export default function Header({ activePage }) {
               {/* User dropdown menu */}
               {userMenuOpen && (
                 <div 
-                  className="absolute right-0 mt-2 w-56 bg-[#111] border border-[#333] rounded-md shadow-lg z-10 animate-fadeIn"
+                  className="absolute right-0 mt-2 w-56 rounded-md shadow-lg z-10 animate-fadeIn"
+                  style={{ 
+                    backgroundColor: 'var(--panel-dark)', 
+                    borderColor: 'var(--border-color)',
+                    borderWidth: '1px'
+                  }}
                   role="menu"
                 >
-                  <div className="p-3 border-b border-[#333]">
+                  <div className="p-3" style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <p className="text-sm font-medium">{userProfile?.name || currentUser.displayName || 'User'}</p>
-                    <p className="text-xs text-gray-400 truncate">{currentUser.email}</p>
+                    <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{currentUser.email}</p>
                   </div>
                   <div className="py-1">
                     <Link 
                       href="/profile" 
                       className="flex items-center px-4 py-2 text-sm hover:bg-[#222] focus:bg-[#222] focus:outline-none transition-colors"
+                      style={{ 
+                        color: 'var(--text-main)',
+                        ':hover': { backgroundColor: 'var(--panel-charcoal)' }
+                      }}
                       role="menuitem"
                       onClick={() => setUserMenuOpen(false)}
                     >
@@ -210,6 +240,10 @@ export default function Header({ activePage }) {
                     <Link 
                       href="/orders" 
                       className="flex items-center px-4 py-2 text-sm hover:bg-[#222] focus:bg-[#222] focus:outline-none transition-colors"
+                      style={{ 
+                        color: 'var(--text-main)',
+                        ':hover': { backgroundColor: 'var(--panel-charcoal)' }
+                      }}
                       role="menuitem"
                       onClick={() => setUserMenuOpen(false)}
                     >
@@ -221,6 +255,9 @@ export default function Header({ activePage }) {
                     <button 
                       onClick={handleLogout}
                       className="flex items-center w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-[#222] focus:bg-[#222] focus:outline-none transition-colors"
+                      style={{ 
+                        ':hover': { backgroundColor: 'var(--panel-charcoal)' }
+                      }}
                       role="menuitem"
                     >
                       <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -247,7 +284,8 @@ export default function Header({ activePage }) {
           
           {/* Mobile menu button */}
           <button 
-            className="md:hidden text-white p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 focus:ring-offset-black"
+            className="md:hidden p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 focus:ring-offset-black"
+            style={{ color: 'var(--text-main)' }}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
@@ -268,7 +306,11 @@ export default function Header({ activePage }) {
       {/* Mobile Navigation Menu */}
       {mobileMenuOpen && (
         <div 
-          className="md:hidden fixed inset-0 z-40 bg-black/95 pt-[60px] overflow-y-auto animate-fadeIn"
+          className="md:hidden fixed inset-0 z-40 pt-[60px] overflow-y-auto animate-fadeIn"
+          style={{ 
+            backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.95)' : 'rgba(240, 240, 240, 0.95)',
+            color: 'var(--text-main)'
+          }}
           ref={mobileMenuRef}
           role="dialog"
           aria-modal="true"
@@ -277,7 +319,8 @@ export default function Header({ activePage }) {
           <nav className="flex flex-col px-4 py-3" aria-label="Mobile Navigation">
             <Link 
               href="/" 
-              className={`flex items-center py-3 border-b border-[#333] ${activePage === 'home' ? 'text-[#e60012]' : ''}`}
+              className={`flex items-center py-3 ${activePage === 'home' ? 'text-[#e60012]' : ''}`}
+              style={{ borderBottom: '1px solid var(--border-color)' }}
               onClick={() => setMobileMenuOpen(false)}
               aria-current={activePage === 'home' ? 'page' : undefined}
             >
@@ -288,7 +331,8 @@ export default function Header({ activePage }) {
             </Link>
             <Link 
               href="/services" 
-              className={`flex items-center py-3 border-b border-[#333] ${activePage === 'services' ? 'text-[#e60012]' : ''}`}
+              className={`flex items-center py-3 ${activePage === 'services' ? 'text-[#e60012]' : ''}`}
+              style={{ borderBottom: '1px solid var(--border-color)' }}
               onClick={() => setMobileMenuOpen(false)}
               aria-current={activePage === 'services' ? 'page' : undefined}
             >
@@ -300,7 +344,8 @@ export default function Header({ activePage }) {
             </Link>
             <Link 
               href="/spare-parts" 
-              className={`flex items-center py-3 border-b border-[#333] ${activePage === 'spare-parts' ? 'text-[#e60012]' : ''}`}
+              className={`flex items-center py-3 ${activePage === 'spare-parts' ? 'text-[#e60012]' : ''}`}
+              style={{ borderBottom: '1px solid var(--border-color)' }}
               onClick={() => setMobileMenuOpen(false)}
               aria-current={activePage === 'spare-parts' ? 'page' : undefined}
             >
@@ -311,7 +356,8 @@ export default function Header({ activePage }) {
             </Link>
             <Link 
               href="/contact" 
-              className={`flex items-center py-3 border-b border-[#333] ${activePage === 'contact' ? 'text-[#e60012]' : ''}`}
+              className={`flex items-center py-3 ${activePage === 'contact' ? 'text-[#e60012]' : ''}`}
+              style={{ borderBottom: '1px solid var(--border-color)' }}
               onClick={() => setMobileMenuOpen(false)}
               aria-current={activePage === 'contact' ? 'page' : undefined}
             >
@@ -321,23 +367,49 @@ export default function Header({ activePage }) {
               Contact
             </Link>
             
+            {/* Theme toggle in mobile menu */}
+            <button
+              onClick={() => {
+                toggleTheme();
+              }}
+              className="flex items-center py-3"
+              style={{ borderBottom: '1px solid var(--border-color)' }}
+            >
+              {isDarkMode ? (
+                <>
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  Switch to Light Mode
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                  Switch to Dark Mode
+                </>
+              )}
+            </button>
+            
             {/* Mobile user menu or login button */}
             {currentUser ? (
               <>
-                <div className="py-4 mt-2 border-b border-[#333]">
+                <div className="py-4 mt-2" style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white font-medium">
                       {getUserInitials()}
                     </div>
                     <div>
                       <p className="text-sm font-medium">{userProfile?.name || currentUser.displayName || 'User'}</p>
-                      <p className="text-xs text-gray-400 truncate">{currentUser.email}</p>
+                      <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{currentUser.email}</p>
                     </div>
                   </div>
                 </div>
                 <Link 
                   href="/profile" 
-                  className="flex items-center py-3 border-b border-[#333]"
+                  className="flex items-center py-3"
+                  style={{ borderBottom: '1px solid var(--border-color)' }}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -347,7 +419,8 @@ export default function Header({ activePage }) {
                 </Link>
                 <Link 
                   href="/orders" 
-                  className="flex items-center py-3 border-b border-[#333]"
+                  className="flex items-center py-3"
+                  style={{ borderBottom: '1px solid var(--border-color)' }}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { db } from '@/firebase/config';
 import { collection, query, where, orderBy, getDocs, serverTimestamp, addDoc, doc, getDoc } from 'firebase/firestore';
 

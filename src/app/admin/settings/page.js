@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function SettingsPage() {
+  const { isDarkMode, toggleTheme } = useTheme()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState('general')
@@ -229,6 +231,28 @@ export default function SettingsPage() {
           {/* Appearance Settings */}
           {activeTab === 'appearance' && (
             <div className="space-y-6">
+              {/* Theme Toggle */}
+              <div className="p-4 border border-[#333] rounded-md">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-medium text-white">Site Theme</h3>
+                    <p className="text-sm text-gray-400">Toggle between light and dark mode for the entire website</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={isDarkMode} 
+                      onChange={toggleTheme}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e60012]"></div>
+                    <span className="ml-3 text-sm font-medium text-gray-300">
+                      {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+                    </span>
+                  </label>
+                </div>
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
