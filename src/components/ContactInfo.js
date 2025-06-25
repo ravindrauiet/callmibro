@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ContactInfo() {
   const [isVisible, setIsVisible] = useState(false)
+  const { isDarkMode } = useTheme()
   
   useEffect(() => {
     setIsVisible(true)
@@ -97,10 +99,14 @@ export default function ContactInfo() {
   ]
 
   return (
-    <div className="bg-[#111] border border-[#333] rounded-xl p-6 sm:p-8 shadow-lg hover:shadow-[#e60012]/10 transition-shadow">
+    <div className="rounded-xl p-6 sm:p-8 shadow-lg hover:shadow-[#e60012]/10 transition-shadow" style={{ 
+      backgroundColor: 'var(--panel-dark)',
+      borderColor: 'var(--border-color)',
+      borderWidth: '1px'
+    }}>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">Get in Touch</h2>
-        <p className="text-gray-400 text-sm">We're here to help and answer any questions you might have</p>
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-main)' }}>Get in Touch</h2>
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>We're here to help and answer any questions you might have</p>
       </div>
       
       <div className="space-y-6">
@@ -118,9 +124,9 @@ export default function ContactInfo() {
               </div>
             </div>
             <div>
-              <h3 className="text-lg font-medium mb-1">{item.title}</h3>
+              <h3 className="text-lg font-medium mb-1" style={{ color: 'var(--text-main)' }}>{item.title}</h3>
               {item.details.map((detail, i) => (
-                <p key={i} className="text-gray-400 text-sm mb-1">{detail}</p>
+                <p key={i} className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>{detail}</p>
               ))}
             </div>
           </div>
@@ -128,17 +134,23 @@ export default function ContactInfo() {
       </div>
       
       {/* Social Media */}
-      <div className="mt-8 border-t border-[#222] pt-6">
-        <h3 className="text-lg font-medium mb-4">Connect With Us</h3>
+      <div className="mt-8 pt-6" style={{ 
+        borderTopWidth: '1px',
+        borderColor: 'var(--border-color)'
+      }}>
+        <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--text-main)' }}>Connect With Us</h3>
         <div className="flex space-x-3">
           {socialLinks.map((link, index) => (
             <a 
               key={link.name}
               href="#" 
-              className={`bg-[#222] p-3 rounded-lg text-white hover:bg-gradient-to-r hover:from-[#e60012] hover:to-[#ff6b6b] transition-all transform ${
+              className={`p-3 rounded-lg text-white hover:bg-gradient-to-r hover:from-[#e60012] hover:to-[#ff6b6b] transition-all transform ${
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
               }`}
-              style={{ transitionDelay: `${(index + contactInfo.length) * 150}ms` }}
+              style={{ 
+                backgroundColor: 'var(--panel-gray)',
+                transitionDelay: `${(index + contactInfo.length) * 150}ms` 
+              }}
               aria-label={link.name}
             >
               {link.icon}

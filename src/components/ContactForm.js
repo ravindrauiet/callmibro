@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { db } from '@/firebase/config'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ContactForm() {
   const { currentUser } = useAuth();
+  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -67,10 +69,14 @@ export default function ContactForm() {
   }
 
   return (
-    <div className="bg-[#111] border border-[#333] rounded-xl p-6 sm:p-8 shadow-lg hover:shadow-[#e60012]/10 transition-shadow">
+    <div className="rounded-xl p-6 sm:p-8 shadow-lg hover:shadow-[#e60012]/10 transition-shadow" style={{ 
+      backgroundColor: 'var(--panel-dark)',
+      borderColor: 'var(--border-color)',
+      borderWidth: '1px'
+    }}>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">Send Us a Message</h2>
-        <p className="text-gray-400 text-sm">Fill out the form below and we'll get back to you shortly</p>
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-main)' }}>Send Us a Message</h2>
+        <p style={{ color: 'var(--text-secondary)' }} className="text-sm">Fill out the form below and we'll get back to you shortly</p>
       </div>
       
       {submitSuccess ? (
@@ -95,28 +101,40 @@ export default function ContactForm() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
           {/* Name field */}
           <div>
-            <label htmlFor="name" className="block text-white text-sm font-medium mb-2">Full Name <span className="text-[#e60012]">*</span></label>
+            <label htmlFor="name" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-main)' }}>Full Name <span className="text-[#e60012]">*</span></label>
             <input
               type="text"
               id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
+              className="w-full rounded-lg px-4 py-3 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
+              style={{ 
+                backgroundColor: 'var(--panel-gray)',
+                color: 'var(--text-main)',
+                borderColor: 'var(--border-color)',
+                borderWidth: '1px'
+              }}
               required
             />
           </div>
           
           {/* Email field */}
           <div>
-            <label htmlFor="email" className="block text-white text-sm font-medium mb-2">Email <span className="text-[#e60012]">*</span></label>
+            <label htmlFor="email" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-main)' }}>Email <span className="text-[#e60012]">*</span></label>
             <input
               type="email"
               id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
+              className="w-full rounded-lg px-4 py-3 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
+              style={{ 
+                backgroundColor: 'var(--panel-gray)',
+                color: 'var(--text-main)',
+                borderColor: 'var(--border-color)',
+                borderWidth: '1px'
+              }}
               required
             />
           </div>
@@ -125,26 +143,38 @@ export default function ContactForm() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
           {/* Phone field */}
           <div>
-            <label htmlFor="phone" className="block text-white text-sm font-medium mb-2">Phone Number</label>
+            <label htmlFor="phone" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-main)' }}>Phone Number</label>
             <input
               type="tel"
               id="phone"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
+              className="w-full rounded-lg px-4 py-3 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
+              style={{ 
+                backgroundColor: 'var(--panel-gray)',
+                color: 'var(--text-main)',
+                borderColor: 'var(--border-color)',
+                borderWidth: '1px'
+              }}
             />
           </div>
           
           {/* Subject field */}
           <div>
-            <label htmlFor="subject" className="block text-white text-sm font-medium mb-2">Subject <span className="text-[#e60012]">*</span></label>
+            <label htmlFor="subject" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-main)' }}>Subject <span className="text-[#e60012]">*</span></label>
             <select
               id="subject"
               name="subject"
               value={formData.subject}
               onChange={handleChange}
-              className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors appearance-none cursor-pointer"
+              className="w-full rounded-lg px-4 py-3 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors appearance-none cursor-pointer"
+              style={{ 
+                backgroundColor: 'var(--panel-gray)',
+                color: 'var(--text-main)',
+                borderColor: 'var(--border-color)',
+                borderWidth: '1px'
+              }}
               required
             >
               <option value="">Select a subject</option>
@@ -158,14 +188,20 @@ export default function ContactForm() {
         
         {/* Message field */}
         <div className="mb-6">
-          <label htmlFor="message" className="block text-white text-sm font-medium mb-2">Message <span className="text-[#e60012]">*</span></label>
+          <label htmlFor="message" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-main)' }}>Message <span className="text-[#e60012]">*</span></label>
           <textarea
             id="message"
             name="message"
             value={formData.message}
             onChange={handleChange}
             rows="5"
-            className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
+            className="w-full rounded-lg px-4 py-3 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] transition-colors"
+            style={{ 
+              backgroundColor: 'var(--panel-gray)',
+              color: 'var(--text-main)',
+              borderColor: 'var(--border-color)',
+              borderWidth: '1px'
+            }}
             required
           ></textarea>
         </div>

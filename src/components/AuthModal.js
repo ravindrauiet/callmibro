@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Modal from './Modal'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { toast } from 'react-hot-toast'
 
 export default function AuthModal({ isOpen, onClose }) {
@@ -21,6 +22,7 @@ export default function AuthModal({ isOpen, onClose }) {
   })
   const [showPassword, setShowPassword] = useState(false)
   const [forgotPassword, setForgotPassword] = useState(false)
+  const { isDarkMode } = useTheme()
 
   const { signup, login, googleSignIn, facebookSignIn, resetPassword, authInProgress } = useAuth()
 
@@ -225,7 +227,7 @@ export default function AuthModal({ isOpen, onClose }) {
             {/* Name field (only for signup) */}
             {!isLogin && (
               <div>
-                <label htmlFor="name" className="block text-white text-sm font-medium mb-1.5">
+                <label htmlFor="name" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-main)' }}>
                   Full Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -234,7 +236,13 @@ export default function AuthModal({ isOpen, onClose }) {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full bg-[#222] border border-[#333] rounded px-3 py-2 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] text-sm sm:text-base"
+                  className="w-full rounded px-3 py-2 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] text-sm sm:text-base"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)',
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)',
+                    borderWidth: '1px'
+                  }}
                   required
                   disabled={isLoading}
                   autoComplete="name"
@@ -247,7 +255,7 @@ export default function AuthModal({ isOpen, onClose }) {
         
         {/* Email field */}
         <div>
-          <label htmlFor="email" className="block text-white text-sm font-medium mb-1.5">
+          <label htmlFor="email" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-main)' }}>
             Email <span className="text-red-500">*</span>
           </label>
           <input
@@ -256,7 +264,13 @@ export default function AuthModal({ isOpen, onClose }) {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full bg-[#222] border border-[#333] rounded px-3 py-2 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] text-sm sm:text-base"
+            className="w-full rounded px-3 py-2 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] text-sm sm:text-base"
+            style={{ 
+              backgroundColor: 'var(--panel-gray)',
+              color: 'var(--text-main)',
+              borderColor: 'var(--border-color)',
+              borderWidth: '1px'
+            }}
             required
             disabled={isLoading}
             autoComplete={isLogin ? "email" : "new-email"}
@@ -268,7 +282,7 @@ export default function AuthModal({ isOpen, onClose }) {
           <>
             {/* Password field */}
             <div>
-              <label htmlFor="password" className="block text-white text-sm font-medium mb-1.5">
+              <label htmlFor="password" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-main)' }}>
                 Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -278,7 +292,13 @@ export default function AuthModal({ isOpen, onClose }) {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full bg-[#222] border border-[#333] rounded px-3 py-2 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] text-sm sm:text-base pr-10"
+                  className="w-full rounded px-3 py-2 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] text-sm sm:text-base pr-10"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)',
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)',
+                    borderWidth: '1px'
+                  }}
                   required
                   disabled={isLoading}
                   autoComplete={isLogin ? "current-password" : "new-password"}
@@ -287,7 +307,8 @@ export default function AuthModal({ isOpen, onClose }) {
                 />
                 <button 
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-[#e60012]"
+                  style={{ color: 'var(--text-secondary)' }}
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   tabIndex="-1"
@@ -308,7 +329,7 @@ export default function AuthModal({ isOpen, onClose }) {
               {/* Password strength indicator (only for signup) */}
               {!isLogin && formData.password && (
                 <div className="mt-1">
-                  <div className="h-1 w-full bg-gray-700 rounded-full overflow-hidden">
+                  <div className="h-1 w-full rounded-full overflow-hidden" style={{ backgroundColor: 'var(--border-color)' }}>
                     <div 
                       className={`h-full ${
                         passwordStrength.score <= 2 ? 'bg-red-500' : 
@@ -332,7 +353,7 @@ export default function AuthModal({ isOpen, onClose }) {
             {/* Confirm Password field (only for signup) */}
             {!isLogin && (
               <div>
-                <label htmlFor="confirmPassword" className="block text-white text-sm font-medium mb-1.5">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-main)' }}>
                   Confirm Password <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -341,7 +362,13 @@ export default function AuthModal({ isOpen, onClose }) {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full bg-[#222] border border-[#333] rounded px-3 py-2 text-white focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] text-sm sm:text-base"
+                  className="w-full rounded px-3 py-2 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] text-sm sm:text-base"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)',
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)',
+                    borderWidth: '1px'
+                  }}
                   required
                   disabled={isLoading}
                   autoComplete="new-password"
@@ -355,7 +382,11 @@ export default function AuthModal({ isOpen, onClose }) {
         {/* Submit button */}
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white py-2.5 rounded hover:from-[#d40010] hover:to-[#e55b5b] transition-colors mt-2 text-sm sm:text-base flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 focus:ring-offset-[#111]"
+          className="w-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white py-2.5 rounded hover:from-[#d40010] hover:to-[#e55b5b] transition-colors mt-2 text-sm sm:text-base flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2"
+          style={{ 
+            boxShadow: '0 4px 6px rgba(230, 0, 18, 0.25)',
+            '--tw-ring-offset-color': 'var(--panel-dark)'
+          }}
           disabled={isLoading}
           aria-busy={isLoading}
         >
@@ -402,7 +433,7 @@ export default function AuthModal({ isOpen, onClose }) {
         
         {/* Toggle between login and signup */}
         {!forgotPassword && (
-          <div className="text-center mt-4 text-gray-400 text-sm">
+          <div className="text-center mt-4 text-sm" style={{ color: 'var(--text-secondary)' }}>
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button
               type="button"
@@ -420,17 +451,26 @@ export default function AuthModal({ isOpen, onClose }) {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#333]"></div>
+                <div className="w-full" style={{ borderTopWidth: '1px', borderColor: 'var(--border-color)' }}></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-[#111] text-gray-400 text-xs sm:text-sm">Or continue with</span>
+                <span className="px-2 text-xs sm:text-sm" style={{ 
+                  backgroundColor: 'var(--panel-dark)',
+                  color: 'var(--text-secondary)'
+                }}>Or continue with</span>
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-3 mt-4">
               <button
                 type="button"
-                className="bg-[#222] hover:bg-[#333] text-white py-2 px-3 sm:px-4 rounded border border-[#333] transition-colors flex items-center justify-center text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 focus:ring-offset-[#111]"
+                className="py-2 px-3 sm:px-4 rounded border transition-colors flex items-center justify-center text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)',
+                  color: 'var(--text-main)',
+                  borderColor: 'var(--border-color)',
+                  '--tw-ring-offset-color': 'var(--panel-dark)'
+                }}
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
                 aria-label="Sign in with Google"
@@ -443,7 +483,13 @@ export default function AuthModal({ isOpen, onClose }) {
               
               <button
                 type="button"
-                className="bg-[#222] hover:bg-[#333] text-white py-2 px-3 sm:px-4 rounded border border-[#333] transition-colors flex items-center justify-center text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 focus:ring-offset-[#111]"
+                className="py-2 px-3 sm:px-4 rounded border transition-colors flex items-center justify-center text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)',
+                  color: 'var(--text-main)',
+                  borderColor: 'var(--border-color)',
+                  '--tw-ring-offset-color': 'var(--panel-dark)'
+                }}
                 onClick={handleFacebookSignIn}
                 disabled={isLoading}
                 aria-label="Sign in with Facebook"
@@ -458,7 +504,7 @@ export default function AuthModal({ isOpen, onClose }) {
         )}
         
         {/* Privacy notice */}
-        <p className="text-xs text-gray-500 mt-6 text-center">
+        <p className="text-xs mt-6 text-center" style={{ color: 'var(--text-secondary)' }}>
           By continuing, you agree to our <a href="#" className="text-[#e60012] hover:underline">Terms of Service</a> and <a href="#" className="text-[#e60012] hover:underline">Privacy Policy</a>
         </p>
       </form>

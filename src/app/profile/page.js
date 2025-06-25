@@ -8,6 +8,7 @@ import ProfileInfo from '../../components/profile/ProfileInfo'
 import Bookings from '../../components/profile/Bookings'
 import OrderHistory from '../../components/profile/OrderHistory'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { toast } from 'react-hot-toast'
 import { db } from '@/firebase/config'
 import { doc, getDoc, updateDoc, collection, query, where, orderBy, getDocs } from 'firebase/firestore'
@@ -16,6 +17,7 @@ import Image from 'next/image'
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('profile')
   const { currentUser, logout } = useAuth()
+  const { isDarkMode } = useTheme()
   const router = useRouter()
   const [userProfile, setUserProfile] = useState(null)
   const [userBookings, setUserBookings] = useState([])
@@ -206,10 +208,10 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-color)' }}>
         <div className="text-center">
           <div className="animate-spin w-12 h-12 border-4 border-t-transparent rounded-full mx-auto mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b]"></div>
-          <p className="text-xl">Loading your profile...</p>
+          <p className="text-xl" style={{ color: 'var(--text-main)' }}>Loading your profile...</p>
         </div>
       </div>
     )
@@ -229,20 +231,30 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-black to-[#111] text-white">
+    <div className="flex flex-col min-h-screen" style={{ 
+      background: isDarkMode 
+        ? 'linear-gradient(to bottom, var(--bg-color), var(--panel-dark))' 
+        : 'linear-gradient(to bottom, var(--bg-color), var(--panel-charcoal))'
+    }}>
       <Header activePage="profile" />
       
       <main className="flex-grow py-10">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-10">
             <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">My Account</h1>
-            <p className="text-gray-400">Manage your details, bookings, & orders</p>
+            <p style={{ color: 'var(--text-secondary)' }}>Manage your details, bookings, & orders</p>
           </div>
           
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Profile sidebar */}
             <div className="lg:w-1/3">
-              <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] border border-[#222] rounded-xl p-6 text-center shadow-lg">
+              <div className="rounded-xl p-6 text-center shadow-lg" style={{ 
+                background: isDarkMode 
+                  ? 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))' 
+                  : 'var(--panel-dark)',
+                borderColor: 'var(--border-color)',
+                borderWidth: '1px'
+              }}>
                 <div className="w-32 h-32 mx-auto bg-gradient-to-r from-[#e60012] to-[#ff6b6b] rounded-full flex items-center justify-center mb-4 shadow-lg">
                   <span className="text-4xl font-bold text-white">
                     {currentUser.displayName 
@@ -251,10 +263,10 @@ export default function ProfilePage() {
                   </span>
                 </div>
                 
-                <h2 className="text-2xl font-bold mb-1">
+                <h2 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-main)' }}>
                   {currentUser.displayName || currentUser.email.split('@')[0]}
                 </h2>
-                <p className="text-gray-400 mb-4">{currentUser.email}</p>
+                <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>{currentUser.email}</p>
                 
                 <button 
                   onClick={() => setEditMode(true)} 
@@ -267,12 +279,16 @@ export default function ProfilePage() {
             {/* Content area */}
             <div className="lg:w-2/3">
               {/* Tabs */}
-              <div className="border-b border-[#333] mb-6">
+              <div className="mb-6" style={{ 
+                borderBottomWidth: '1px', 
+                borderColor: 'var(--border-color)'
+              }}>
                 <div className="flex">
                   <button 
                     className={`pb-3 px-4 font-medium transition-all ${activeTab === 'profile' 
                       ? 'text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text border-b-2 border-[#e60012]' 
-                      : 'text-gray-400 hover:text-white'}`}
+                      : 'hover:text-[#e60012]'}`}
+                    style={{ color: activeTab === 'profile' ? '' : 'var(--text-secondary)' }}
                     onClick={() => setActiveTab('profile')}
                   >
                     Profile
@@ -280,7 +296,8 @@ export default function ProfilePage() {
                   <button 
                     className={`pb-3 px-4 font-medium transition-all ${activeTab === 'bookings' 
                       ? 'text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text border-b-2 border-[#e60012]' 
-                      : 'text-gray-400 hover:text-white'}`}
+                      : 'hover:text-[#e60012]'}`}
+                    style={{ color: activeTab === 'bookings' ? '' : 'var(--text-secondary)' }}
                     onClick={() => setActiveTab('bookings')}
                   >
                     Bookings
@@ -288,7 +305,8 @@ export default function ProfilePage() {
                   <button 
                     className={`pb-3 px-4 font-medium transition-all ${activeTab === 'orders' 
                       ? 'text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text border-b-2 border-[#e60012]' 
-                      : 'text-gray-400 hover:text-white'}`}
+                      : 'hover:text-[#e60012]'}`}
+                    style={{ color: activeTab === 'orders' ? '' : 'var(--text-secondary)' }}
                     onClick={() => setActiveTab('orders')}
                   >
                     Orders

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { toast } from 'react-hot-toast'
 import { FiHome, FiMapPin, FiPlus, FiEdit2, FiTrash2, FiCheck } from 'react-icons/fi'
 
@@ -11,6 +12,7 @@ export default function ProfileInfo({ userProfile }) {
   const [addressModalOpen, setAddressModalOpen] = useState(false)
   const [editingAddress, setEditingAddress] = useState(null)
   const [savedAddresses, setSavedAddresses] = useState([])
+  const { isDarkMode } = useTheme()
   const [formData, setFormData] = useState({
     displayName: '',
     email: '',
@@ -205,7 +207,13 @@ export default function ProfileInfo({ userProfile }) {
   }
 
   return (
-    <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] border border-[#222] rounded-xl p-6 shadow-lg">
+    <div className="rounded-xl p-6 shadow-lg" style={{ 
+      background: isDarkMode 
+        ? 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))' 
+        : 'var(--panel-dark)',
+      borderColor: 'var(--border-color)',
+      borderWidth: '1px'
+    }}>
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl font-semibold bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Profile Information</h3>
         <button 
@@ -221,51 +229,75 @@ export default function ProfileInfo({ userProfile }) {
         <form onSubmit={handleSubmit} className="animate-fadeIn">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Full Name</label>
               <input
                 type="text"
                 name="displayName"
                 value={formData.displayName}
                 onChange={handleChange}
-                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                className="w-full rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)',
+                  color: 'var(--text-main)',
+                  borderColor: 'var(--border-color)',
+                  borderWidth: '1px'
+                }}
                 required
                 disabled={loading}
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Email Address</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Email Address</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 disabled
-                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg p-3 text-white opacity-70"
+                className="w-full rounded-lg p-3 opacity-70"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)',
+                  color: 'var(--text-main)',
+                  borderColor: 'var(--border-color)',
+                  borderWidth: '1px'
+                }}
               />
-              <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Email cannot be changed</p>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Phone Number</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Phone Number</label>
               <input
                 type="tel"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                className="w-full rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)',
+                  color: 'var(--text-main)',
+                  borderColor: 'var(--border-color)',
+                  borderWidth: '1px'
+                }}
                 required
                 disabled={loading}
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Shipping Address</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Shipping Address</label>
               <textarea
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
                 rows="3"
-                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                className="w-full rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)',
+                  color: 'var(--text-main)',
+                  borderColor: 'var(--border-color)',
+                  borderWidth: '1px'
+                }}
                 required
                 disabled={loading}
               ></textarea>
@@ -282,24 +314,40 @@ export default function ProfileInfo({ userProfile }) {
         </form>
       ) : (
         <div className="space-y-6">
-          <div className="bg-[#0d0d0d] rounded-lg p-4 border border-[#222]">
-            <p className="text-sm text-gray-400 mb-1">Full Name</p>
-            <p className="font-medium">{userProfile?.name || currentUser?.displayName || 'Not set'}</p>
+          <div className="rounded-lg p-4" style={{ 
+            backgroundColor: 'var(--panel-gray)',
+            borderColor: 'var(--border-color)',
+            borderWidth: '1px'
+          }}>
+            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Full Name</p>
+            <p className="font-medium" style={{ color: 'var(--text-main)' }}>{userProfile?.name || currentUser?.displayName || 'Not set'}</p>
           </div>
           
-          <div className="bg-[#0d0d0d] rounded-lg p-4 border border-[#222]">
-            <p className="text-sm text-gray-400 mb-1">Email Address</p>
-            <p className="font-medium">{userProfile?.email || currentUser?.email || 'Not set'}</p>
+          <div className="rounded-lg p-4" style={{ 
+            backgroundColor: 'var(--panel-gray)',
+            borderColor: 'var(--border-color)',
+            borderWidth: '1px'
+          }}>
+            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Email Address</p>
+            <p className="font-medium" style={{ color: 'var(--text-main)' }}>{userProfile?.email || currentUser?.email || 'Not set'}</p>
           </div>
           
-          <div className="bg-[#0d0d0d] rounded-lg p-4 border border-[#222]">
-            <p className="text-sm text-gray-400 mb-1">Phone Number</p>
-            <p className="font-medium">{userProfile?.phone || 'Not set'}</p>
+          <div className="rounded-lg p-4" style={{ 
+            backgroundColor: 'var(--panel-gray)',
+            borderColor: 'var(--border-color)',
+            borderWidth: '1px'
+          }}>
+            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Phone Number</p>
+            <p className="font-medium" style={{ color: 'var(--text-main)' }}>{userProfile?.phone || 'Not set'}</p>
           </div>
           
-          <div className="bg-[#0d0d0d] rounded-lg p-4 border border-[#222]">
-            <p className="text-sm text-gray-400 mb-1">Shipping Address</p>
-            <p className="font-medium">{userProfile?.address || 'Not set'}</p>
+          <div className="rounded-lg p-4" style={{ 
+            backgroundColor: 'var(--panel-gray)',
+            borderColor: 'var(--border-color)',
+            borderWidth: '1px'
+          }}>
+            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Shipping Address</p>
+            <p className="font-medium" style={{ color: 'var(--text-main)' }}>{userProfile?.address || 'Not set'}</p>
           </div>
           
           <button
@@ -312,7 +360,7 @@ export default function ProfileInfo({ userProfile }) {
       )}
 
       {/* Saved Addresses Section */}
-      <div className="mt-10 pt-8 border-t border-[#222]">
+      <div className="mt-10 pt-8" style={{ borderTopWidth: '1px', borderColor: 'var(--border-color)' }}>
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-semibold bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">
             Saved Addresses
@@ -330,11 +378,15 @@ export default function ProfileInfo({ userProfile }) {
         {savedAddresses && savedAddresses.length > 0 ? (
           <div className="space-y-4">
             {savedAddresses.map((address) => (
-              <div key={address.id} className="bg-[#0d0d0d] rounded-lg p-4 border border-[#222] relative">
+              <div key={address.id} className="rounded-lg p-4 relative" style={{ 
+                backgroundColor: 'var(--panel-gray)',
+                borderColor: 'var(--border-color)',
+                borderWidth: '1px'
+              }}>
                 <div className="flex justify-between">
                   <div className="flex items-center gap-2">
                     <FiHome size={18} className="text-[#e60012]" />
-                    <p className="font-medium text-white">{address.name}</p>
+                    <p className="font-medium" style={{ color: 'var(--text-main)' }}>{address.name}</p>
                     {address.isDefault && (
                       <span className="bg-[#e60012]/20 text-[#ff6b6b] text-xs px-2 py-0.5 rounded-full">
                         Default
@@ -344,28 +396,34 @@ export default function ProfileInfo({ userProfile }) {
                   <div className="flex items-center gap-2">
                     <button 
                       onClick={() => openAddressModal(address)}
-                      className="text-gray-400 hover:text-white" 
+                      className="hover:text-[#e60012]" 
+                      style={{ color: 'var(--text-secondary)' }}
                       title="Edit"
                     >
                       <FiEdit2 size={16} />
                     </button>
                     <button 
                       onClick={() => handleDeleteAddress(address.id)}
-                      className="text-gray-400 hover:text-red-500" 
+                      className="hover:text-red-500" 
+                      style={{ color: 'var(--text-secondary)' }}
                       title="Delete"
                     >
                       <FiTrash2 size={16} />
                     </button>
                   </div>
                 </div>
-                <p className="text-gray-400 mt-2 pl-6">{address.fullAddress}</p>
+                <p className="mt-2 pl-6" style={{ color: 'var(--text-secondary)' }}>{address.fullAddress}</p>
               </div>
             ))}
           </div>
         ) : (
-          <div className="bg-[#0d0d0d] rounded-lg p-6 border border-[#222] text-center">
-            <FiMapPin size={32} className="text-gray-600 mx-auto mb-3" />
-            <p className="text-gray-400">You haven't saved any addresses yet</p>
+          <div className="rounded-lg p-6 text-center" style={{ 
+            backgroundColor: 'var(--panel-gray)',
+            borderColor: 'var(--border-color)',
+            borderWidth: '1px'
+          }}>
+            <FiMapPin size={32} className="mx-auto mb-3" style={{ color: 'var(--text-secondary)' }} />
+            <p style={{ color: 'var(--text-secondary)' }}>You haven't saved any addresses yet</p>
             <button
               onClick={() => openAddressModal()}
               className="mt-4 text-[#e60012] hover:text-[#ff6b6b] text-sm font-medium"
@@ -379,22 +437,32 @@ export default function ProfileInfo({ userProfile }) {
       {/* Address Modal */}
       {addressModalOpen && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#111] border border-[#333] rounded-xl p-6 max-w-md w-full animate-fadeIn">
-            <h3 className="text-xl font-semibold mb-4">
+          <div className="rounded-xl p-6 max-w-md w-full animate-fadeIn" style={{ 
+            backgroundColor: 'var(--panel-dark)',
+            borderColor: 'var(--border-color)',
+            borderWidth: '1px'
+          }}>
+            <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-main)' }}>
               {editingAddress ? 'Edit Address' : 'Add New Address'}
             </h3>
             
             <form onSubmit={handleAddressSubmit}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Address Name</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Address Name</label>
                   <input
                     type="text"
                     name="name"
                     value={addressForm.name}
                     onChange={handleAddressChange}
                     placeholder="Home, Work, etc."
-                    className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                    className="w-full rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                    style={{ 
+                      backgroundColor: 'var(--panel-gray)',
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)',
+                      borderWidth: '1px'
+                    }}
                     required
                     disabled={loading}
                   />
@@ -402,7 +470,7 @@ export default function ProfileInfo({ userProfile }) {
                 
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="block text-sm font-medium text-gray-300">Full Address</label>
+                    <label className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Full Address</label>
                     <button 
                       type="button" 
                       onClick={getCurrentLocation}
@@ -418,7 +486,13 @@ export default function ProfileInfo({ userProfile }) {
                     onChange={handleAddressChange}
                     placeholder="Enter complete address"
                     rows="3"
-                    className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                    className="w-full rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                    style={{ 
+                      backgroundColor: 'var(--panel-gray)',
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)',
+                      borderWidth: '1px'
+                    }}
                     required
                     disabled={loading}
                   ></textarea>
@@ -431,9 +505,13 @@ export default function ProfileInfo({ userProfile }) {
                     name="isDefault"
                     checked={addressForm.isDefault}
                     onChange={handleAddressCheckbox}
-                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] bg-[#1a1a1a] border-[#333] rounded"
+                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] rounded"
+                    style={{ 
+                      backgroundColor: 'var(--panel-gray)',
+                      borderColor: 'var(--border-color)'
+                    }}
                   />
-                  <label htmlFor="isDefault" className="ml-2 block text-sm text-gray-300">
+                  <label htmlFor="isDefault" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
                     Set as default address
                   </label>
                 </div>
@@ -443,7 +521,8 @@ export default function ProfileInfo({ userProfile }) {
                 <button
                   type="button"
                   onClick={() => setAddressModalOpen(false)}
-                  className="flex-1 bg-[#222] hover:bg-[#333] text-white px-4 py-2 rounded-lg transition-all font-medium"
+                  className="flex-1 text-white px-4 py-2 rounded-lg transition-all font-medium"
+                  style={{ backgroundColor: 'var(--panel-gray)' }}
                   disabled={loading}
                 >
                   Cancel

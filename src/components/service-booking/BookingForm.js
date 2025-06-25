@@ -10,6 +10,7 @@ import { FiMapPin, FiUser, FiUserPlus, FiLock } from 'react-icons/fi'
 import { useTheme } from '@/contexts/ThemeContext'
 
 export default function BookingForm({ service, brand, model, onComplete }) {
+  console.log('BookingForm rendering with props:', { service, brand, model });
   const { currentUser } = useAuth()
   const router = useRouter()
   const { isDarkMode } = useTheme()
@@ -56,7 +57,7 @@ export default function BookingForm({ service, brand, model, onComplete }) {
             const originalData = {
               name: userData.name || currentUser.displayName || '',
               email: userData.email || currentUser.email || '',
-              phone: userData.phone || ''
+              phone: userData.phone || currentUser.phoneNumber || ''
             }
             setOriginalUserData(originalData)
             
@@ -169,8 +170,21 @@ export default function BookingForm({ service, brand, model, onComplete }) {
   }
 
   const validatePhone = (phone) => {
-    const regex = /^\d{10}$/;
-    return regex.test(phone.replace(/[^0-9]/g, '')) ? null : 'Please enter a valid 10-digit phone number';
+    // If phone is empty, require it
+    if (!phone || phone.trim() === '') {
+      return 'Phone number is required';
+    }
+    
+    // Remove all non-numeric characters for validation
+    const cleanedPhone = phone.replace(/\D/g, '');
+    
+    // Check if it has at least 10 digits
+    if (cleanedPhone.length < 10) {
+      return 'Please enter a valid 10-digit phone number';
+    }
+    
+    // Valid phone number
+    return null;
   }
 
   const validateRequired = (value, fieldName) => {
@@ -189,8 +203,8 @@ export default function BookingForm({ service, brand, model, onComplete }) {
   const handleChange = (e) => {
     const { name, value } = e.target
     
-    // Don't update if field should be read-only
-    if (bookingFor === 'self' && (name === 'name' || name === 'email' || name === 'phone')) {
+    // Allow phone to be edited even when booking for self
+    if (bookingFor === 'self' && (name === 'name' || name === 'email')) {
       return
     }
     
@@ -227,6 +241,8 @@ export default function BookingForm({ service, brand, model, onComplete }) {
   }
 
   const validateForm = () => {
+    console.log('Validating form with data:', formData);
+    
     const newErrors = {
       name: validateRequired(formData.name, 'Full name'),
       email: validateEmail(formData.email),
@@ -236,29 +252,36 @@ export default function BookingForm({ service, brand, model, onComplete }) {
       time: validateRequired(formData.time, 'Time slot')
     }
     
+    console.log('Validation errors:', newErrors);
     setErrors(newErrors)
     
     // Check if any errors exist
-    return !Object.values(newErrors).some(error => error !== null);
+    const hasErrors = Object.values(newErrors).some(error => error !== null);
+    console.log('Form has errors:', hasErrors);
+    return !hasErrors;
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log('Form submission started with data:', formData);
     
     // Validate form
     if (!validateForm()) {
       toast.error('Please correct the errors in the form')
+      console.log('Form validation failed');
       return
     }
     
     if (!currentUser) {
       toast.error('You must be logged in to book a service')
+      console.log('User not logged in');
       return
     }
     
     setLoading(true)
     
     try {
+      console.log('Preparing booking data for submission');
       // Save booking to Firestore
       const bookingData = {
         userId: currentUser.uid,
@@ -289,7 +312,9 @@ export default function BookingForm({ service, brand, model, onComplete }) {
         updatedAt: serverTimestamp()
       }
       
+      console.log('Submitting booking data to Firestore:', bookingData);
       const docRef = await addDoc(collection(db, 'bookings'), bookingData)
+      console.log('Booking created with ID:', docRef.id);
       
       toast.success('Service booking created successfully!')
       
@@ -300,9 +325,11 @@ export default function BookingForm({ service, brand, model, onComplete }) {
       
       // Redirect to booking confirmation page
       const confirmationUrl = `/services/booking-confirmation?bookingId=${docRef.id}&serviceName=${encodeURIComponent(service)}&serviceType=${encodeURIComponent(model.name)}&date=${encodeURIComponent(formData.date)}&timeSlot=${encodeURIComponent(formData.time)}`;
+      console.log('Redirecting to:', confirmationUrl);
       router.push(confirmationUrl);
       
     } catch (error) {
+      console.error('Failed to create booking:', error);
       toast.error('Failed to create booking. Please try again.')
     } finally {
       setLoading(false)
@@ -457,6 +484,14 @@ export default function BookingForm({ service, brand, model, onComplete }) {
       additionalNotes: formData.additionalNotes
     }));
   }, [formData.address, formData.issue, formData.additionalNotes]);
+
+  console.log('BookingForm before render - current state:', { 
+    formData, 
+    errors, 
+    loading, 
+    bookingFor,
+    isDarkMode
+  });
 
   return (
     <div className="border rounded-xl p-6 sm:p-8 shadow-2xl" style={{ 
@@ -661,12 +696,39 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                 <p className="font-bold">{formData.name || 'Not provided'}</p>
               </div>
               <div className="p-4 rounded-lg" style={{ background: 'var(--panel-charcoal)' }}>
-                <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">Phone Number</p>
-                <p className="font-bold">{formData.phone || 'Not provided'}</p>
-              </div>
-              <div className="p-4 rounded-lg md:col-span-2" style={{ background: 'var(--panel-charcoal)' }}>
                 <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">Email Address</p>
                 <p className="font-bold">{formData.email || 'Not provided'}</p>
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <label htmlFor="phone" className="block text-sm font-medium">Phone Number</label>
+                <input 
+                  type="tel" 
+                  id="phone" 
+                  name="phone" 
+                  value={formData.phone} 
+                  onChange={handleChange}
+                  placeholder="Enter 10-digit phone number"
+                  className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
+                    errors.phone ? 'border-red-600 bg-red-50/10' : ''
+                  }`}
+                  style={{ 
+                    background: errors.phone ? 'var(--panel-charcoal)' : 'var(--panel-charcoal)', 
+                    borderColor: errors.phone ? '#e60012' : 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
+                  required
+                />
+                {errors.phone && (
+                  <div className="flex items-center mt-1 text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <p className="text-xs">{errors.phone}</p>
+                  </div>
+                )}
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  Please enter a valid 10-digit phone number (required)
+                </p>
               </div>
             </div>
           </div>
@@ -704,16 +766,26 @@ export default function BookingForm({ service, brand, model, onComplete }) {
                 onChange={handleChange}
                 placeholder="Enter 10-digit phone number"
                 className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-colors ${
-                  errors.phone ? 'border-red-600' : ''
+                  errors.phone ? 'border-red-600 bg-red-50/10' : ''
                 }`}
                 style={{ 
-                  background: 'var(--panel-charcoal)', 
-                  borderColor: errors.phone ? undefined : 'var(--border-color)',
+                  background: errors.phone ? 'var(--panel-charcoal)' : 'var(--panel-charcoal)', 
+                  borderColor: errors.phone ? '#e60012' : 'var(--border-color)',
                   color: 'var(--text-main)'
                 }}
                 required
               />
-              {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
+              {errors.phone && (
+                <div className="flex items-center mt-1 text-red-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <p className="text-xs">{errors.phone}</p>
+                </div>
+              )}
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                Please enter a valid 10-digit phone number (required)
+              </p>
             </div>
 
             <div className="space-y-2 md:col-span-2">

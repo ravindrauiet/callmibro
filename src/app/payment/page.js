@@ -9,11 +9,13 @@ import { useAuth } from '@/contexts/AuthContext'
 import { db } from '@/firebase/config'
 import { doc, getDoc, updateDoc, serverTimestamp, addDoc, collection } from 'firebase/firestore'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function PaymentPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { currentUser } = useAuth()
+  const { isDarkMode } = useTheme()
   
   const bookingId = searchParams.get('bookingId')
   
@@ -137,7 +139,7 @@ export default function PaymentPage() {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-black to-[#111] text-white">
+      <div className="min-h-screen" style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>
         <Header activePage="services" />
         <main className="py-10 px-4 max-w-6xl mx-auto text-center">
           <div className="animate-spin w-12 h-12 border-4 border-t-transparent rounded-full mx-auto mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b]"></div>
@@ -150,10 +152,14 @@ export default function PaymentPage() {
   
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-black to-[#111] text-white">
+      <div className="min-h-screen" style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>
         <Header activePage="services" />
+        
         <main className="py-10 px-4 max-w-6xl mx-auto text-center">
-          <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] border border-[#222] rounded-xl p-6 md:p-12 max-w-3xl mx-auto shadow-lg">
+          <div className="border rounded-xl p-6 md:p-12 max-w-3xl mx-auto shadow-lg" style={{ 
+            background: 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))',
+            borderColor: 'var(--border-color)'
+          }}>
             <div className="w-20 h-20 rounded-full bg-gradient-to-r from-red-900 to-red-800 mx-auto flex items-center justify-center mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -161,7 +167,7 @@ export default function PaymentPage() {
             </div>
             
             <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Payment Error</h1>
-            <p className="text-gray-400 mb-8">{error}</p>
+            <p style={{ color: 'var(--text-secondary)' }} className="mb-8">{error}</p>
             
             <button 
               onClick={() => router.push('/services')}
@@ -171,34 +177,45 @@ export default function PaymentPage() {
             </button>
           </div>
         </main>
+        
         <Footer />
       </div>
     )
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-[#111] text-white">
+    <div className="min-h-screen" style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>
       <Header activePage="services" />
       
       <main className="py-10 px-4 max-w-6xl mx-auto">
-        <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] border border-[#222] rounded-xl p-6 md:p-8 max-w-3xl mx-auto shadow-lg">
+        <div className="border rounded-xl p-6 md:p-8 max-w-3xl mx-auto shadow-lg" style={{ 
+          background: 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))',
+          borderColor: 'var(--border-color)'
+        }}>
           <h1 className="text-2xl md:text-3xl font-bold mb-2 text-center bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Complete Your Payment</h1>
-          <p className="text-gray-400 text-center mb-6">Pay using UPI to confirm your booking</p>
+          <p style={{ color: 'var(--text-secondary)' }} className="text-center mb-6">Pay using UPI to confirm your booking</p>
           
           {success ? (
-            <div className="bg-green-900/30 border border-green-800 rounded-lg p-6 text-center">
+            <div className="rounded-lg p-4 text-center" style={{
+              background: isDarkMode ? 'rgba(22, 101, 52, 0.3)' : 'rgba(187, 247, 208, 0.3)',
+              borderColor: isDarkMode ? '#166534' : '#16a34a',
+              borderWidth: '1px'
+            }}>
               <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-800 to-green-900 mx-auto flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <h2 className="text-xl font-semibold mb-2">Payment Successful!</h2>
-              <p className="text-gray-300 mb-4">Your booking has been confirmed and added to your orders.</p>
-              <p className="text-gray-400 text-sm mb-2">Redirecting you to the confirmation page...</p>
+              <p style={{ color: 'var(--text-secondary)' }} className="mb-4">Your booking has been confirmed and added to your orders.</p>
+              <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-2">Redirecting you to the confirmation page...</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-[#161616] rounded-lg p-6 shadow-md">
+              <div className="rounded-lg p-6 shadow-md" style={{ 
+                background: 'var(--panel-dark)', 
+                borderColor: 'var(--border-color)' 
+              }}>
                 <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Scan QR Code</h2>
                 
                 <div className="bg-white p-4 rounded-lg mb-4 shadow-md">
@@ -214,20 +231,29 @@ export default function PaymentPage() {
                 
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-gray-400 mb-1">UPI ID</p>
+                    <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">UPI ID</p>
                     <div className="flex items-center">
                       <input 
                         type="text" 
                         value={paymentInfo.upiId} 
                         readOnly
-                        className="bg-[#222] border border-[#333] rounded-lg py-2 px-3 text-white flex-grow focus:outline-none"
+                        className="rounded-lg py-2 px-3 flex-grow focus:outline-none"
+                        style={{ 
+                          background: 'var(--panel-charcoal)', 
+                          borderColor: 'var(--border-color)',
+                          color: 'var(--text-main)',
+                          border: '1px solid var(--border-color)'
+                        }}
                       />
                       <button 
                         onClick={() => {
                           navigator.clipboard.writeText(paymentInfo.upiId)
                           toast.success('UPI ID copied!')
                         }}
-                        className="ml-2 bg-[#333] hover:bg-[#444] p-2 rounded-lg transition-all"
+                        className="ml-2 p-2 rounded-lg transition-all"
+                        style={{ 
+                          background: 'var(--panel-charcoal)'
+                        }}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -237,18 +263,21 @@ export default function PaymentPage() {
                   </div>
                   
                   <div>
-                    <p className="text-sm text-gray-400 mb-1">Amount to Pay</p>
+                    <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-1">Amount to Pay</p>
                     <p className="text-2xl font-bold bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">₹{paymentInfo.amount}</p>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-[#161616] rounded-lg p-6 shadow-md">
+              <div className="rounded-lg p-6 shadow-md" style={{ 
+                background: 'var(--panel-dark)', 
+                borderColor: 'var(--border-color)' 
+              }}>
                 <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Verify Payment</h2>
                 
                 <form onSubmit={handleVerifyPayment} className="space-y-6">
                   <div>
-                    <label htmlFor="utrNumber" className="block text-sm text-gray-400 mb-1">
+                    <label htmlFor="utrNumber" style={{ color: 'var(--text-secondary)' }} className="block text-sm mb-1">
                       Enter UTR Number
                     </label>
                     <input
@@ -257,7 +286,13 @@ export default function PaymentPage() {
                       value={utrNumber}
                       onChange={(e) => setUtrNumber(e.target.value)}
                       placeholder="Enter 12-digit UTR number"
-                      className="w-full bg-[#222] border border-[#333] rounded-lg py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                      className="w-full rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                      style={{ 
+                        background: 'var(--panel-charcoal)', 
+                        borderColor: 'var(--border-color)',
+                        color: 'var(--text-main)',
+                        border: '1px solid var(--border-color)'
+                      }}
                       disabled={verifying}
                     />
                   </div>
@@ -280,7 +315,7 @@ export default function PaymentPage() {
                   </button>
                 </form>
                 
-                <div className="mt-6 text-sm text-gray-400">
+                <div className="mt-6 text-sm" style={{ color: 'var(--text-secondary)' }}>
                   <p className="mb-2">Instructions:</p>
                   <ol className="list-decimal list-inside space-y-1">
                     <li>Scan the QR code or copy UPI ID</li>

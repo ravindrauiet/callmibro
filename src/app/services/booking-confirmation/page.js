@@ -259,29 +259,44 @@ export default function BookingConfirmationPage() {
           </p>
           
           {bookingDetails && (
-            <div className="bg-[#161616] rounded-lg p-6 mb-8 border border-[#222] shadow-md">
+            <div className="rounded-lg p-6 mb-8 border shadow-md" style={{ 
+              background: 'var(--panel-dark)', 
+              borderColor: 'var(--border-color)' 
+            }}>
               <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Our Repair Services</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="bg-[#0d0d0d] p-4 rounded-lg border border-[#222]">
-                  <p className="text-gray-400 mb-1">Service</p>
+                <div className="p-4 rounded-lg border" style={{ 
+                  background: 'var(--panel-charcoal)', 
+                  borderColor: 'var(--border-color)' 
+                }}>
+                  <p style={{ color: 'var(--text-secondary)' }} className="mb-1">Service</p>
                   <p className="font-medium">{bookingDetails.serviceName}</p>
                 </div>
                 
-                <div className="bg-[#0d0d0d] p-4 rounded-lg border border-[#222]">
-                  <p className="text-gray-400 mb-1">Date & Time</p>
+                <div className="p-4 rounded-lg border" style={{ 
+                  background: 'var(--panel-charcoal)', 
+                  borderColor: 'var(--border-color)' 
+                }}>
+                  <p style={{ color: 'var(--text-secondary)' }} className="mb-1">Date & Time</p>
                   <p className="font-medium">
                     {bookingDetails.schedule?.date || 'To be confirmed'}, {bookingDetails.schedule?.timeSlot || ''}
                   </p>
                 </div>
                 
-                <div className="bg-[#0d0d0d] p-4 rounded-lg border border-[#222]">
-                  <p className="text-gray-400 mb-1">Address</p>
+                <div className="p-4 rounded-lg border" style={{ 
+                  background: 'var(--panel-charcoal)', 
+                  borderColor: 'var(--border-color)' 
+                }}>
+                  <p style={{ color: 'var(--text-secondary)' }} className="mb-1">Address</p>
                   <p className="font-medium">{bookingDetails.address?.street || 'To be confirmed'}</p>
                 </div>
                 
-                <div className="bg-[#0d0d0d] p-4 rounded-lg border border-[#222]">
-                  <p className="text-gray-400 mb-1">Price</p>
+                <div className="p-4 rounded-lg border" style={{ 
+                  background: 'var(--panel-charcoal)', 
+                  borderColor: 'var(--border-color)' 
+                }}>
+                  <p style={{ color: 'var(--text-secondary)' }} className="mb-1">Price</p>
                   <p className="font-medium bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">₹ 1,200</p>
                 </div>
               </div>
@@ -302,8 +317,12 @@ export default function BookingConfirmationPage() {
               </div>
               
               {bookingDetails.payment && bookingDetails.payment.status === 'paid' && (
-                <div className="mt-4 bg-gradient-to-r from-green-900/30 to-green-800/30 border border-green-800 rounded-lg p-4 text-center">
-                  <p className="text-green-300">
+                <div className="mt-4 rounded-lg p-4 text-center" style={{
+                  background: isDarkMode ? 'rgba(22, 101, 52, 0.3)' : 'rgba(187, 247, 208, 0.3)',
+                  borderColor: isDarkMode ? '#166534' : '#16a34a',
+                  borderWidth: '1px'
+                }}>
+                  <p style={{ color: isDarkMode ? '#86efac' : '#166534' }}>
                     Payment completed! This booking has been added to your <button 
                       onClick={() => router.push('/orders')}
                       className="underline hover:text-white transition-colors font-medium"
@@ -323,21 +342,21 @@ export default function BookingConfirmationPage() {
                 <div className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-0.5 shadow-sm">
                   <span className="text-white text-sm">1</span>
                 </div>
-                <p className="text-gray-300">Our team will contact you within 2 hours to confirm your booking details.</p>
+                <p style={{ color: 'var(--text-secondary)' }}>Our team will contact you within 2 hours to confirm your booking details.</p>
               </div>
               
               <div className="flex items-start">
                 <div className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-0.5 shadow-sm">
                   <span className="text-white text-sm">2</span>
                 </div>
-                <p className="text-gray-300">A technician will be assigned and will arrive at your location on the scheduled date and time.</p>
+                <p style={{ color: 'var(--text-secondary)' }}>A technician will be assigned and will arrive at your location on the scheduled date and time.</p>
               </div>
               
               <div className="flex items-start">
                 <div className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-0.5 shadow-sm">
                   <span className="text-white text-sm">3</span>
                 </div>
-                <p className="text-gray-300">You can track your booking status from your profile section.</p>
+                <p style={{ color: 'var(--text-secondary)' }}>You can track your booking status from your profile section.</p>
               </div>
             </div>
           </div>
@@ -345,7 +364,11 @@ export default function BookingConfirmationPage() {
           <div className="text-center">
             <button 
               onClick={() => router.push('/')}
-              className="px-6 py-3 bg-[#222] hover:bg-[#333] text-white transition-all rounded-lg shadow-md"
+              className="px-6 py-3 rounded-lg shadow-md transition-all"
+              style={{ 
+                background: 'var(--panel-charcoal)', 
+                color: 'var(--text-main)'
+              }}
             >
               Back to Home
             </button>

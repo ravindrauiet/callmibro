@@ -1,8 +1,11 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function Modal({ isOpen, onClose, title, children }) {
+  const { isDarkMode } = useTheme()
+  
   // Close modal when Escape key is pressed
   useEffect(() => {
     const handleEscape = (e) => {
@@ -39,17 +42,37 @@ export default function Modal({ isOpen, onClose, title, children }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black bg-opacity-75 backdrop-blur-sm" 
+        className="absolute inset-0 backdrop-blur-sm" 
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}
         onClick={onClose}
       ></div>
       
       {/* Modal Container */}
-      <div className="bg-[#111] border border-[#333] rounded-lg w-full max-w-md mx-auto z-10 overflow-hidden shadow-xl transform transition-all">
+      <div 
+        className="rounded-lg w-full max-w-md mx-auto z-10 overflow-hidden shadow-xl transform transition-all"
+        style={{ 
+          backgroundColor: 'var(--panel-dark)',
+          borderColor: 'var(--border-color)',
+          borderWidth: '1px'
+        }}
+      >
         {/* Modal Header */}
-        <div className="flex justify-between items-center border-b border-[#333] px-4 sm:px-6 py-3 sm:py-4">
-          <h2 className="text-lg sm:text-xl font-bold text-white">{title}</h2>
+        <div 
+          className="flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4"
+          style={{ 
+            borderBottomWidth: '1px',
+            borderColor: 'var(--border-color)'
+          }}
+        >
+          <h2 
+            className="text-lg sm:text-xl font-bold"
+            style={{ color: 'var(--text-main)' }}
+          >
+            {title}
+          </h2>
           <button 
-            className="text-gray-400 hover:text-white transition-colors focus:outline-none"
+            className="hover:text-[#e60012] transition-colors focus:outline-none"
+            style={{ color: 'var(--text-secondary)' }}
             onClick={onClose}
             aria-label="Close"
           >
