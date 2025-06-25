@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function FilterSearchBar() {
   const [activeFilter, setActiveFilter] = useState('all')
+  const { isDarkMode } = useTheme()
   
   const filters = [
     { id: 'all', name: 'All Parts' },
@@ -14,7 +16,12 @@ export default function FilterSearchBar() {
   ]
 
   return (
-    <section id="products" className="bg-[#111] py-6 sm:py-8 border-t border-b border-[#222]">
+    <section id="products" className="py-6 sm:py-8 border-t border-b" 
+      style={{ 
+        backgroundColor: 'var(--panel-dark)',
+        borderColor: 'var(--border-color)'
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         {/* Category Filters */}
         <div className="flex items-center justify-center mb-6 overflow-x-auto pb-2 hide-scrollbar">
@@ -26,8 +33,12 @@ export default function FilterSearchBar() {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   activeFilter === filter.id
                     ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white'
-                    : 'bg-[#222] text-gray-300 hover:bg-[#333]'
+                    : 'hover:bg-[#333]'
                 }`}
+                style={{ 
+                  backgroundColor: activeFilter === filter.id ? '' : 'var(--panel-gray)',
+                  color: activeFilter === filter.id ? 'white' : 'var(--text-secondary)'
+                }}
               >
                 {filter.name}
               </button>
@@ -37,7 +48,15 @@ export default function FilterSearchBar() {
       
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex flex-col sm:flex-row flex-1 gap-3 sm:gap-4">
-            <select className="bg-[#222] text-white p-2.5 text-sm border border-[#333] rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer">
+            <select 
+              className="p-2.5 text-sm rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer"
+              style={{ 
+                backgroundColor: 'var(--panel-gray)',
+                color: 'var(--text-main)',
+                borderColor: 'var(--border-color)',
+                borderWidth: '1px'
+              }}
+            >
               <option>Device Category</option>
               <option>Mobile Phones</option>
               <option>TVs</option>
@@ -45,7 +64,15 @@ export default function FilterSearchBar() {
               <option>Refrigerators</option>
             </select>
             
-            <select className="bg-[#222] text-white p-2.5 text-sm border border-[#333] rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer">
+            <select 
+              className="p-2.5 text-sm rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer"
+              style={{ 
+                backgroundColor: 'var(--panel-gray)',
+                color: 'var(--text-main)',
+                borderColor: 'var(--border-color)',
+                borderWidth: '1px'
+              }}
+            >
               <option>Brand</option>
               <option>Samsung</option>
               <option>Apple</option>
@@ -53,7 +80,15 @@ export default function FilterSearchBar() {
               <option>Sony</option>
             </select>
             
-            <select className="bg-[#222] text-white p-2.5 text-sm border border-[#333] rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer">
+            <select 
+              className="p-2.5 text-sm rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer"
+              style={{ 
+                backgroundColor: 'var(--panel-gray)',
+                color: 'var(--text-main)',
+                borderColor: 'var(--border-color)',
+                borderWidth: '1px'
+              }}
+            >
               <option>Model</option>
               <option>iPhone 13</option>
               <option>Galaxy S21</option>
@@ -66,7 +101,13 @@ export default function FilterSearchBar() {
               <input 
                 type="text" 
                 placeholder="Search part name or SKU" 
-                className="w-full p-2.5 pl-10 text-sm bg-[#222] text-white border border-[#333] rounded-lg focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]"
+                className="w-full p-2.5 pl-10 text-sm rounded-lg focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)',
+                  color: 'var(--text-main)',
+                  borderColor: 'var(--border-color)',
+                  borderWidth: '1px'
+                }}
               />
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

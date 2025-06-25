@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ProductsGrid() {
   const [isVisible, setIsVisible] = useState(false)
+  const { isDarkMode } = useTheme()
   
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -133,17 +135,22 @@ export default function ProductsGrid() {
   }
 
   return (
-    <section id="products-grid" className="bg-[#111] py-10 sm:py-16">
+    <section id="products-grid" className="py-10 sm:py-16" style={{ backgroundColor: 'var(--panel-dark)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {products.map((product, index) => (
             <Link 
               key={product.id}
               href={`/spare-parts/${product.id}`}
-              className={`group bg-[#111] border border-[#222] rounded-xl overflow-hidden transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transform ${
+              className={`group rounded-xl overflow-hidden transition-all transform ${
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
               } transition-all duration-700`}
-              style={{ transitionDelay: `${index * 100}ms` }}
+              style={{ 
+                backgroundColor: 'var(--panel-dark)', 
+                borderColor: 'var(--border-color)',
+                borderWidth: '1px',
+                transitionDelay: `${index * 100}ms` 
+              }}
             >
               {/* Image Container */}
               <div className="relative overflow-hidden aspect-[4/3]">
@@ -171,11 +178,18 @@ export default function ProductsGrid() {
                   {renderRating(product.rating)}
                 </div>
                 
-                <h3 className="text-white font-medium text-base sm:text-lg group-hover:text-[#e60012] transition-colors">{product.name}</h3>
-                <p className="text-gray-400 text-xs sm:text-sm mb-2">{product.sku}</p>
+                <h3 className="font-medium text-base sm:text-lg group-hover:text-[#e60012] transition-colors" style={{ color: 'var(--text-main)' }}>{product.name}</h3>
+                <p className="text-xs sm:text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{product.sku}</p>
                 <div className="text-[#e60012] font-bold text-sm sm:text-base mb-3">{product.price}</div>
                 
-                <div className={`py-2 px-4 rounded-lg text-center text-white text-sm ${product.featured ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : 'bg-[#333]'} opacity-80 group-hover:opacity-100 transition-opacity`}>
+                <div 
+                  className={`py-2 px-4 rounded-lg text-center text-white text-sm opacity-80 group-hover:opacity-100 transition-opacity`}
+                  style={{ 
+                    background: product.featured 
+                      ? 'linear-gradient(to right, var(--accent-color), #ff6b6b)' 
+                      : 'var(--panel-gray)' 
+                  }}
+                >
                   Add to Cart
                 </div>
               </div>

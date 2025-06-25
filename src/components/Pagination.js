@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function Pagination() {
   const [currentPage, setCurrentPage] = useState(1)
   const totalPages = 5
+  const { isDarkMode } = useTheme()
   
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -42,7 +44,7 @@ export default function Pagination() {
   }
 
   return (
-    <section className="bg-[#111] py-8 sm:py-12">
+    <section className="py-8 sm:py-12" style={{ backgroundColor: 'var(--panel-dark)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         <div className="flex justify-center items-center gap-2">
           {/* Previous button */}
@@ -51,9 +53,13 @@ export default function Pagination() {
             disabled={currentPage === 1}
             className={`w-10 h-10 flex items-center justify-center rounded-full border ${
               currentPage === 1 
-                ? 'border-[#333] text-gray-500 cursor-not-allowed' 
-                : 'border-[#333] text-white hover:border-[#e60012] hover:text-[#e60012] transition-colors'
+                ? 'cursor-not-allowed' 
+                : 'hover:border-[#e60012] hover:text-[#e60012] transition-colors'
             }`}
+            style={{ 
+              borderColor: 'var(--border-color)',
+              color: currentPage === 1 ? 'var(--text-secondary)' : 'var(--text-main)'
+            }}
             aria-label="Previous page"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -70,9 +76,13 @@ export default function Pagination() {
                 page === currentPage 
                   ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white' 
                   : page === '...' 
-                    ? 'text-gray-400 cursor-default' 
-                    : 'text-white hover:text-[#e60012] hover:bg-[#222] transition-all'
+                    ? 'cursor-default' 
+                    : 'hover:text-[#e60012] transition-all'
               }`}
+              style={{ 
+                backgroundColor: page === currentPage ? '' : page === '...' ? 'transparent' : 'var(--panel-gray)',
+                color: page === currentPage ? 'white' : page === '...' ? 'var(--text-secondary)' : 'var(--text-main)'
+              }}
               disabled={page === '...'}
             >
               {page}
@@ -85,9 +95,13 @@ export default function Pagination() {
             disabled={currentPage === totalPages}
             className={`w-10 h-10 flex items-center justify-center rounded-full border ${
               currentPage === totalPages 
-                ? 'border-[#333] text-gray-500 cursor-not-allowed' 
-                : 'border-[#333] text-white hover:border-[#e60012] hover:text-[#e60012] transition-colors'
+                ? 'cursor-not-allowed' 
+                : 'hover:border-[#e60012] hover:text-[#e60012] transition-colors'
             }`}
+            style={{ 
+              borderColor: 'var(--border-color)',
+              color: currentPage === totalPages ? 'var(--text-secondary)' : 'var(--text-main)'
+            }}
             aria-label="Next page"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
