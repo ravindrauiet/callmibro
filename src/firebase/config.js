@@ -8,7 +8,7 @@ import { getStorage } from "firebase/storage";
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCxgEegetMFGha1ZIcBdLRb0XI7lu5cYiA",
-  authDomain: "callmibro.firebaseapp.com",
+  authDomain: "www.callmibro.com",
   projectId: "callmibro",
   storageBucket: "callmibro.appspot.com",
   messagingSenderId: "411367076640",

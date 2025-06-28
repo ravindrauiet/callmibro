@@ -156,11 +156,16 @@ export default function AuthModal({ isOpen, onClose }) {
     setError('')
     
     try {
+      console.log('Google sign-in button clicked');
+      console.log('Current user agent:', navigator.userAgent);
+      console.log('Window width:', window.innerWidth);
+      console.log('Is mobile:', /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+      
       await googleSignIn()
       onClose()
     } catch (error) {
-      console.error('Google sign-in error:', error)
-      setError('Failed to sign in with Google')
+      console.error('Google sign-in error in modal:', error)
+      setError('Failed to sign in with Google: ' + error.message)
     } finally {
       setIsLoading(false)
     }
@@ -498,6 +503,62 @@ export default function AuthModal({ isOpen, onClose }) {
                   <path fill="currentColor" d="M20.007,3H3.993C3.445,3,3,3.445,3,3.993v16.013C3,20.555,3.445,21,3.993,21h8.621v-6.971h-2.346v-2.717h2.346V9.31 c0-2.325,1.42-3.591,3.494-3.591c0.993,0,1.847,0.074,2.096,0.107v2.43l-1.438,0.001c-1.128,0-1.346,0.536-1.346,1.323v1.734h2.69 l-0.35,2.717h-2.34V21h4.587C20.555,21,21,20.555,21,20.007V3.993C21,3.445,20.555,3,20.007,3z"/>
                 </svg>
                 Facebook
+              </button>
+            </div>
+            
+            {/* Debug button for testing */}
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await fetch('/api/log', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        message: 'Debug test',
+                        data: {
+                          test: 'manual test',
+                          timestamp: new Date().toISOString()
+                        },
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        url: window.location.href
+                      }),
+                    });
+                    alert('Debug test sent to server');
+                  } catch (error) {
+                    alert('Debug test failed: ' + error.message);
+                  }
+                }}
+                className="text-xs text-gray-500 hover:text-gray-700 underline"
+                disabled={isLoading}
+              >
+                Debug Test
+              </button>
+              
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    // Import Firebase auth functions
+                    const { getRedirectResult } = await import('firebase/auth');
+                    const { auth } = await import('../firebase/config');
+                    
+                    const result = await getRedirectResult(auth);
+                    if (result) {
+                      alert(`Redirect result found!\nUser: ${result.user.email}\nProvider: ${result.providerId}`);
+                    } else {
+                      alert('No redirect result found');
+                    }
+                  } catch (error) {
+                    alert('Redirect check failed: ' + error.message);
+                  }
+                }}
+                className="text-xs text-gray-500 hover:text-gray-700 underline ml-4"
+                disabled={isLoading}
+              >
+                Check Redirect
               </button>
             </div>
           </div>

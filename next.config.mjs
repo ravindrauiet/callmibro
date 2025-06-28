@@ -115,6 +115,14 @@ const nextConfig = withPWA(pwaConfig)({
       },
     ]
   },
+  async rewrites() {
+    return [
+      {
+        source: '/__/auth/:path*',
+        destination: 'https://callmibro.firebaseapp.com/__/auth/:path*'
+      }
+    ];
+  },
 })
 
 export default nextConfig
