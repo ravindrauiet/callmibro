@@ -8,6 +8,8 @@ import {
   onAuthStateChanged, 
   GoogleAuthProvider, 
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   FacebookAuthProvider,
   updateProfile as updateAuthProfile,
   sendPasswordResetEmail,
@@ -41,6 +43,12 @@ export function AuthProvider({ children }) {
   const [userProfile, setUserProfile] = useState(null);
   const [authError, setAuthError] = useState(null);
   const [authInProgress, setAuthInProgress] = useState(false);
+
+  // Helper function to detect mobile devices
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           window.innerWidth <= 768;
+  };
 
   // Helper function to handle auth errors
   const handleAuthError = (error) => {
@@ -177,38 +185,49 @@ export function AuthProvider({ children }) {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      const result = await signInWithPopup(auth, provider);
       
-      // Get user token for secure requests
-      const token = await getIdToken(result.user);
-      
-      // Check if the user document exists
-      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-      
-      const userData = {
-        name: result.user.displayName,
-        email: result.user.email,
-        photoURL: result.user.photoURL,
-        emailVerified: result.user.emailVerified,
-        lastLogin: serverTimestamp()
-      };
-      
-      // If not, create a new user document
-      if (!userDoc.exists()) {
-        userData.createdAt = serverTimestamp();
-        userData.updatedAt = serverTimestamp();
-        userData.authProvider = 'google';
-        
-        await setDoc(doc(db, 'users', result.user.uid), userData);
+      // Use redirect for mobile devices, popup for desktop
+      if (isMobileDevice()) {
+        console.log('Using redirect authentication for mobile device');
+        await signInWithRedirect(auth, provider);
+        // The redirect will happen, so we don't need to handle the result here
+        return;
       } else {
-        // Update lastLogin if user exists
-        await setDoc(doc(db, 'users', result.user.uid), userData, { merge: true });
+        console.log('Using popup authentication for desktop device');
+        const result = await signInWithPopup(auth, provider);
+        
+        // Get user token for secure requests
+        const token = await getIdToken(result.user);
+        
+        // Check if the user document exists
+        const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+        
+        const userData = {
+          name: result.user.displayName,
+          email: result.user.email,
+          photoURL: result.user.photoURL,
+          emailVerified: result.user.emailVerified,
+          lastLogin: serverTimestamp()
+        };
+        
+        // If not, create a new user document
+        if (!userDoc.exists()) {
+          userData.createdAt = serverTimestamp();
+          userData.updatedAt = serverTimestamp();
+          userData.authProvider = 'google';
+          
+          await setDoc(doc(db, 'users', result.user.uid), userData);
+        } else {
+          // Update lastLogin if user exists
+          await setDoc(doc(db, 'users', result.user.uid), userData, { merge: true });
+        }
+        
+        setUserProfile(userData);
+        toast.success('Logged in with Google successfully!');
+        return { result, token };
       }
-      
-      setUserProfile(userData);
-      toast.success('Logged in with Google successfully!');
-      return { result, token };
     } catch (error) {
+      console.error('Google sign-in error:', error);
       handleAuthError(error);
       throw error;
     } finally {
@@ -222,37 +241,45 @@ export function AuthProvider({ children }) {
     setAuthInProgress(true);
     try {
       const provider = new FacebookAuthProvider();
-      const result = await signInWithPopup(auth, provider);
       
-      // Get user token for secure requests
-      const token = await getIdToken(result.user);
-      
-      // Check if the user document exists
-      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-      
-      const userData = {
-        name: result.user.displayName,
-        email: result.user.email,
-        photoURL: result.user.photoURL,
-        emailVerified: result.user.emailVerified,
-        lastLogin: serverTimestamp()
-      };
-      
-      // If not, create a new user document
-      if (!userDoc.exists()) {
-        userData.createdAt = serverTimestamp();
-        userData.updatedAt = serverTimestamp();
-        userData.authProvider = 'facebook';
-        
-        await setDoc(doc(db, 'users', result.user.uid), userData);
+      // Use redirect for mobile devices, popup for desktop
+      if (isMobileDevice()) {
+        await signInWithRedirect(auth, provider);
+        // The redirect will happen, so we don't need to handle the result here
+        return;
       } else {
-        // Update lastLogin if user exists
-        await setDoc(doc(db, 'users', result.user.uid), userData, { merge: true });
+        const result = await signInWithPopup(auth, provider);
+        
+        // Get user token for secure requests
+        const token = await getIdToken(result.user);
+        
+        // Check if the user document exists
+        const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+        
+        const userData = {
+          name: result.user.displayName,
+          email: result.user.email,
+          photoURL: result.user.photoURL,
+          emailVerified: result.user.emailVerified,
+          lastLogin: serverTimestamp()
+        };
+        
+        // If not, create a new user document
+        if (!userDoc.exists()) {
+          userData.createdAt = serverTimestamp();
+          userData.updatedAt = serverTimestamp();
+          userData.authProvider = 'facebook';
+          
+          await setDoc(doc(db, 'users', result.user.uid), userData);
+        } else {
+          // Update lastLogin if user exists
+          await setDoc(doc(db, 'users', result.user.uid), userData, { merge: true });
+        }
+        
+        setUserProfile(userData);
+        toast.success('Logged in with Facebook successfully!');
+        return { result, token };
       }
-      
-      setUserProfile(userData);
-      toast.success('Logged in with Facebook successfully!');
-      return { result, token };
     } catch (error) {
       handleAuthError(error);
       throw error;
@@ -477,6 +504,56 @@ export function AuthProvider({ children }) {
     });
 
     return unsubscribe;
+  }, []);
+
+  // Handle redirect results from Google/Facebook auth
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        console.log('Checking for redirect result...');
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log('Redirect result found:', result.providerId);
+          // Get user token for secure requests
+          const token = await getIdToken(result.user);
+          
+          // Check if the user document exists
+          const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+          
+          const userData = {
+            name: result.user.displayName,
+            email: result.user.email,
+            photoURL: result.user.photoURL,
+            emailVerified: result.user.emailVerified,
+            lastLogin: serverTimestamp()
+          };
+          
+          // If not, create a new user document
+          if (!userDoc.exists()) {
+            userData.createdAt = serverTimestamp();
+            userData.updatedAt = serverTimestamp();
+            userData.authProvider = result.providerId === 'google.com' ? 'google' : 'facebook';
+            
+            await setDoc(doc(db, 'users', result.user.uid), userData);
+            console.log('New user document created');
+          } else {
+            // Update lastLogin if user exists
+            await setDoc(doc(db, 'users', result.user.uid), userData, { merge: true });
+            console.log('Existing user document updated');
+          }
+          
+          setUserProfile(userData);
+          toast.success('Logged in successfully!');
+        } else {
+          console.log('No redirect result found');
+        }
+      } catch (error) {
+        console.error('Error handling redirect result:', error);
+        handleAuthError(error);
+      }
+    };
+
+    handleRedirectResult();
   }, []);
 
   // Context value
