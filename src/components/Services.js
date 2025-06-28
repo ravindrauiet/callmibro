@@ -90,42 +90,45 @@ export default function Services() {
         </div>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {services.map((service, index) => (
-            <Link 
-              href={service.url} 
-              key={index}
-              className={`group p-6 rounded-xl transition-all hover:shadow-lg hover:shadow-[#e60012]/10 transform ${
-                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-              } transition-all duration-700 border hover:border-[#e60012]`}
-              style={{ 
-                transitionDelay: `${index * 100}ms`,
-                background: 'var(--panel-dark)',
-                borderColor: 'var(--border-color)'
-              }}
-            >
-              <div className={`w-16 h-16 mb-6 p-3 rounded-lg ${service.primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : ''} flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}
-                style={!service.primary ? { background: 'var(--panel-gray)' } : {}}
-              >
-                <Image 
-                  src={service.icon} 
-                  alt={service.title} 
-                  width={30} 
-                  height={30}
-                  className="brightness-[10]"
-                />
+        <div className="overflow-x-auto pb-4 hide-scrollbar">
+          <div className="flex gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6 lg:gap-8 min-w-max sm:min-w-0">
+            {services.map((service, index) => (
+              <div key={index} className="w-80 sm:w-auto flex-shrink-0 sm:flex-shrink">
+                <Link 
+                  href={service.url} 
+                  className={`group p-6 rounded-xl transition-all hover:shadow-lg hover:shadow-[#e60012]/10 transform ${
+                    isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                  } transition-all duration-700 border hover:border-[#e60012] block h-full`}
+                  style={{ 
+                    transitionDelay: `${index * 100}ms`,
+                    background: 'var(--panel-dark)',
+                    borderColor: 'var(--border-color)'
+                  }}
+                >
+                  <div className={`w-16 h-16 mb-6 p-3 rounded-lg ${service.primary ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : ''} flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}
+                    style={!service.primary ? { background: 'var(--panel-gray)' } : {}}
+                  >
+                    <Image 
+                      src={service.icon} 
+                      alt={service.title} 
+                      width={30} 
+                      height={30}
+                      className="brightness-[10]"
+                    />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-[#e60012] transition-colors">{service.title}</h3>
+                  <p style={{ color: 'var(--text-secondary)' }} className="text-sm">{service.description}</p>
+                  
+                  <div className="mt-6 flex items-center text-sm text-[#e60012] font-medium opacity-0 group-hover:opacity-100 transform group-hover:translate-x-0 -translate-x-2 transition-all duration-300">
+                    <span>Learn more</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </Link>
               </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-[#e60012] transition-colors">{service.title}</h3>
-              <p style={{ color: 'var(--text-secondary)' }} className="text-sm">{service.description}</p>
-              
-              <div className="mt-6 flex items-center text-sm text-[#e60012] font-medium opacity-0 group-hover:opacity-100 transform group-hover:translate-x-0 -translate-x-2 transition-all duration-300">
-                <span>Learn more</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </Link>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>

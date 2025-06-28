@@ -103,9 +103,9 @@ export default function Hero() {
           }`}
         >
           {/* Device frame with image inside */}
-          <div className="relative mx-auto max-w-md">
+          <div className="relative mx-auto max-w-[240px] h-[320px] sm:max-w-sm sm:h-auto md:max-w-md">
             {/* Phone frame */}
-            <div className="relative w-full aspect-[9/16] rounded-3xl border-[8px] border-[#333] bg-gray-800 shadow-2xl overflow-hidden">
+            <div className="relative w-full h-full sm:aspect-[9/16] rounded-3xl border-[6px] sm:border-[8px] border-[#333] bg-gray-800 shadow-2xl overflow-hidden">
               {/* Screen content */}
               <div className="absolute inset-0 overflow-hidden">
                 <Image
@@ -113,14 +113,16 @@ export default function Hero() {
                   alt="CallMiBro Repair Service"
                   fill
                   className="object-cover object-center"
+                  sizes="(max-width: 640px) 240px, (max-width: 768px) 384px, 448px"
+                  priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                  <div className="p-6">
-                    <div className="flex items-center mb-2">
-                      <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                      <span className="text-white text-sm font-medium">Live Tracking</span>
+                  <div className="p-2 sm:p-3 md:p-6">
+                    <div className="flex items-center mb-1 sm:mb-2">
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-green-500 mr-1 sm:mr-2"></div>
+                      <span className="text-white text-xs sm:text-sm font-medium">Live Tracking</span>
                     </div>
-                    <h3 className="text-white text-lg font-bold mb-1">iPhone Screen Repair</h3>
+                    <h3 className="text-white text-xs sm:text-sm md:text-lg font-bold mb-1">iPhone Screen Repair</h3>
                     <p className="text-gray-300 text-xs">ETA: 35 mins • Technician: on the way</p>
                   </div>
                 </div>
@@ -128,15 +130,15 @@ export default function Hero() {
             </div>
             
             {/* Decorative elements */}
-            <div className="absolute -top-6 -right-6 w-24 h-24 bg-[#e60012]/10 rounded-full blur-xl"></div>
-            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[#e60012]/10 rounded-full blur-xl"></div>
+            <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 md:-top-6 md:-right-6 w-12 h-12 sm:w-16 sm:h-16 md:w-24 md:h-24 bg-[#e60012]/10 rounded-full blur-xl"></div>
+            <div className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4 md:-bottom-6 md:-left-6 w-16 h-16 sm:w-20 sm:h-20 md:w-32 md:h-32 bg-[#e60012]/10 rounded-full blur-xl"></div>
           </div>
           
           {/* Floating badges */}
-          <div className="absolute top-10 -left-4 md:-left-10 bg-white text-black p-2 rounded-lg shadow-lg transform rotate-[-6deg] shadow-[#e60012]/20">
+          <div className="absolute top-4 -left-1 sm:top-6 sm:-left-2 md:top-10 md:-left-4 lg:-left-10 bg-white text-black p-1 sm:p-1.5 md:p-2 rounded-lg shadow-lg transform rotate-[-6deg] shadow-[#e60012]/20">
             <div className="flex items-center">
-              <div className="bg-[#e60012] rounded-full p-1.5 mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="bg-[#e60012] rounded-full p-0.5 sm:p-1 md:p-1.5 mr-1 sm:mr-1.5 md:mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
@@ -144,10 +146,10 @@ export default function Hero() {
             </div>
           </div>
           
-          <div className="absolute bottom-12 -right-4 md:-right-10 bg-white text-black p-2 rounded-lg shadow-lg transform rotate-[6deg] shadow-[#e60012]/20">
+          <div className="absolute bottom-6 -right-1 sm:bottom-8 sm:-right-2 md:bottom-12 md:-right-4 lg:-right-10 bg-white text-black p-1 sm:p-1.5 md:p-2 rounded-lg shadow-lg transform rotate-[6deg] shadow-[#e60012]/20">
             <div className="flex items-center">
-              <div className="bg-[#e60012] rounded-full p-1.5 mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="bg-[#e60012] rounded-full p-0.5 sm:p-1 md:p-1.5 mr-1 sm:mr-1.5 md:mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
