@@ -3,14 +3,20 @@
 import { useState } from 'react'
 import { useTheme } from '@/contexts/ThemeContext'
 
-export default function Pagination() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const totalPages = 5
+export default function Pagination({ 
+  currentPage = 1, 
+  totalPages = 1, 
+  onPageChange,
+  totalItems = 0,
+  itemsPerPage = 6
+}) {
   const { isDarkMode } = useTheme()
   
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
+      if (onPageChange) {
+        onPageChange(page)
+      }
     }
   }
   

@@ -6,12 +6,15 @@ import Link from 'next/link'
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { useTheme } from '@/contexts/ThemeContext'
+import Pagination from './Pagination'
 
 export default function ProductsGrid({ filters = {} }) {
   const [isVisible, setIsVisible] = useState(false)
   const [products, setProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(6) // Show 6 products per page
   const { isDarkMode } = useTheme()
   
   useEffect(() => {
@@ -138,7 +141,27 @@ export default function ProductsGrid({ filters = {} }) {
     }
 
     setFilteredProducts(filtered)
+    
+    // Reset to first page when filters change
+    setCurrentPage(1)
   }, [filters, products])
+
+  // Calculate current page products
+  const getCurrentPageProducts = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return filteredProducts.slice(startIndex, endIndex)
+  }
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+  }
+
+  // Calculate pagination info
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length)
 
   // Static fallback products
   const getStaticProducts = () => [
@@ -311,13 +334,13 @@ export default function ProductsGrid({ filters = {} }) {
         {/* Results count */}
         <div className="mb-6">
           <p style={{ color: 'var(--text-secondary)' }} className="text-sm">
-            Showing {filteredProducts.length} of {products.length} products
+            Showing {getCurrentPageProducts().length} of {filteredProducts.length} products (Page {currentPage} of {Math.ceil(filteredProducts.length / itemsPerPage)})
           </p>
         </div>
 
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-            {filteredProducts.map((product, index) => (
+            {getCurrentPageProducts().map((product, index) => (
               <Link 
                 key={product.id}
                 href={`/spare-parts/${product.id}`}
@@ -424,6 +447,19 @@ export default function ProductsGrid({ filters = {} }) {
           </div>
         )}
       </div>
+      
+      {/* Pagination */}
+      {filteredProducts.length > 0 && totalPages > 1 && (
+        <div className="mt-8">
+          <Pagination 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            totalItems={filteredProducts.length}
+            itemsPerPage={itemsPerPage}
+          />
+        </div>
+      )}
     </section>
   )
 } 

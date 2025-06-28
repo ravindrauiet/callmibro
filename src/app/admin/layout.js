@@ -89,6 +89,7 @@ export default function AdminLayout({ children }) {
     { name: 'Express Bookings', href: '/admin/express-bookings', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
     { name: 'Products', href: '/admin/products', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
     { name: 'Spare Parts', href: '/admin/spare-parts', icon: 'M15 9a2 2 0 10-4 0v5a2 2 0 104 0V9z M12 4.5a.5.5 0 00-1 0V6H9.5a.5.5 0 000 1H11v1.5a.5.5 0 001 0V7h1.5a.5.5 0 000-1H12V4.5z M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0-11V3' },
+    { name: 'Bundle Deals', href: '/admin/bundle-deals', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
     { name: 'Orders', href: '/admin/orders', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
     { name: 'Users', href: '/admin/users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
     { name: 'Technicians', href: '/admin/technicians', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
