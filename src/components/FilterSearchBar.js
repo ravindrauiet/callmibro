@@ -186,7 +186,7 @@ export default function FilterSearchBar({ onFiltersChange }) {
   }, [activeFilter, deviceCategory, brand, model, searchTerm])
 
   return (
-    <section id="products" className="py-6 sm:py-8 border-t border-b" 
+    <section id="products" className="py-4 sm:py-6 border-t border-b" 
       style={{ 
         backgroundColor: 'var(--panel-dark)',
         borderColor: 'var(--border-color)'
@@ -194,13 +194,13 @@ export default function FilterSearchBar({ onFiltersChange }) {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         {/* Category Filters */}
-        <div className="flex items-center justify-center mb-6 overflow-x-auto pb-2 hide-scrollbar">
-          <div className="flex space-x-2">
+        <div className="flex items-center justify-center mb-4 sm:mb-6 overflow-x-auto pb-2 hide-scrollbar">
+          <div className="flex space-x-1.5 sm:space-x-2">
             {filters.map(filter => (
               <button
                 key={filter.id}
                 onClick={() => handleFilterChange('category', filter.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                   activeFilter === filter.id
                     ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white'
                     : 'hover:bg-[#333]'
@@ -216,13 +216,13 @@ export default function FilterSearchBar({ onFiltersChange }) {
           </div>
         </div>
       
-        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4">
           <div className="flex flex-col sm:flex-row flex-1 gap-3 sm:gap-4">
             {/* Device Category */}
             <select 
               value={deviceCategory}
               onChange={(e) => handleFilterChange('deviceCategory', e.target.value)}
-              className="p-2.5 text-sm rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer"
+              className="p-2 sm:p-2.5 text-xs sm:text-sm rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer"
               style={{ 
                 backgroundColor: 'var(--panel-gray)',
                 color: 'var(--text-main)',
@@ -240,7 +240,7 @@ export default function FilterSearchBar({ onFiltersChange }) {
             <select 
               value={brand}
               onChange={(e) => handleFilterChange('brand', e.target.value)}
-              className="p-2.5 text-sm rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer"
+              className="p-2 sm:p-2.5 text-xs sm:text-sm rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer"
               style={{ 
                 backgroundColor: 'var(--panel-gray)',
                 color: 'var(--text-main)',
@@ -258,7 +258,7 @@ export default function FilterSearchBar({ onFiltersChange }) {
             <select 
               value={model}
               onChange={(e) => handleFilterChange('model', e.target.value)}
-              className="p-2.5 text-sm rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer"
+              className="p-2 sm:p-2.5 text-xs sm:text-sm rounded-lg focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012] appearance-none cursor-pointer"
               style={{ 
                 backgroundColor: 'var(--panel-gray)',
                 color: 'var(--text-main)',
@@ -281,7 +281,7 @@ export default function FilterSearchBar({ onFiltersChange }) {
                 placeholder="Search part name or SKU" 
                 value={searchTerm}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
-                className="w-full p-2.5 pl-10 text-sm rounded-lg focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]"
+                className="w-full p-2 sm:p-2.5 pl-9 sm:pl-10 text-xs sm:text-sm rounded-lg focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]"
                 style={{ 
                   backgroundColor: 'var(--panel-gray)',
                   color: 'var(--text-main)',
@@ -289,8 +289,8 @@ export default function FilterSearchBar({ onFiltersChange }) {
                   borderWidth: '1px'
                 }}
               />
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 sm:pl-3 pointer-events-none">
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
               </div>
@@ -301,7 +301,7 @@ export default function FilterSearchBar({ onFiltersChange }) {
           {(deviceCategory || brand || model || searchTerm || activeFilter !== 'all') && (
             <button
               onClick={clearFilters}
-              className="px-4 py-2.5 text-sm rounded-lg border transition-colors duration-300 font-medium"
+              className="px-4 py-2 sm:py-2.5 text-xs sm:text-sm rounded-lg border transition-colors duration-300 font-medium"
               style={{ 
                 borderColor: 'var(--border-color)', 
                 color: 'var(--text-secondary)',
@@ -315,46 +315,46 @@ export default function FilterSearchBar({ onFiltersChange }) {
 
         {/* Active Filters Display */}
         {(deviceCategory || brand || model || searchTerm) && (
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
             {deviceCategory && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
+              <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
                 Device: {deviceCategory}
                 <button
                   onClick={() => handleFilterChange('deviceCategory', '')}
-                  className="ml-2 text-[#e60012] hover:text-[#d40010]"
+                  className="ml-1 sm:ml-2 text-[#e60012] hover:text-[#d40010]"
                 >
                   ×
                 </button>
               </span>
             )}
             {brand && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
+              <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
                 Brand: {brand}
                 <button
                   onClick={() => handleFilterChange('brand', '')}
-                  className="ml-2 text-[#e60012] hover:text-[#d40010]"
+                  className="ml-1 sm:ml-2 text-[#e60012] hover:text-[#d40010]"
                 >
                   ×
                 </button>
               </span>
             )}
             {model && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
+              <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
                 Model: {model}
                 <button
                   onClick={() => handleFilterChange('model', '')}
-                  className="ml-2 text-[#e60012] hover:text-[#d40010]"
+                  className="ml-1 sm:ml-2 text-[#e60012] hover:text-[#d40010]"
                 >
                   ×
                 </button>
               </span>
             )}
             {searchTerm && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
+              <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
                 Search: "{searchTerm}"
                 <button
                   onClick={() => handleFilterChange('search', '')}
-                  className="ml-2 text-[#e60012] hover:text-[#d40010]"
+                  className="ml-1 sm:ml-2 text-[#e60012] hover:text-[#d40010]"
                 >
                   ×
                 </button>

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Header from '../../../components/Header'
-import Footer from '../../../components/Footer'
+import Link from 'next/link'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 import { useAuth } from '@/contexts/AuthContext'
 import { db } from '@/firebase/config'
 import { collection, doc, getDoc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
@@ -28,6 +29,7 @@ export default function BookingConfirmationPage() {
   const timeSlot = searchParams?.get('timeSlot')
   const isReschedule = searchParams?.get('reschedule') === 'true'
   const paymentSuccess = searchParams?.get('payment') === 'success'
+  const isOffline = searchParams.get('offline') === 'true'
   
   useEffect(() => {
     // If there's a bookingId, we need to fetch the booking details

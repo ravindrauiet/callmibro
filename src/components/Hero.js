@@ -8,7 +8,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false)
   const { isDarkMode } = useTheme()
-  
+
   useEffect(() => {
     setIsVisible(true)
   }, [])
@@ -29,7 +29,7 @@ export default function Hero() {
         <div className="absolute bottom-20 right-10 w-60 h-60 rounded-full bg-[#e60012]/5 blur-3xl"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-[#e60012]/5 blur-3xl"></div>
       </div>
-      
+
       {/* Hero content container */}
       <div className="container mx-auto px-4 py-12 md:py-20 flex flex-col md:flex-row items-center relative z-10">
         {/* Left content - Text & CTA */}
@@ -63,8 +63,8 @@ export default function Hero() {
               </svg>
             </Link>
             
-            <Link 
-              href="/spare-parts" 
+            <Link
+              href="/spare-parts"
               className="bg-transparent border-2 px-8 py-3 rounded-full transition-colors duration-300 font-medium text-base"
               style={{ 
                 borderColor: 'var(--text-main)', 
@@ -103,7 +103,7 @@ export default function Hero() {
           }`}
         >
           {/* Device frame with image inside */}
-          <div className="relative mx-auto max-w-[240px] h-[320px] sm:max-w-sm sm:h-auto md:max-w-md">
+          <div className="relative mx-auto max-w-[240px] h-[320px] sm:max-w-sm sm:h-[450px] md:max-w-md">
             {/* Phone frame */}
             <div className="relative w-full h-full sm:aspect-[9/16] rounded-3xl border-[6px] sm:border-[8px] border-[#333] bg-gray-800 shadow-2xl overflow-hidden">
               {/* Screen content */}
@@ -114,7 +114,8 @@ export default function Hero() {
                   fill
                   className="object-cover object-center"
                   sizes="(max-width: 640px) 240px, (max-width: 768px) 384px, 448px"
-                  priority
+                  priority={true}
+                  quality={90}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                   <div className="p-2 sm:p-3 md:p-6">

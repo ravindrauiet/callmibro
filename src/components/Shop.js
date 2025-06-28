@@ -12,6 +12,7 @@ export default function Shop() {
   const [products, setProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const { isDarkMode } = useTheme()
   
   // Filter states
@@ -38,19 +39,25 @@ export default function Shop() {
   }
   
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setIsVisible(true)
+    try {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          setIsVisible(true)
+        }
+      }, {
+        threshold: 0.2
+      })
+      
+      const element = document.getElementById('shop-section')
+      if (element) observer.observe(element)
+      
+      return () => {
+        if (element) observer.unobserve(element)
       }
-    }, {
-      threshold: 0.2
-    })
-    
-    const element = document.getElementById('shop-section')
-    if (element) observer.observe(element)
-    
-    return () => {
-      if (element) observer.unobserve(element)
+    } catch (err) {
+      console.error('Error in Shop intersection observer:', err)
+      // Default to visible if observer fails
+      setIsVisible(true)
     }
   }, [])
 
@@ -60,6 +67,7 @@ export default function Shop() {
     
     const fetchProducts = async () => {
       setLoading(true)
+      setError(null)
       try {
         const productsSnapshot = await getDocs(
           query(collection(db, 'spareParts'), where('isActive', '==', true), orderBy('createdAt', 'desc'))
@@ -103,6 +111,7 @@ export default function Shop() {
         
       } catch (error) {
         console.error('Shop: Error fetching products:', error)
+        setError('Failed to load products. Using fallback data.')
         // Fallback to static data if database fails
         const staticData = getStaticProducts()
         setProducts(staticData)
@@ -245,6 +254,13 @@ export default function Shop() {
     }
   ]
 
+  // Handle image error
+  const handleImageError = (e) => {
+    console.error('Failed to load product image')
+    e.target.onerror = null;
+    e.target.src = "/phone-battery.jpg";
+  }
+
   return (
     <section id="shop-section" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden">
       {/* Background Elements */}
@@ -259,7 +275,7 @@ export default function Shop() {
       <div className="container mx-auto max-w-6xl relative z-10">
         {/* Section Heading */}
         <div 
-          className={`mb-12 md:mb-16 text-center transform transition-all duration-700 ${
+          className={`mb-10 md:mb-12 text-center transform transition-all duration-700 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
@@ -277,23 +293,32 @@ export default function Shop() {
           </p>
         </div>
         
+        {/* Error message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 rounded-lg text-center">
+            <p className="text-red-400 text-sm">
+              {error}
+            </p>
+          </div>
+        )}
+        
         {/* Filter Options */}
         <div 
           className={`transform transition-all duration-700 delay-300 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="rounded-xl p-6 mb-8 border shadow-lg" style={{ 
+          <div className="rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 border shadow-lg" style={{ 
             background: 'var(--panel-dark)', 
             borderColor: 'var(--border-color)' 
           }}>
-            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between">
               <div className="flex-1">
-                <label style={{ color: 'var(--text-secondary)' }} className="block text-sm mb-2 font-medium">Device Category</label>
+                <label style={{ color: 'var(--text-secondary)' }} className="block text-xs sm:text-sm mb-1 sm:mb-2 font-medium">Device Category</label>
                 <select 
                   value={deviceCategory}
                   onChange={(e) => handleFilterChange('deviceCategory', e.target.value)}
-                  className="w-full p-2.5 border rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]" 
+                  className="w-full p-2 sm:p-2.5 border rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]" 
                   style={{ 
                     background: 'var(--bg-color)', 
                     color: 'var(--text-main)',
@@ -308,11 +333,11 @@ export default function Shop() {
               </div>
               
               <div className="flex-1">
-                <label style={{ color: 'var(--text-secondary)' }} className="block text-sm mb-2 font-medium">Brand</label>
+                <label style={{ color: 'var(--text-secondary)' }} className="block text-xs sm:text-sm mb-1 sm:mb-2 font-medium">Brand</label>
                 <select 
                   value={brand}
                   onChange={(e) => handleFilterChange('brand', e.target.value)}
-                  className="w-full p-2.5 border rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]" 
+                  className="w-full p-2 sm:p-2.5 border rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]" 
                   style={{ 
                     background: 'var(--bg-color)', 
                     color: 'var(--text-main)',
@@ -327,11 +352,11 @@ export default function Shop() {
               </div>
               
               <div className="flex-1">
-                <label style={{ color: 'var(--text-secondary)' }} className="block text-sm mb-2 font-medium">Model</label>
+                <label style={{ color: 'var(--text-secondary)' }} className="block text-xs sm:text-sm mb-1 sm:mb-2 font-medium">Model</label>
                 <select 
                   value={model}
                   onChange={(e) => handleFilterChange('model', e.target.value)}
-                  className="w-full p-2.5 border rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]" 
+                  className="w-full p-2 sm:p-2.5 border rounded-lg text-sm appearance-none focus:border-[#e60012] focus:outline-none focus:ring-1 focus:ring-[#e60012]" 
                   style={{ 
                     background: 'var(--bg-color)', 
                     color: 'var(--text-main)',
@@ -350,7 +375,7 @@ export default function Shop() {
                 <div className="flex items-end">
                   <button
                     onClick={clearFilters}
-                    className="px-4 py-2.5 text-sm rounded-lg border transition-colors duration-300 font-medium"
+                    className="w-full sm:w-auto px-4 py-2 sm:py-2.5 text-sm rounded-lg border transition-colors duration-300 font-medium"
                     style={{ 
                       borderColor: 'var(--border-color)', 
                       color: 'var(--text-secondary)',
@@ -365,35 +390,35 @@ export default function Shop() {
             
             {/* Active Filters Display */}
             {(deviceCategory || brand || model) && (
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
                 {deviceCategory && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
                     Device: {deviceCategory}
                     <button
                       onClick={() => handleFilterChange('deviceCategory', '')}
-                      className="ml-2 text-[#e60012] hover:text-[#d40010]"
+                      className="ml-1 sm:ml-2 text-[#e60012] hover:text-[#d40010]"
                     >
                       ×
                     </button>
                   </span>
                 )}
                 {brand && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
                     Brand: {brand}
                     <button
                       onClick={() => handleFilterChange('brand', '')}
-                      className="ml-2 text-[#e60012] hover:text-[#d40010]"
+                      className="ml-1 sm:ml-2 text-[#e60012] hover:text-[#d40010]"
                     >
                       ×
                     </button>
                   </span>
                 )}
                 {model && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-[#e60012]/10 text-[#e60012]">
                     Model: {model}
                     <button
                       onClick={() => handleFilterChange('model', '')}
-                      className="ml-2 text-[#e60012] hover:text-[#d40010]"
+                      className="ml-1 sm:ml-2 text-[#e60012] hover:text-[#d40010]"
                     >
                       ×
                     </button>
@@ -406,14 +431,47 @@ export default function Shop() {
         
         {/* Products Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#e60012]"></div>
+          <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 hide-scrollbar snap-x snap-mandatory">
+            <div className="flex gap-4 min-w-max">
+              {[...Array(3)].map((_, index) => (
+                <div 
+                  key={index} 
+                  className="w-[260px] flex-shrink-0 snap-start rounded-xl overflow-hidden border" 
+                  style={{ 
+                    backgroundColor: 'var(--panel-dark)', 
+                    borderColor: 'var(--border-color)',
+                    borderWidth: '1px'
+                  }}
+                >
+                  {/* Image Skeleton */}
+                  <div className="relative overflow-hidden aspect-[4/3] bg-gray-800 animate-shimmer"></div>
+                  
+                  {/* Content Skeleton */}
+                  <div className="p-4 sm:p-5 space-y-3">
+                    <div className="flex items-center mb-2">
+                      <div className="h-3 w-24 bg-gray-700 rounded animate-shimmer"></div>
+                    </div>
+                    
+                    <div className="h-5 w-3/4 bg-gray-700 rounded animate-shimmer"></div>
+                    
+                    <div className="space-y-1">
+                      <div className="h-3 w-1/2 bg-gray-700 rounded animate-shimmer"></div>
+                      <div className="h-3 w-2/3 bg-gray-700 rounded animate-shimmer"></div>
+                    </div>
+                    
+                    <div className="h-4 w-16 bg-gray-700 rounded animate-shimmer"></div>
+                    
+                    <div className="h-8 w-full bg-gray-700 rounded-lg mt-2 animate-shimmer"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="overflow-x-auto pb-4 hide-scrollbar">
+          <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 hide-scrollbar snap-x snap-mandatory">
             <div className="flex gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 lg:gap-8 min-w-max sm:min-w-0">
               {filteredProducts.slice(0, 6).map((product, index) => (
-                <div key={product.id} className="w-72 sm:w-auto flex-shrink-0 sm:flex-shrink">
+                <div key={product.id} className="w-[260px] sm:w-auto flex-shrink-0 sm:flex-shrink snap-start">
                   <Link 
                     href={`/spare-parts/${product.id}`}
                     className={`group rounded-xl overflow-hidden transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 transform ${
@@ -432,11 +490,8 @@ export default function Shop() {
                         alt={product.name}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "/phone-battery.jpg";
-                        }}
+                        sizes="(max-width: 640px) 260px, (max-width: 1024px) 50vw, 33vw"
+                        onError={handleImageError}
                       />
                       
                       {/* Badge */}
@@ -469,10 +524,10 @@ export default function Shop() {
                     </div>
                     
                     {/* Product Details */}
-                    <div className="p-5">
-                      <div className="flex items-center mb-2 text-sm">
+                    <div className="p-4 sm:p-5">
+                      <div className="flex items-center mb-2 text-xs sm:text-sm">
                         <div className="flex text-yellow-400">
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path>
                           </svg>
                           <span className="ml-1">{product.rating}</span>
@@ -481,7 +536,7 @@ export default function Shop() {
                         <span style={{ color: 'var(--text-secondary)' }}>{product.reviews} reviews</span>
                       </div>
                       
-                      <h3 className="text-lg font-bold mb-1 group-hover:text-[#e60012] transition-colors">{product.name}</h3>
+                      <h3 className="text-base sm:text-lg font-bold mb-1 group-hover:text-[#e60012] transition-colors">{product.name}</h3>
                       
                       {/* Device info */}
                       <div className="text-xs mb-2 space-y-1" style={{ color: 'var(--text-secondary)' }}>
@@ -493,7 +548,7 @@ export default function Shop() {
                         )}
                       </div>
                       
-                      <div className="text-[#e60012] font-medium mb-4">₹{product.price.toLocaleString()}</div>
+                      <div className="text-[#e60012] font-medium mb-3 sm:mb-4">₹{product.price.toLocaleString()}</div>
                       
                       <div className={`mt-2 py-2 px-4 rounded-lg text-center text-white ${product.featured ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b]' : ''} opacity-80 group-hover:opacity-100 transition-opacity`}
                         style={!product.featured ? { background: 'var(--panel-gray)' } : {}}

@@ -13,24 +13,31 @@ export default function ProductsGrid({ filters = {} }) {
   const [products, setProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(6) // Show 6 products per page
   const { isDarkMode } = useTheme()
   
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setIsVisible(true)
+    try {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          setIsVisible(true)
+        }
+      }, {
+        threshold: 0.1
+      })
+      
+      const element = document.getElementById('products-grid')
+      if (element) observer.observe(element)
+      
+      return () => {
+        if (element) observer.unobserve(element)
       }
-    }, {
-      threshold: 0.1
-    })
-    
-    const element = document.getElementById('products-grid')
-    if (element) observer.observe(element)
-    
-    return () => {
-      if (element) observer.unobserve(element)
+    } catch (err) {
+      console.error('Error in ProductsGrid intersection observer:', err)
+      // Default to visible if observer fails
+      setIsVisible(true)
     }
   }, [])
 
@@ -40,6 +47,7 @@ export default function ProductsGrid({ filters = {} }) {
     
     const fetchProducts = async () => {
       setLoading(true)
+      setError(null)
       try {
         const productsSnapshot = await getDocs(
           query(collection(db, 'spareParts'), where('isActive', '==', true), orderBy('createdAt', 'desc'))
@@ -63,6 +71,7 @@ export default function ProductsGrid({ filters = {} }) {
         console.error('Error fetching products:', error)
         if (!isMounted) return;
         
+        setError('Failed to load products. Using fallback data.')
         // Fallback to static data if database fails
         const staticData = getStaticProducts()
         setProducts(staticData)
@@ -316,12 +325,60 @@ export default function ProductsGrid({ filters = {} }) {
     )
   }
 
+  // Handle image error
+  const handleImageError = (e) => {
+    console.error('Failed to load product image')
+    e.target.onerror = null;
+    // Try to use a local fallback image
+    if (e.target.src && !e.target.src.includes('/')) {
+      e.target.src = "/phone-battery.jpg";
+    } else {
+      e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' /%3E%3C/svg%3E";
+    }
+  }
+
   if (loading) {
     return (
       <section id="products-grid" className="py-10 sm:py-16" style={{ backgroundColor: 'var(--panel-dark)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#e60012]"></div>
+          {/* Skeleton loading state */}
+          <div className="mb-6">
+            <div className="h-5 w-48 bg-gray-700 rounded animate-shimmer"></div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            {[...Array(6)].map((_, index) => (
+              <div 
+                key={index} 
+                className="rounded-xl overflow-hidden border" 
+                style={{ 
+                  backgroundColor: 'var(--panel-dark)', 
+                  borderColor: 'var(--border-color)',
+                  borderWidth: '1px'
+                }}
+              >
+                {/* Image Skeleton */}
+                <div className="relative overflow-hidden aspect-[4/3] bg-gray-800 animate-shimmer"></div>
+                
+                {/* Content Skeleton */}
+                <div className="p-4 sm:p-5 space-y-3">
+                  <div className="flex items-center mb-2">
+                    <div className="h-3 w-24 bg-gray-700 rounded animate-shimmer"></div>
+                  </div>
+                  
+                  <div className="h-5 w-3/4 bg-gray-700 rounded animate-shimmer"></div>
+                  
+                  <div className="space-y-1">
+                    <div className="h-3 w-1/2 bg-gray-700 rounded animate-shimmer"></div>
+                    <div className="h-3 w-2/3 bg-gray-700 rounded animate-shimmer"></div>
+                  </div>
+                  
+                  <div className="h-4 w-16 bg-gray-700 rounded animate-shimmer"></div>
+                  
+                  <div className="h-8 w-full bg-gray-700 rounded-lg mt-2 animate-shimmer"></div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -337,6 +394,15 @@ export default function ProductsGrid({ filters = {} }) {
             Showing {getCurrentPageProducts().length} of {filteredProducts.length} products (Page {currentPage} of {Math.ceil(filteredProducts.length / itemsPerPage)})
           </p>
         </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 rounded-lg text-center">
+            <p className="text-red-400 text-sm">
+              {error}
+            </p>
+          </div>
+        )}
 
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
@@ -362,15 +428,7 @@ export default function ProductsGrid({ filters = {} }) {
                     fill
                     className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      // Try to use a local fallback image
-                      if (product.imageURL && !product.imageURL.includes('/')) {
-                        e.target.src = product.image || "/phone-battery.jpg";
-                      } else {
-                        e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' /%3E%3C/svg%3E";
-                      }
-                    }}
+                    onError={handleImageError}
                     unoptimized={product.imageURL && product.imageURL.includes('cloudfront.net')}
                   />
                   

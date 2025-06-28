@@ -8,6 +8,7 @@ import { db } from '@/firebase/config'
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore'
 import { FiMapPin, FiUser, FiUserPlus, FiLock } from 'react-icons/fi'
 import { useTheme } from '@/contexts/ThemeContext'
+import { v4 as uuidv4 } from 'uuid'
 
 export default function BookingForm({ service, brand, model, onComplete }) {
   console.log('BookingForm rendering with props:', { service, brand, model });
@@ -312,6 +313,47 @@ export default function BookingForm({ service, brand, model, onComplete }) {
         updatedAt: serverTimestamp()
       }
       
+      // Check if offline
+      if (!navigator.onLine) {
+        // Save booking offline
+        const bookingId = uuidv4()
+        const offlineBooking = {
+          id: bookingId,
+          ...bookingData,
+          createdAt: new Date().toISOString(),
+          syncPending: true
+        }
+        
+        // Save to IndexedDB
+        const dbPromise = indexedDB.open('callmibro-offline', 1)
+        dbPromise.onupgradeneeded = (event) => {
+          const db = event.target.result
+          if (!db.objectStoreNames.contains('offline-bookings')) {
+            db.createObjectStore('offline-bookings', { keyPath: 'id' })
+          }
+        }
+        dbPromise.onsuccess = (event) => {
+          const db = event.target.result
+          const transaction = db.transaction(['offline-bookings'], 'readwrite')
+          const store = transaction.objectStore('offline-bookings')
+          store.add(offlineBooking)
+        }
+        
+        toast.success('Booking saved offline. Will sync when online.')
+        setLoading(false)
+        
+        // Call the onComplete callback if provided
+        if (typeof onComplete === 'function') {
+          onComplete(bookingId);
+        }
+        
+        // Redirect to booking confirmation page
+        const confirmationUrl = `/services/booking-confirmation?bookingId=${bookingId}&serviceName=${encodeURIComponent(service)}&serviceType=${encodeURIComponent(model.name)}&date=${encodeURIComponent(formData.date)}&timeSlot=${encodeURIComponent(formData.time)}&offline=true`;
+        console.log('Redirecting to:', confirmationUrl);
+        router.push(confirmationUrl);
+        return
+      }
+      
       console.log('Submitting booking data to Firestore:', bookingData);
       const docRef = await addDoc(collection(db, 'bookings'), bookingData)
       console.log('Booking created with ID:', docRef.id);
@@ -434,6 +476,46 @@ export default function BookingForm({ service, brand, model, onComplete }) {
         isExpressBooking: true, // Flag for express booking
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
+      }
+      
+      // Check if offline
+      if (!navigator.onLine) {
+        // Save booking offline
+        const bookingId = uuidv4()
+        const offlineBooking = {
+          id: bookingId,
+          ...bookingData,
+          createdAt: new Date().toISOString(),
+          syncPending: true
+        }
+        
+        // Save to IndexedDB
+        const dbPromise = indexedDB.open('callmibro-offline', 1)
+        dbPromise.onupgradeneeded = (event) => {
+          const db = event.target.result
+          if (!db.objectStoreNames.contains('offline-bookings')) {
+            db.createObjectStore('offline-bookings', { keyPath: 'id' })
+          }
+        }
+        dbPromise.onsuccess = (event) => {
+          const db = event.target.result
+          const transaction = db.transaction(['offline-bookings'], 'readwrite')
+          const store = transaction.objectStore('offline-bookings')
+          store.add(offlineBooking)
+        }
+        
+        toast.success('Express booking saved offline. Will sync when online.')
+        setLoading(false)
+        
+        // Call the onComplete callback if provided
+        if (typeof onComplete === 'function') {
+          onComplete(bookingId);
+        }
+        
+        // Redirect to booking confirmation page
+        const confirmationUrl = `/services/booking-confirmation?bookingId=${bookingId}&serviceName=${encodeURIComponent(service)}&serviceType=${encodeURIComponent(model.name)}&date=${encodeURIComponent(formData.date)}&timeSlot=${encodeURIComponent(formData.time)}&express=true&offline=true`;
+        router.push(confirmationUrl);
+        return
       }
       
       const docRef = await addDoc(collection(db, 'bookings'), bookingData)

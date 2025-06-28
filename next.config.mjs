@@ -1,5 +1,15 @@
+import withPWA from 'next-pwa'
+
+// Configuration for PWA
+const pwaConfig = {
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development'
+}
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig = withPWA(pwaConfig)({
   images: {
     remotePatterns: [
       {
@@ -57,7 +67,8 @@ const nextConfig = {
       'firebasestorage.googleapis.com',
       'lh3.googleusercontent.com',
       'graph.facebook.com',
-      'platform-lookaside.fbsbx.com'
+      'platform-lookaside.fbsbx.com',
+      'www.shutterstock.com'
     ]
   },
   experimental: {
@@ -68,7 +79,42 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
-  }
-};
+  },
+  // Enable React strict mode for development
+  reactStrictMode: true,
+  // Disable x-powered-by header for security
+  poweredByHeader: false,
+  // Configure headers for security and caching
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+      {
+        source: '/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          }
+        ],
+      },
+    ]
+  },
+})
 
-export default nextConfig;
+export default nextConfig

@@ -109,3 +109,45 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;  /* Safari and Chrome */
 }
+
+/* Horizontal scroll with snap points */
+.snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.snap-start {
+  scroll-snap-align: start;
+}
+
+.snap-center {
+  scroll-snap-align: center;
+}
+
+/* Touch-friendly scrolling */
+@media (hover: none) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--panel-dark) 0%,
+    var(--panel-charcoal) 20%,
+    var(--panel-dark) 40%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
