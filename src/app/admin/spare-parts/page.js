@@ -8,6 +8,8 @@ import { toast } from 'react-hot-toast'
 export default function SparePartsManagement() {
   const [spareParts, setSpareParts] = useState([])
   const [categories, setCategories] = useState([])
+  const [brands, setBrands] = useState([])
+  const [models, setModels] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
@@ -18,6 +20,9 @@ export default function SparePartsManagement() {
   // Form state
   const [sparePartForm, setSparePartForm] = useState({
     name: '',
+    deviceCategory: '',
+    brand: '',
+    model: '',
     category: '',
     description: '',
     price: '',
@@ -28,6 +33,29 @@ export default function SparePartsManagement() {
     specifications: '',
     featured: false
   })
+
+  // Predefined device categories, brands, and models
+  const deviceCategories = [
+    'Mobile Phones',
+    'TVs', 
+    'ACs',
+    'Refrigerators',
+    'Washing Machines',
+    'Laptops',
+    'Tablets',
+    'Gaming Consoles'
+  ]
+
+  const brandOptions = {
+    'Mobile Phones': ['Apple', 'Samsung', 'Xiaomi', 'OnePlus', 'OPPO', 'Vivo', 'Realme', 'Nothing', 'Google', 'Motorola'],
+    'TVs': ['Samsung', 'LG', 'Sony', 'Panasonic', 'TCL', 'Mi', 'OnePlus', 'VU', 'Thomson', 'BPL'],
+    'ACs': ['Voltas', 'Blue Star', 'Carrier', 'Daikin', 'Hitachi', 'LG', 'Samsung', 'Panasonic', 'Whirlpool', 'Godrej'],
+    'Refrigerators': ['LG', 'Samsung', 'Whirlpool', 'Godrej', 'Haier', 'Panasonic', 'Hitachi', 'Bosch', 'BPL', 'Voltas'],
+    'Washing Machines': ['LG', 'Samsung', 'Whirlpool', 'IFB', 'Bosch', 'Haier', 'Panasonic', 'Godrej', 'BPL', 'Voltas'],
+    'Laptops': ['Dell', 'HP', 'Lenovo', 'Apple', 'ASUS', 'Acer', 'MSI', 'Razer', 'Alienware', 'Gigabyte'],
+    'Tablets': ['Apple', 'Samsung', 'Xiaomi', 'Lenovo', 'Realme', 'OPPO', 'OnePlus', 'Amazon', 'Google', 'Huawei'],
+    'Gaming Consoles': ['Sony', 'Microsoft', 'Nintendo', 'Steam', 'ASUS', 'Razer', 'Logitech', 'Corsair', 'HyperX', 'SteelSeries']
+  }
 
   // Fetch spare parts
   useEffect(() => {
@@ -44,13 +72,23 @@ export default function SparePartsManagement() {
           stock: doc.data().stock || 0
         }))
         
-        // Extract unique categories
+        // Extract unique categories, brands, and models
         const uniqueCategories = [...new Set(sparePartsData.map(part => part.category))]
+          .filter(Boolean)
+          .sort()
+        
+        const uniqueBrands = [...new Set(sparePartsData.map(part => part.brand))]
+          .filter(Boolean)
+          .sort()
+        
+        const uniqueModels = [...new Set(sparePartsData.map(part => part.model))]
           .filter(Boolean)
           .sort()
         
         setSpareParts(sparePartsData)
         setCategories(uniqueCategories)
+        setBrands(uniqueBrands)
+        setModels(uniqueModels)
       } catch (error) {
         console.error('Error fetching spare parts:', error)
         toast.error('Failed to load spare parts')
@@ -67,7 +105,9 @@ export default function SparePartsManagement() {
     const matchesSearch = 
       part.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       part.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      part.compatibility?.toLowerCase().includes(searchTerm.toLowerCase())
+      part.compatibility?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      part.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      part.model?.toLowerCase().includes(searchTerm.toLowerCase())
     
     const matchesCategory = filterCategory === 'all' || part.category === filterCategory
     
@@ -79,6 +119,9 @@ export default function SparePartsManagement() {
     if (sparePart) {
       setSparePartForm({
         name: sparePart.name || '',
+        deviceCategory: sparePart.deviceCategory || '',
+        brand: sparePart.brand || '',
+        model: sparePart.model || '',
         category: sparePart.category || '',
         description: sparePart.description || '',
         price: sparePart.price ? sparePart.price.toString() : '',
@@ -93,6 +136,9 @@ export default function SparePartsManagement() {
     } else {
       setSparePartForm({
         name: '',
+        deviceCategory: '',
+        brand: '',
+        model: '',
         category: categories.length > 0 ? categories[0] : '',
         description: '',
         price: '',
@@ -112,8 +158,8 @@ export default function SparePartsManagement() {
   const handleSparePartSubmit = async (e) => {
     e.preventDefault()
     
-    if (!sparePartForm.name || !sparePartForm.category) {
-      toast.error('Name and category are required')
+    if (!sparePartForm.name || !sparePartForm.deviceCategory || !sparePartForm.brand) {
+      toast.error('Name, Device Category, and Brand are required')
       return
     }
     
@@ -152,9 +198,15 @@ export default function SparePartsManagement() {
           updatedAt: new Date()
         }, ...prev])
         
-        // Add new category to categories list if it doesn't exist
+        // Add new category, brand, and model to lists if they don't exist
         if (sparePartForm.category && !categories.includes(sparePartForm.category)) {
           setCategories(prev => [...prev, sparePartForm.category].sort())
+        }
+        if (sparePartForm.brand && !brands.includes(sparePartForm.brand)) {
+          setBrands(prev => [...prev, sparePartForm.brand].sort())
+        }
+        if (sparePartForm.model && !models.includes(sparePartForm.model)) {
+          setModels(prev => [...prev, sparePartForm.model].sort())
         }
         
         toast.success('Spare part added successfully')
@@ -250,6 +302,15 @@ export default function SparePartsManagement() {
                   Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Device Category
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Brand
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Model
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Category
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -300,6 +361,15 @@ export default function SparePartsManagement() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {part.deviceCategory || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {part.brand || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {part.model || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {part.category || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -340,7 +410,7 @@ export default function SparePartsManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-400">
+                  <td colSpan={10} className="px-6 py-4 text-center text-sm text-gray-400">
                     {searchTerm || filterCategory !== 'all' 
                       ? 'No spare parts found matching your search criteria' 
                       : 'No spare parts found. Add your first spare part!'
@@ -374,6 +444,62 @@ export default function SparePartsManagement() {
                     onChange={(e) => setSparePartForm({...sparePartForm, name: e.target.value})}
                     className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
                     required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="deviceCategory" className="block text-sm font-medium text-gray-300 mb-1">
+                    Device Category <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="deviceCategory"
+                    list="deviceCategory-options"
+                    value={sparePartForm.deviceCategory}
+                    onChange={(e) => setSparePartForm({...sparePartForm, deviceCategory: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                    placeholder="Select or type a device category"
+                    required
+                  />
+                  <datalist id="deviceCategory-options">
+                    {deviceCategories.map(category => (
+                      <option key={category} value={category} />
+                    ))}
+                  </datalist>
+                </div>
+                
+                <div>
+                  <label htmlFor="brand" className="block text-sm font-medium text-gray-300 mb-1">
+                    Brand <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="brand"
+                    list="brand-options"
+                    value={sparePartForm.brand}
+                    onChange={(e) => setSparePartForm({...sparePartForm, brand: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                    placeholder="Select or type a brand"
+                    required
+                  />
+                  <datalist id="brand-options">
+                    {brandOptions[sparePartForm.deviceCategory]?.map(brand => (
+                      <option key={brand} value={brand} />
+                    ))}
+                  </datalist>
+                </div>
+                
+                <div>
+                  <label htmlFor="model" className="block text-sm font-medium text-gray-300 mb-1">
+                    Model
+                  </label>
+                  <input
+                    type="text"
+                    id="model"
+                    value={sparePartForm.model}
+                    onChange={(e) => setSparePartForm({...sparePartForm, model: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                    placeholder="e.g. Galaxy S10, iPhone 12, etc."
                   />
                 </div>
                 

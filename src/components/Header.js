@@ -163,7 +163,7 @@ export default function Header({ activePage }) {
         
         <div className="flex items-center space-x-4">
           {/* Theme Toggle Button */}
-          <button
+          {/* <button
             onClick={toggleTheme}
             className="p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 focus:ring-offset-black"
             aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
@@ -177,7 +177,7 @@ export default function Header({ activePage }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
             )}
-          </button>
+          </button> */}
           
           {/* Login button or User menu */}
           {currentUser ? (

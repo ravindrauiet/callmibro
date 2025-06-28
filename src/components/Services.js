@@ -32,7 +32,7 @@ export default function Services() {
       description: "Professional screen & battery replacement services",
       icon: "/icons/mobile-screen.svg",
       url: "/services?category=mobile",
-      primary: true
+      primary: false
     },
     {
       title: "TV Services",
@@ -46,7 +46,7 @@ export default function Services() {
       description: "Specialized cooling, gas refill & maintenance",
       icon: "/icons/ac.svg",
       url: "/services?category=ac",
-      primary: true
+      primary: false
     },
     {
       title: "Refrigerator Fix",
