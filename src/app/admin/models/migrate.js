@@ -119,19 +119,23 @@ export default function MigrateModels() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-white">Models Migration Utility</h2>
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>Models Migration Utility</h2>
       </div>
       
-      <div className="bg-[#1a1a1a] rounded-lg shadow-md p-6">
+      <div className="rounded-lg shadow-md p-6" style={{ backgroundColor: 'var(--panel-charcoal)' }}>
         <div className="mb-6">
-          <h3 className="text-lg font-medium text-white mb-2">Data Migration Tool</h3>
-          <p className="text-gray-300 mb-4">
+          <h3 className="text-lg font-medium mb-2" style={{ color: 'var(--text-main)' }}>Data Migration Tool</h3>
+          <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
             This utility has been disabled by the administrator.
           </p>
           
-          <div className="bg-[#222] border border-[#333] rounded-md p-4 mb-4">
-            <h4 className="text-md font-medium text-white mb-2">Notice:</h4>
-            <ul className="list-disc list-inside text-gray-300 space-y-1">
+          <div className="rounded-md p-4 mb-4" style={{ 
+            backgroundColor: 'var(--panel-gray)',
+            borderColor: 'var(--border-color)',
+            border: '1px solid var(--border-color)'
+          }}>
+            <h4 className="text-md font-medium mb-2" style={{ color: 'var(--text-main)' }}>Notice:</h4>
+            <ul className="list-disc list-inside space-y-1" style={{ color: 'var(--text-secondary)' }}>
               <li>The migration functionality has been disabled.</li>
               <li>Please contact system administrator for more information.</li>
             </ul>
@@ -140,7 +144,11 @@ export default function MigrateModels() {
           <button
             onClick={runMigration}
             disabled={true}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 cursor-not-allowed focus:outline-none"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium cursor-not-allowed focus:outline-none"
+            style={{ 
+              backgroundColor: 'gray',
+              color: 'white'
+            }}
           >
             Migration Disabled
           </button>

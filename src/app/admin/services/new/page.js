@@ -20,7 +20,7 @@ export default function NewService() {
     maxPrice: '',
     isActive: true,
     features: [''],
-    brands: [''],
+    supportedBrands: [''],
     faq: [{ question: '', answer: '' }]
   })
 
@@ -62,18 +62,18 @@ export default function NewService() {
   }
 
   const handleBrandChange = (index, value) => {
-    const updatedBrands = [...formData.brands]
+    const updatedBrands = [...formData.supportedBrands]
     updatedBrands[index] = value
-    setFormData(prev => ({ ...prev, brands: updatedBrands }))
+    setFormData(prev => ({ ...prev, supportedBrands: updatedBrands }))
   }
 
   const addBrand = () => {
-    setFormData(prev => ({ ...prev, brands: [...prev.brands, ''] }))
+    setFormData(prev => ({ ...prev, supportedBrands: [...prev.supportedBrands, ''] }))
   }
 
   const removeBrand = (index) => {
-    const updatedBrands = formData.brands.filter((_, i) => i !== index)
-    setFormData(prev => ({ ...prev, brands: updatedBrands }))
+    const updatedBrands = formData.supportedBrands.filter((_, i) => i !== index)
+    setFormData(prev => ({ ...prev, supportedBrands: updatedBrands }))
   }
 
   const handleFaqChange = (index, field, value) => {
@@ -112,7 +112,7 @@ export default function NewService() {
         minPrice: formData.minPrice ? parseFloat(formData.minPrice) : null,
         maxPrice: formData.maxPrice ? parseFloat(formData.maxPrice) : null,
         features: formData.features.filter(feature => feature.trim() !== ''),
-        brands: formData.brands.filter(brand => brand.trim() !== ''),
+        supportedBrands: formData.supportedBrands.filter(brand => brand.trim() !== ''),
         faq: formData.faq.filter(item => item.question.trim() !== '' && item.answer.trim() !== ''),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -142,10 +142,11 @@ export default function NewService() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-white">Add New Service</h2>
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>Add New Service</h2>
         <button
           onClick={() => router.push('/admin/services')}
-          className="inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          className="inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          style={{ color: 'var(--text-main)' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -154,14 +155,14 @@ export default function NewService() {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-[#1a1a1a] rounded-lg shadow-md p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="rounded-lg shadow-md p-6 space-y-6" style={{ backgroundColor: 'var(--panel-charcoal)' }}>
         {/* Basic Information */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-white border-b border-[#333] pb-2">Basic Information</h3>
+          <h3 className="text-lg font-medium border-b pb-2" style={{ color: 'var(--text-main)', borderColor: 'var(--border-color)' }}>Basic Information</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                 Service Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -170,13 +171,18 @@ export default function NewService() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)', 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
                 required
               />
             </div>
             
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="category" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                 Category <span className="text-red-500">*</span>
               </label>
               <select
@@ -184,7 +190,12 @@ export default function NewService() {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)', 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
                 required
               >
                 <option value="">Select Category</option>
@@ -200,7 +211,7 @@ export default function NewService() {
           </div>
           
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+            <label htmlFor="description" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
               Description <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -209,14 +220,19 @@ export default function NewService() {
               value={formData.description}
               onChange={handleChange}
               rows={4}
-              className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+              style={{ 
+                backgroundColor: 'var(--panel-gray)', 
+                borderColor: 'var(--border-color)',
+                color: 'var(--text-main)'
+              }}
               required
             />
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="minPrice" className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="minPrice" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                 Minimum Price (₹)
               </label>
               <input
@@ -227,12 +243,17 @@ export default function NewService() {
                 onChange={handleChange}
                 min="0"
                 step="1"
-                className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)', 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
               />
             </div>
             
             <div>
-              <label htmlFor="maxPrice" className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="maxPrice" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                 Maximum Price (₹)
               </label>
               <input
@@ -243,7 +264,12 @@ export default function NewService() {
                 onChange={handleChange}
                 min="0"
                 step="1"
-                className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)', 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
               />
             </div>
           </div>
@@ -255,9 +281,10 @@ export default function NewService() {
               name="isActive"
               checked={formData.isActive}
               onChange={handleChange}
-              className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
+              className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] rounded"
+              style={{ borderColor: 'var(--border-color)' }}
             />
-            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-300">
+            <label htmlFor="isActive" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
               Active (visible to customers)
             </label>
           </div>
@@ -265,12 +292,12 @@ export default function NewService() {
         
         {/* Service Icon */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-white border-b border-[#333] pb-2">Service Icon</h3>
+          <h3 className="text-lg font-medium border-b pb-2" style={{ color: 'var(--text-main)', borderColor: 'var(--border-color)' }}>Service Icon</h3>
           
           <div className="flex items-center space-x-6">
             <div className="flex-shrink-0">
               {iconPreview ? (
-                <div className="h-24 w-24 bg-[#333] rounded-md flex items-center justify-center overflow-hidden">
+                <div className="h-24 w-24 rounded-md flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--panel-gray)' }}>
                   <img 
                     src={iconPreview} 
                     alt="Icon Preview" 
@@ -278,8 +305,8 @@ export default function NewService() {
                   />
                 </div>
               ) : (
-                <div className="h-24 w-24 bg-[#333] rounded-md flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="h-24 w-24 rounded-md flex items-center justify-center" style={{ backgroundColor: 'var(--panel-gray)' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--text-secondary)' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
@@ -287,22 +314,26 @@ export default function NewService() {
             </div>
             
             <div className="flex-grow">
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                 Upload Icon
               </label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleIconChange}
-                className="block w-full text-sm text-gray-400
+                className="block w-full text-sm
                   file:mr-4 file:py-2 file:px-4
                   file:rounded-md file:border-0
                   file:text-sm file:font-medium
-                  file:bg-[#333] file:text-white
-                  hover:file:bg-[#444]
+                  hover:file:bg-opacity-80
                 "
+                style={{ 
+                  color: 'var(--text-secondary)',
+                  '--tw-file-bg': 'var(--panel-gray)',
+                  '--tw-file-color': 'var(--text-main)'
+                }}
               />
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
                 Recommended size: 64x64px. PNG or SVG format.
               </p>
             </div>
@@ -311,7 +342,7 @@ export default function NewService() {
         
         {/* Features */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-white border-b border-[#333] pb-2">Features</h3>
+          <h3 className="text-lg font-medium border-b pb-2" style={{ color: 'var(--text-main)', borderColor: 'var(--border-color)' }}>Features</h3>
           
           {formData.features.map((feature, index) => (
             <div key={index} className="flex items-center space-x-2">
@@ -320,12 +351,18 @@ export default function NewService() {
                 value={feature}
                 onChange={(e) => handleFeatureChange(index, e.target.value)}
                 placeholder="Enter feature"
-                className="flex-grow px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)', 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
               />
               <button
                 type="button"
                 onClick={() => removeFeature(index)}
-                className="p-2 text-gray-400 hover:text-red-500"
+                className="p-2 hover:text-red-500"
+                style={{ color: 'var(--text-secondary)' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -337,32 +374,42 @@ export default function NewService() {
           <button
             type="button"
             onClick={addFeature}
-            className="inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#333] hover:bg-[#444] focus:outline-none"
+            className="inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium focus:outline-none"
+            style={{ 
+              backgroundColor: 'var(--panel-gray)',
+              color: 'var(--text-main)'
+            }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
             Add Feature
           </button>
         </div>
         
-        {/* Brands */}
+        {/* Supported Brands */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-white border-b border-[#333] pb-2">Supported Brands</h3>
+          <h3 className="text-lg font-medium border-b pb-2" style={{ color: 'var(--text-main)', borderColor: 'var(--border-color)' }}>Supported Brands</h3>
           
-          {formData.brands.map((brand, index) => (
+          {formData.supportedBrands.map((brand, index) => (
             <div key={index} className="flex items-center space-x-2">
               <input
                 type="text"
                 value={brand}
                 onChange={(e) => handleBrandChange(index, e.target.value)}
                 placeholder="Enter brand name"
-                className="flex-grow px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)', 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
               />
               <button
                 type="button"
                 onClick={() => removeBrand(index)}
-                className="p-2 text-gray-400 hover:text-red-500"
+                className="p-2 hover:text-red-500"
+                style={{ color: 'var(--text-secondary)' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -374,9 +421,13 @@ export default function NewService() {
           <button
             type="button"
             onClick={addBrand}
-            className="inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#333] hover:bg-[#444] focus:outline-none"
+            className="inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium focus:outline-none"
+            style={{ 
+              backgroundColor: 'var(--panel-gray)',
+              color: 'var(--text-main)'
+            }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
             Add Brand
@@ -385,81 +436,91 @@ export default function NewService() {
         
         {/* FAQ */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-white border-b border-[#333] pb-2">FAQ</h3>
+          <h3 className="text-lg font-medium border-b pb-2" style={{ color: 'var(--text-main)', borderColor: 'var(--border-color)' }}>FAQ</h3>
           
-          {formData.faq.map((item, index) => (
-            <div key={index} className="space-y-3 p-4 bg-[#222] rounded-md">
-              <div className="flex justify-between items-center">
-                <h4 className="text-sm font-medium text-white">FAQ Item #{index + 1}</h4>
-                <button
-                  type="button"
-                  onClick={() => removeFaq(index)}
-                  className="p-1 text-gray-400 hover:text-red-500"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
+          {formData.faq.map((faqItem, index) => (
+            <div key={index} className="space-y-2 p-4 border rounded-md" style={{ borderColor: 'var(--border-color)' }}>
+              <h4 className="text-sm font-medium" style={{ color: 'var(--text-main)' }}>FAQ Item #{index + 1}</h4>
               
-              <div>
-                <label htmlFor={`faq-question-${index}`} className="block text-sm font-medium text-gray-300 mb-1">
-                  Question
-                </label>
+              <div className="space-y-2">
                 <input
                   type="text"
-                  id={`faq-question-${index}`}
-                  value={item.question}
+                  value={faqItem.question}
                   onChange={(e) => handleFaqChange(index, 'question', e.target.value)}
-                  className="w-full px-3 py-2 bg-[#1a1a1a] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  placeholder="Question"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-charcoal)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
+                />
+                
+                <textarea
+                  value={faqItem.answer}
+                  onChange={(e) => handleFaqChange(index, 'answer', e.target.value)}
+                  placeholder="Answer"
+                  rows={2}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-charcoal)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                 />
               </div>
               
-              <div>
-                <label htmlFor={`faq-answer-${index}`} className="block text-sm font-medium text-gray-300 mb-1">
-                  Answer
-                </label>
-                <textarea
-                  id={`faq-answer-${index}`}
-                  value={item.answer}
-                  onChange={(e) => handleFaqChange(index, 'answer', e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 bg-[#1a1a1a] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => removeFaq(index)}
+                className="inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium focus:outline-none"
+                style={{ 
+                  backgroundColor: 'var(--panel-gray)',
+                  color: 'var(--text-main)'
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Remove FAQ
+              </button>
             </div>
           ))}
           
           <button
             type="button"
             onClick={addFaq}
-            className="inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#333] hover:bg-[#444] focus:outline-none"
+            className="inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium focus:outline-none"
+            style={{ 
+              backgroundColor: 'var(--panel-gray)',
+              color: 'var(--text-main)'
+            }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Add FAQ Item
+            Add FAQ
           </button>
         </div>
         
-        {/* Submit Button */}
-        <div className="pt-4 border-t border-[#333] flex justify-end">
+        <div className="pt-4 border-t flex justify-end" style={{ borderColor: 'var(--border-color)' }}>
           <button
             type="submit"
             disabled={loading}
-            className={`inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-[#e60012] hover:bg-[#d40010] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e60012] ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e60012] ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            style={{ 
+              backgroundColor: '#e60012',
+              color: 'white',
+              '--tw-ring-offset-color': 'var(--panel-charcoal)'
+            }}
           >
-            {loading ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Creating...
-              </>
-            ) : (
-              'Create Service'
+            {loading && (
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
             )}
+            {loading ? 'Adding Service...' : 'Add Service'}
           </button>
         </div>
       </form>

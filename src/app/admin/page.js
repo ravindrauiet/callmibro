@@ -310,7 +310,7 @@ function StatCard({ title, value, icon, color, link }) {
       >
         <div className="flex items-center">
           <div className={`p-3 rounded-md bg-gradient-to-br ${color}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'white' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
             </svg>
           </div>
@@ -341,7 +341,7 @@ function QuickAction({ title, description, icon, link, color }) {
         }}
       >
         <div className={`p-3 rounded-md bg-gradient-to-br ${color} inline-flex`}>
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'white' }}>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
           </svg>
         </div>

@@ -14,17 +14,15 @@ export default function NewTechnician() {
     name: '',
     email: '',
     phone: '',
+    imageURL: '',
     specialization: '',
     experience: '',
+    bio: '',
+    isAvailable: true,
     address: '',
     city: '',
-    pincode: '',
-    isAvailable: true,
-    imageURL: '',
-    bio: '',
-    rating: 0,
-    totalJobs: 0,
-    completedJobs: 0
+    state: '',
+    pincode: ''
   })
 
   const handleChange = (e) => {
@@ -37,27 +35,25 @@ export default function NewTechnician() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    if (!technicianForm.name || !technicianForm.email || !technicianForm.phone) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    
     setLoading(true)
-
+    
     try {
-      // Validate required fields
-      if (!technicianForm.name || !technicianForm.email || !technicianForm.phone) {
-        toast.error('Name, email and phone are required')
-        setLoading(false)
-        return
-      }
-
-      // Create technician document
       const technicianData = {
         ...technicianForm,
-        experience: technicianForm.experience ? parseInt(technicianForm.experience) : 0,
+        experience: parseInt(technicianForm.experience) || 0,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       }
-
+      
       await addDoc(collection(db, 'technicians'), technicianData)
       
-      toast.success('Technician added successfully!')
+      toast.success('Technician added successfully')
       router.push('/admin/technicians')
     } catch (error) {
       console.error('Error adding technician:', error)
@@ -70,10 +66,15 @@ export default function NewTechnician() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-white">Add New Technician</h2>
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>Add New Technician</h2>
         <button
           onClick={() => router.push('/admin/technicians')}
-          className="inline-flex items-center px-4 py-2 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-[#222] hover:bg-[#333] focus:outline-none"
+          className="inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none"
+          style={{ 
+            borderColor: 'var(--border-color)',
+            backgroundColor: 'var(--panel-gray)',
+            color: 'var(--text-main)'
+          }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -82,15 +83,15 @@ export default function NewTechnician() {
         </button>
       </div>
 
-      <div className="bg-[#1a1a1a] rounded-lg shadow-md p-6">
+      <div className="rounded-lg shadow-md p-6" style={{ backgroundColor: 'var(--panel-charcoal)' }}>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Personal Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-white border-b border-[#333] pb-2">Personal Information</h3>
+              <h3 className="text-lg font-medium border-b pb-2" style={{ color: 'var(--text-main)', borderColor: 'var(--border-color)' }}>Personal Information</h3>
               
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="name" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Full Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -99,13 +100,18 @@ export default function NewTechnician() {
                   name="name"
                   value={technicianForm.name}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                   required
                 />
               </div>
               
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Email <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -114,13 +120,18 @@ export default function NewTechnician() {
                   name="email"
                   value={technicianForm.email}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                   required
                 />
               </div>
               
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="phone" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Phone Number <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -129,13 +140,18 @@ export default function NewTechnician() {
                   name="phone"
                   value={technicianForm.phone}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                   required
                 />
               </div>
               
               <div>
-                <label htmlFor="imageURL" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="imageURL" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Profile Image URL
                 </label>
                 <input
@@ -144,12 +160,17 @@ export default function NewTechnician() {
                   name="imageURL"
                   value={technicianForm.imageURL}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                   placeholder="https://example.com/image.jpg"
                 />
                 {technicianForm.imageURL && (
                   <div className="mt-2 flex items-center">
-                    <div className="h-16 w-16 bg-[#222] rounded-full flex items-center justify-center overflow-hidden">
+                    <div className="h-16 w-16 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--panel-gray)' }}>
                       <img 
                         src={technicianForm.imageURL} 
                         alt="Preview" 
@@ -160,7 +181,7 @@ export default function NewTechnician() {
                         }}
                       />
                     </div>
-                    <span className="ml-2 text-xs text-gray-400">Preview (if URL is valid)</span>
+                    <span className="ml-2 text-xs" style={{ color: 'var(--text-secondary)' }}>Preview (if URL is valid)</span>
                   </div>
                 )}
               </div>
@@ -168,10 +189,10 @@ export default function NewTechnician() {
             
             {/* Professional Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-white border-b border-[#333] pb-2">Professional Information</h3>
+              <h3 className="text-lg font-medium border-b pb-2" style={{ color: 'var(--text-main)', borderColor: 'var(--border-color)' }}>Professional Information</h3>
               
               <div>
-                <label htmlFor="specialization" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="specialization" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Specialization
                 </label>
                 <select
@@ -179,7 +200,12 @@ export default function NewTechnician() {
                   name="specialization"
                   value={technicianForm.specialization}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                 >
                   <option value="">Select Specialization</option>
                   <option value="AC Repair">AC Repair</option>
@@ -193,7 +219,7 @@ export default function NewTechnician() {
               </div>
               
               <div>
-                <label htmlFor="experience" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="experience" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Years of Experience
                 </label>
                 <input
@@ -202,13 +228,18 @@ export default function NewTechnician() {
                   name="experience"
                   value={technicianForm.experience}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                   min="0"
                 />
               </div>
               
               <div>
-                <label htmlFor="bio" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="bio" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Bio / Description
                 </label>
                 <textarea
@@ -217,7 +248,12 @@ export default function NewTechnician() {
                   value={technicianForm.bio}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                   placeholder="Brief description about the technician's skills and experience"
                 />
               </div>
@@ -229,9 +265,10 @@ export default function NewTechnician() {
                   name="isAvailable"
                   checked={technicianForm.isAvailable}
                   onChange={handleChange}
-                  className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
+                  className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] rounded"
+                  style={{ borderColor: 'var(--border-color)' }}
                 />
-                <label htmlFor="isAvailable" className="ml-2 block text-sm text-gray-300">
+                <label htmlFor="isAvailable" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
                   Available for new assignments
                 </label>
               </div>
@@ -240,11 +277,11 @@ export default function NewTechnician() {
           
           {/* Address Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-white border-b border-[#333] pb-2">Address Information</h3>
+            <h3 className="text-lg font-medium border-b pb-2" style={{ color: 'var(--text-main)', borderColor: 'var(--border-color)' }}>Address Information</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="address" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="address" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Address
                 </label>
                 <input
@@ -253,12 +290,17 @@ export default function NewTechnician() {
                   name="address"
                   value={technicianForm.address}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                 />
               </div>
               
               <div>
-                <label htmlFor="city" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="city" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   City
                 </label>
                 <input
@@ -267,12 +309,36 @@ export default function NewTechnician() {
                   name="city"
                   value={technicianForm.city}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                 />
               </div>
               
               <div>
-                <label htmlFor="pincode" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="state" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                  State
+                </label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
+                  value={technicianForm.state}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="pincode" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Pincode
                 </label>
                 <input
@@ -281,33 +347,36 @@ export default function NewTechnician() {
                   name="pincode"
                   value={technicianForm.pincode}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                 />
               </div>
             </div>
           </div>
           
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={() => router.push('/admin/technicians')}
-              className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none"
-            >
-              Cancel
-            </button>
+          <div className="flex justify-end">
             <button
               type="submit"
               disabled={loading}
-              className={`px-4 py-2 bg-[#e60012] rounded-md text-white hover:bg-[#d40010] focus:outline-none ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e60012] ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              style={{ 
+                backgroundColor: '#e60012',
+                color: 'white',
+                '--tw-ring-offset-color': 'var(--panel-charcoal)'
+              }}
             >
               {loading ? (
-                <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Adding...
-                </span>
+                  Adding Technician...
+                </>
               ) : (
                 'Add Technician'
               )}
