@@ -502,7 +502,8 @@ export default function AuthModal({ isOpen, onClose }) {
               </button>
             </div>
             
-            {/* Debug button for testing */}
+            {/* Debug buttons - Commented out for production */}
+            {/*
             <div className="mt-4 text-center">
               <button
                 type="button"
@@ -573,6 +574,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 Clear Auth State
               </button>
             </div>
+            */}
           </div>
         )}
         

@@ -46,6 +46,8 @@ const GenericSkeleton = () => (
 export default function Home() {
   const { isDarkMode } = useTheme()
   const { currentUser } = useAuth()
+  // Comment out debug state and functions
+  /*
   const [authDebug, setAuthDebug] = useState({
     redirectResult: null,
     redirectError: null,
@@ -99,12 +101,14 @@ export default function Home() {
 
     checkRedirectResult()
   }, [])
+  */
   
   return (
     <div className="flex flex-col min-h-screen">
       <Header activePage="home" />
       
-      {/* Debug Panel - Always visible for testing */}
+      {/* Debug Panel - Commented out for production */}
+      {/*
       <div className="fixed top-20 right-4 z-50">
         <div className="bg-black/90 text-white p-4 rounded-lg shadow-lg max-w-xs sm:max-w-md overflow-auto max-h-[80vh]">
           <div className="flex justify-between items-center mb-2">
@@ -154,6 +158,7 @@ export default function Home() {
           )}
         </div>
       </div>
+      */}
       
       <Hero />
       
