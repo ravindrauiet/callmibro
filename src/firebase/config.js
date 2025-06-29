@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore, enableIndexedDbPersistence, CACHE_SIZE_UNLIMITED } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 // Helper – decide authDomain without crashing on the server
@@ -57,6 +57,21 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
+
+// Get auth with a specific domain (for mobile authentication)
+export const getAuthWithDomain = (domain) => {
+  // Create a new config with the specified domain
+  const customConfig = {
+    ...firebaseConfig,
+    authDomain: domain || firebaseConfig.authDomain
+  };
+  
+  // Initialize a new app with the custom config
+  const customApp = initializeApp(customConfig, 'auth-' + (domain || 'default'));
+  
+  // Get auth from the custom app
+  return getAuth(customApp);
+};
 
 // Enable offline persistence
 if (typeof window !== 'undefined') {

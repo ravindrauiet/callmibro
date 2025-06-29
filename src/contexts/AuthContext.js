@@ -16,8 +16,8 @@ import {
   sendEmailVerification,
   getIdToken
 } from 'firebase/auth';
-import { auth, db } from '../firebase/config';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db, getAuthWithDomain } from '../firebase/config';
+import { doc, setDoc, getDoc, serverTimestamp, collection, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 
 // Create auth context
@@ -243,25 +243,32 @@ export function AuthProvider({ children }) {
         // For mobile, use redirect with special handling
         await logToServer('Using redirect authentication for mobile');
         
-        // For mobile, we need to set the redirect URL explicitly to match what's in Firebase console
-        // This ensures the redirect goes back to the same origin
-        const redirectUrl = `${window.location.origin}/auth/callback`;
-        await logToServer('Setting redirect URL', { redirectUrl });
-        
-        // For production, use the current domain as the auth domain
-        if (!isLocalhost) {
-          // Temporarily override the auth domain for the redirect
-          auth._config.authDomain = window.location.hostname;
-          await logToServer('Temporarily overriding authDomain', { 
-            newAuthDomain: auth._config.authDomain 
-          });
-        }
-        
         try {
-          await signInWithRedirect(auth, provider);
-          await logToServer('Redirect initiated successfully');
-          // Page will redirect, no code after this will execute
-          return;
+          // For mobile on production, use the current hostname as auth domain
+          if (!isLocalhost) {
+            const currentHostname = window.location.hostname;
+            await logToServer('Using custom auth with current hostname', { hostname: currentHostname });
+            
+            // Get auth instance with the current hostname as the auth domain
+            const mobileAuth = getAuthWithDomain(currentHostname);
+            
+            // Set up the provider
+            provider.setCustomParameters({ 
+              prompt: 'select_account',
+              access_type: 'offline'
+            });
+            
+            // Use redirect with the custom auth instance
+            await signInWithRedirect(mobileAuth, provider);
+            await logToServer('Mobile redirect initiated with custom auth');
+            return;
+          } else {
+            // For localhost, use the default auth
+            await logToServer('Using default auth for localhost mobile');
+            await signInWithRedirect(auth, provider);
+            await logToServer('Redirect initiated for localhost mobile');
+            return;
+          }
         } catch (redirectError) {
           await logToServer('Redirect failed, trying popup as fallback', { 
             error: redirectError.message,

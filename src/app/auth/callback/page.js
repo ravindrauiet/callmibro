@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuth, getRedirectResult } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/firebase/config';
+import { db, getAuthWithDomain } from '@/firebase/config';
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -14,10 +14,18 @@ export default function AuthCallback() {
     const handleRedirect = async () => {
       try {
         console.log('Auth callback page loaded, checking for redirect result...');
-        const auth = getAuth();
         
-        // Try to get the redirect result
-        const result = await getRedirectResult(auth);
+        // Try with default auth first
+        const auth = getAuth();
+        let result = await getRedirectResult(auth);
+        
+        // If no result, try with custom auth using current hostname
+        if (!result) {
+          console.log('No result with default auth, trying with custom auth...');
+          const hostname = window.location.hostname;
+          const customAuth = getAuthWithDomain(hostname);
+          result = await getRedirectResult(customAuth);
+        }
         
         if (result) {
           console.log('Redirect result found:', result.user.email);

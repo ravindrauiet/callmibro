@@ -124,6 +124,11 @@ const nextConfig = withPWA(pwaConfig)({
         // Handle auth for root domain
         source: '/callmibro.com/__/auth/:path*',
         destination: 'https://callmibro.firebaseapp.com/__/auth/:path*'
+      },
+      {
+        // Handle auth callback
+        source: '/auth/callback',
+        destination: '/auth/callback'
       }
     ];
   },
