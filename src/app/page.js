@@ -1,9 +1,12 @@
 'use client'
 
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useState, useEffect } from 'react'
 import Header from '../components/Header'
 import Hero from '../components/Hero'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { getRedirectResult } from 'firebase/auth'
+import { auth } from '@/firebase/config'
 
 // Lazy load non-critical components
 const Services = lazy(() => import('../components/Services'))
@@ -42,10 +45,119 @@ const GenericSkeleton = () => (
 
 export default function Home() {
   const { isDarkMode } = useTheme()
+  const { currentUser } = useAuth()
+  const [authDebug, setAuthDebug] = useState({
+    redirectResult: null,
+    redirectError: null,
+    userAgent: '',
+    isMobile: false,
+    authDomain: '',
+    hostname: ''
+  })
+  const [showDebug, setShowDebug] = useState(false)
+
+  useEffect(() => {
+    // Check for redirect result
+    const checkRedirectResult = async () => {
+      try {
+        // Get user agent info
+        const userAgent = navigator.userAgent
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+        const hostname = window.location.hostname
+
+        // Try to get redirect result
+        const result = await getRedirectResult(auth)
+        
+        setAuthDebug({
+          redirectResult: result ? {
+            providerId: result.providerId,
+            userId: result.user?.uid,
+            email: result.user?.email,
+            operationType: result.operationType
+          } : 'No redirect result found',
+          redirectError: null,
+          userAgent,
+          isMobile,
+          authDomain: auth.config.authDomain,
+          hostname
+        })
+      } catch (error) {
+        setAuthDebug(prev => ({
+          ...prev,
+          redirectResult: null,
+          redirectError: {
+            code: error.code,
+            message: error.message
+          },
+          userAgent: navigator.userAgent,
+          isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+          authDomain: auth.config?.authDomain || 'unknown',
+          hostname: window.location.hostname
+        }))
+      }
+    }
+
+    checkRedirectResult()
+  }, [])
   
   return (
     <div className="flex flex-col min-h-screen">
       <Header activePage="home" />
+      
+      {/* Debug Panel - Double tap to show/hide */}
+      <div 
+        className="fixed top-20 right-4 z-50"
+        onDoubleClick={() => setShowDebug(!showDebug)}
+      >
+        {showDebug && (
+          <div className="bg-black/90 text-white p-4 rounded-lg shadow-lg max-w-xs sm:max-w-md overflow-auto max-h-[80vh]">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-bold text-sm">Auth Debug</h3>
+              <button 
+                onClick={() => setShowDebug(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="text-xs space-y-2">
+              <div>
+                <span className="text-gray-400">User:</span> {currentUser ? `${currentUser.email} (${currentUser.uid})` : 'Not logged in'}
+              </div>
+              <div>
+                <span className="text-gray-400">Mobile:</span> {authDebug.isMobile ? 'Yes' : 'No'}
+              </div>
+              <div>
+                <span className="text-gray-400">Auth Domain:</span> {authDebug.authDomain}
+              </div>
+              <div>
+                <span className="text-gray-400">Hostname:</span> {authDebug.hostname}
+              </div>
+              <div>
+                <span className="text-gray-400">Redirect Result:</span> 
+                <pre className="whitespace-pre-wrap text-xs mt-1">
+                  {authDebug.redirectResult ? JSON.stringify(authDebug.redirectResult, null, 2) : 'None'}
+                </pre>
+              </div>
+              {authDebug.redirectError && (
+                <div>
+                  <span className="text-red-400">Error:</span> 
+                  <pre className="whitespace-pre-wrap text-xs mt-1 text-red-300">
+                    {JSON.stringify(authDebug.redirectError, null, 2)}
+                  </pre>
+                </div>
+              )}
+              <div>
+                <span className="text-gray-400">User Agent:</span> 
+                <div className="text-xs mt-1 break-words">
+                  {authDebug.userAgent}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
       <Hero />
       
       <Suspense fallback={<ServicesSkeleton />}>

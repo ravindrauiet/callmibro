@@ -22,15 +22,12 @@ function resolveAuthDomain() {
       return 'callmibro.firebaseapp.com';
     }
     
-    // For production domains, use the current hostname for better auth flow
+    // For production domains, use the Firebase project domain for better auth flow
+    // This is critical for mobile authentication to work properly
     if (host === 'callmibro.com' || host === 'www.callmibro.com') {
-      // For mobile devices, use the current hostname to avoid third-party cookie issues
-      if (isMobile) {
-        console.log('Mobile device detected, using current hostname for authDomain:', host);
-        return host;
-      }
-      
-      // For desktop, either approach works, but using Firebase domain is more reliable
+      // Always use the Firebase project domain for authentication
+      // This ensures consistent behavior across all devices
+      console.log('Using Firebase project domain for auth:', 'callmibro.firebaseapp.com');
       return 'callmibro.firebaseapp.com';
     }
     

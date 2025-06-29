@@ -235,7 +235,8 @@ export function AuthProvider({ children }) {
         isMobile, 
         hostname,
         isLocalhost,
-        authDomain: auth.config.authDomain
+        authDomain: auth.config.authDomain,
+        currentUrl: window.location.href
       });
       
       // Different strategies for mobile and desktop
@@ -244,38 +245,33 @@ export function AuthProvider({ children }) {
         await logToServer('Using redirect authentication for mobile');
         
         try {
-          // For mobile on production, use the current hostname as auth domain
-          if (!isLocalhost) {
-            const currentHostname = window.location.hostname;
-            await logToServer('Using custom auth with current hostname', { hostname: currentHostname });
-            
-            // Get auth instance with the current hostname as the auth domain
-            const mobileAuth = getAuthWithDomain(currentHostname);
-            
-            // Set up the provider
-            provider.setCustomParameters({ 
-              prompt: 'select_account',
-              access_type: 'offline'
-            });
-            
-            // Use redirect with the custom auth instance
-            await signInWithRedirect(mobileAuth, provider);
-            await logToServer('Mobile redirect initiated with custom auth');
-            return;
-          } else {
-            // For localhost, use the default auth
-            await logToServer('Using default auth for localhost mobile');
-            await signInWithRedirect(auth, provider);
-            await logToServer('Redirect initiated for localhost mobile');
-            return;
+          // Always use the default Firebase auth domain for Google Auth
+          // This is critical for mobile redirect flow to work properly
+          await logToServer('Using Firebase project auth domain for mobile');
+          
+          // Clear any existing auth sessions/cookies that might interfere
+          await logToServer('Clearing any existing auth state');
+          
+          // Set a session storage flag to detect redirect completion
+          if (typeof window !== 'undefined') {
+            window.sessionStorage.setItem('googleAuthStarted', 'true');
+            window.sessionStorage.setItem('authTimestamp', Date.now().toString());
           }
+          
+          // Use redirect with the default auth instance
+          await signInWithRedirect(auth, provider);
+          await logToServer('Mobile redirect initiated with default auth domain');
+          return;
         } catch (redirectError) {
-          await logToServer('Redirect failed, trying popup as fallback', { 
+          await logToServer('Redirect failed, detailed error info', { 
             error: redirectError.message,
-            code: redirectError.code 
+            code: redirectError.code,
+            stack: redirectError.stack?.substring(0, 200),
+            authDomain: auth.config.authDomain
           });
           
           // Fallback to popup if redirect fails
+          await logToServer('Trying popup as fallback on mobile');
           const result = await signInWithPopup(auth, provider);
           await logToServer('Popup fallback successful on mobile', {
             userId: result.user.uid,
@@ -688,10 +684,27 @@ export function AuthProvider({ children }) {
       try {
         await logToServer('Checking for redirect result');
         
+        // Check if we have a pending Google auth from session storage
+        const googleAuthStarted = typeof window !== 'undefined' && window.sessionStorage.getItem('googleAuthStarted');
+        const authTimestamp = typeof window !== 'undefined' && window.sessionStorage.getItem('authTimestamp');
+        
+        if (googleAuthStarted) {
+          await logToServer('Found pending Google auth in session storage', {
+            timestamp: authTimestamp,
+            timeSinceAuth: Date.now() - parseInt(authTimestamp || '0')
+          });
+        }
+        
         // Add a small delay to ensure Firebase is ready
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         const result = await getRedirectResult(auth);
+        
+        // Clear the session storage flags regardless of result
+        if (typeof window !== 'undefined') {
+          window.sessionStorage.removeItem('googleAuthStarted');
+          window.sessionStorage.removeItem('authTimestamp');
+        }
         
         if (result) {
           await logToServer('Redirect result found', { 
@@ -737,6 +750,24 @@ export function AuthProvider({ children }) {
         } else {
           await logToServer('No redirect result found');
           
+          // Check if there's a pending Google auth but no result
+          if (googleAuthStarted) {
+            await logToServer('Google auth was started but no result found', {
+              timeSinceAuthStarted: Date.now() - parseInt(authTimestamp || '0')
+            });
+            
+            // If it's been less than 10 seconds since auth started, this is likely
+            // just the initial page load after the redirect started but before completion
+            const timeSinceAuth = Date.now() - parseInt(authTimestamp || '0');
+            if (timeSinceAuth < 10000) {
+              await logToServer('Recent auth attempt detected, waiting for completion');
+            } else {
+              // If it's been longer, something likely went wrong with the redirect
+              await logToServer('Auth redirect may have failed');
+              toast.error('Authentication failed. Please try again.');
+            }
+          }
+          
           // Check if there's a current user (might have been set by onAuthStateChanged)
           const currentUser = auth.currentUser;
           if (currentUser) {
@@ -759,7 +790,9 @@ export function AuthProvider({ children }) {
         await logToServer('Error handling redirect result', { 
           error: error.message,
           code: error.code,
-          stack: error.stack?.substring(0, 200) // First 200 chars of stack
+          stack: error.stack?.substring(0, 200), // First 200 chars of stack
+          userAgent: navigator.userAgent,
+          isCurrentUserSet: !!auth.currentUser
         });
         console.error('Error handling redirect result:', error);
         
