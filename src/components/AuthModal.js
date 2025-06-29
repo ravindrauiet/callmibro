@@ -7,24 +7,20 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { toast } from 'react-hot-toast'
 
 export default function AuthModal({ isOpen, onClose }) {
-  const [isLogin, setIsLogin] = useState(true)
+  const { login, signup, resetPassword, googleSignIn, facebookSignIn, manualRedirectCheck, clearPendingAuthState } = useAuth();
+  const [isLogin, setIsLogin] = useState(true);
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState({ score: 0, message: '' });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: ''
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [passwordStrength, setPasswordStrength] = useState({
-    score: 0,
-    message: ''
-  })
+  });
   const [showPassword, setShowPassword] = useState(false)
-  const [forgotPassword, setForgotPassword] = useState(false)
   const { isDarkMode } = useTheme()
-
-  const { signup, login, googleSignIn, facebookSignIn, resetPassword, authInProgress } = useAuth()
 
   // Check password strength
   const checkPasswordStrength = (password) => {
@@ -541,15 +537,11 @@ export default function AuthModal({ isOpen, onClose }) {
                 type="button"
                 onClick={async () => {
                   try {
-                    // Import Firebase auth functions
-                    const { getRedirectResult } = await import('firebase/auth');
-                    const { auth } = await import('../firebase/config');
-                    
-                    const result = await getRedirectResult(auth);
-                    if (result) {
-                      alert(`Redirect result found!\nUser: ${result.user.email}\nProvider: ${result.providerId}`);
+                    const result = await manualRedirectCheck();
+                    if (result.success) {
+                      alert(`Redirect result found!\nUser: ${result.result.user.email}\nProvider: ${result.result.providerId}`);
                     } else {
-                      alert('No redirect result found');
+                      alert('No redirect result found: ' + (result.message || result.error));
                     }
                   } catch (error) {
                     alert('Redirect check failed: ' + error.message);
@@ -559,6 +551,26 @@ export default function AuthModal({ isOpen, onClose }) {
                 disabled={isLoading}
               >
                 Check Redirect
+              </button>
+              
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const result = await clearPendingAuthState();
+                    if (result.success) {
+                      alert('Auth state cleared successfully');
+                    } else {
+                      alert('Failed to clear auth state: ' + result.error);
+                    }
+                  } catch (error) {
+                    alert('Clear auth state failed: ' + error.message);
+                  }
+                }}
+                className="text-xs text-gray-500 hover:text-gray-700 underline ml-4"
+                disabled={isLoading}
+              >
+                Clear Auth State
               </button>
             </div>
           </div>

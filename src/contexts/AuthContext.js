@@ -241,39 +241,15 @@ export function AuthProvider({ children }) {
       
       // Different strategies for mobile and desktop
       if (isMobile) {
-        // For mobile, use redirect with special handling
-        await logToServer('Using redirect authentication for mobile');
+        // For mobile, try popup first, then fallback to redirect
+        await logToServer('Using popup authentication for mobile (with redirect fallback)');
         
         try {
-          // Always use the default Firebase auth domain for Google Auth
-          // This is critical for mobile redirect flow to work properly
-          await logToServer('Using Firebase project auth domain for mobile');
-          
-          // Clear any existing auth sessions/cookies that might interfere
-          await logToServer('Clearing any existing auth state');
-          
-          // Set a session storage flag to detect redirect completion
-          if (typeof window !== 'undefined') {
-            window.sessionStorage.setItem('googleAuthStarted', 'true');
-            window.sessionStorage.setItem('authTimestamp', Date.now().toString());
-          }
-          
-          // Use redirect with the default auth instance
-          await signInWithRedirect(auth, provider);
-          await logToServer('Mobile redirect initiated with default auth domain');
-          return;
-        } catch (redirectError) {
-          await logToServer('Redirect failed, detailed error info', { 
-            error: redirectError.message,
-            code: redirectError.code,
-            stack: redirectError.stack?.substring(0, 200),
-            authDomain: auth.config.authDomain
-          });
-          
-          // Fallback to popup if redirect fails
-          await logToServer('Trying popup as fallback on mobile');
+          // Try popup first on mobile (more reliable in modern browsers)
+          await logToServer('Attempting popup authentication on mobile');
           const result = await signInWithPopup(auth, provider);
-          await logToServer('Popup fallback successful on mobile', {
+          
+          await logToServer('Popup authentication successful on mobile', {
             userId: result.user.uid,
             email: result.user.email
           });
@@ -281,6 +257,41 @@ export function AuthProvider({ children }) {
           // Process the result
           await processAuthResult(result);
           return { result };
+        } catch (popupError) {
+          await logToServer('Popup failed on mobile, trying redirect', { 
+            error: popupError.message,
+            code: popupError.code
+          });
+          
+          // If popup fails, try redirect
+          try {
+            // Always use the default Firebase auth domain for Google Auth
+            // This is critical for mobile redirect flow to work properly
+            await logToServer('Using Firebase project auth domain for mobile redirect');
+            
+            // Clear any existing auth sessions/cookies that might interfere
+            await logToServer('Clearing any existing auth state');
+            
+            // Set a session storage flag to detect redirect completion
+            if (typeof window !== 'undefined') {
+              window.sessionStorage.setItem('googleAuthStarted', 'true');
+              window.sessionStorage.setItem('authTimestamp', Date.now().toString());
+            }
+            
+            // Use redirect with the default auth instance
+            await signInWithRedirect(auth, provider);
+            await logToServer('Mobile redirect initiated with default auth domain');
+            return;
+          } catch (redirectError) {
+            await logToServer('Both popup and redirect failed on mobile', { 
+              popupError: popupError.message,
+              redirectError: redirectError.message,
+              authDomain: auth.config.authDomain
+            });
+            
+            // If both fail, throw the original popup error
+            throw popupError;
+          }
         }
       } else {
         // For desktop, use popup (more reliable)
@@ -658,6 +669,66 @@ export function AuthProvider({ children }) {
     await logToServer('Mobile auth test', testData);
   };
 
+  // Manual redirect check function for debugging
+  const manualRedirectCheck = async () => {
+    try {
+      await logToServer('Manual redirect check initiated');
+      
+      const result = await getRedirectResult(auth);
+      
+      if (result) {
+        await logToServer('Manual redirect check found result', {
+          providerId: result.providerId,
+          userId: result.user.uid,
+          email: result.user.email
+        });
+        
+        // Process the result
+        await processAuthResult(result);
+        return { success: true, result };
+      } else {
+        await logToServer('Manual redirect check found no result');
+        return { success: false, message: 'No redirect result found' };
+      }
+    } catch (error) {
+      await logToServer('Manual redirect check failed', {
+        error: error.message,
+        code: error.code
+      });
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Clear pending auth state function for debugging
+  const clearPendingAuthState = async () => {
+    try {
+      await logToServer('Clearing pending auth state');
+      
+      // Clear session storage
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.removeItem('googleAuthStarted');
+        window.sessionStorage.removeItem('authTimestamp');
+        window.localStorage.removeItem('firebase:authUser:callmibro:[DEFAULT]');
+        window.localStorage.removeItem('firebase:authUser:callmibro:auth-default');
+      }
+      
+      // Sign out current user if any
+      if (auth.currentUser) {
+        await signOut(auth);
+        await logToServer('Current user signed out');
+      }
+      
+      await logToServer('Pending auth state cleared successfully');
+      return { success: true, message: 'Auth state cleared' };
+    } catch (error) {
+      await logToServer('Error clearing auth state', {
+        error: error.message,
+        code: error.code
+      });
+      return { success: false, error: error.message };
+    }
+  };
+
   // Call test function on mount
   useEffect(() => {
     testMobileAuth();
@@ -695,10 +766,38 @@ export function AuthProvider({ children }) {
           });
         }
         
-        // Add a small delay to ensure Firebase is ready
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Add a longer delay for mobile devices to ensure Firebase is fully ready
+        const isMobile = isMobileDevice();
+        const delay = isMobile ? 2000 : 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
         
-        const result = await getRedirectResult(auth);
+        // Try to get redirect result multiple times with increasing delays
+        let result = null;
+        let attempts = 0;
+        const maxAttempts = 3;
+        
+        while (!result && attempts < maxAttempts) {
+          attempts++;
+          await logToServer(`Redirect result attempt ${attempts}/${maxAttempts}`);
+          
+          try {
+            result = await getRedirectResult(auth);
+            if (result) {
+              await logToServer('Redirect result found on attempt ' + attempts);
+              break;
+            }
+          } catch (error) {
+            await logToServer(`Redirect result attempt ${attempts} failed`, { 
+              error: error.message,
+              code: error.code 
+            });
+            
+            // If it's not the last attempt, wait before trying again
+            if (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+            }
+          }
+        }
         
         // Clear the session storage flags regardless of result
         if (typeof window !== 'undefined') {
@@ -748,7 +847,7 @@ export function AuthProvider({ children }) {
           toast.success('Logged in successfully!');
           await logToServer('Redirect authentication completed successfully');
         } else {
-          await logToServer('No redirect result found');
+          await logToServer('No redirect result found after all attempts');
           
           // Check if there's a pending Google auth but no result
           if (googleAuthStarted) {
@@ -756,14 +855,14 @@ export function AuthProvider({ children }) {
               timeSinceAuthStarted: Date.now() - parseInt(authTimestamp || '0')
             });
             
-            // If it's been less than 10 seconds since auth started, this is likely
-            // just the initial page load after the redirect started but before completion
+            // If it's been less than 30 seconds since auth started, this might still be processing
             const timeSinceAuth = Date.now() - parseInt(authTimestamp || '0');
-            if (timeSinceAuth < 10000) {
-              await logToServer('Recent auth attempt detected, waiting for completion');
+            if (timeSinceAuth < 30000) {
+              await logToServer('Recent auth attempt detected, might still be processing');
+              // Don't show error yet, as the redirect might still be processing
             } else {
               // If it's been longer, something likely went wrong with the redirect
-              await logToServer('Auth redirect may have failed');
+              await logToServer('Auth redirect may have failed after timeout');
               toast.error('Authentication failed. Please try again.');
             }
           }
@@ -781,6 +880,7 @@ export function AuthProvider({ children }) {
             try {
               await fetchUserProfile(currentUser.uid);
               await logToServer('User profile fetched for current user');
+              toast.success('Logged in successfully!');
             } catch (profileError) {
               await logToServer('Error fetching profile for current user', { error: profileError.message });
             }
@@ -814,14 +914,16 @@ export function AuthProvider({ children }) {
           await logToServer(`Redirect check attempt ${attempt} failed`, { error: error.message });
           if (attempt < 3) {
             // Wait longer between attempts
-            await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
           }
         }
       }
     };
 
-    // Add a small delay before checking redirect result
-    const timer = setTimeout(attemptRedirectCheck, 1000);
+    // Add a longer delay before checking redirect result for mobile devices
+    const isMobile = isMobileDevice();
+    const initialDelay = isMobile ? 3000 : 1000;
+    const timer = setTimeout(attemptRedirectCheck, initialDelay);
     return () => clearTimeout(timer);
   }, []);
 
@@ -843,6 +945,8 @@ export function AuthProvider({ children }) {
     saveUserAddress,
     updateUserAddress,
     deleteUserAddress,
+    manualRedirectCheck,
+    clearPendingAuthState,
     getIdToken: () => currentUser?.getIdToken()
   };
 
