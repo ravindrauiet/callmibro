@@ -54,7 +54,7 @@ export default function Home() {
     authDomain: '',
     hostname: ''
   })
-  const [showDebug, setShowDebug] = useState(false)
+  const [showDebug, setShowDebug] = useState(true)
 
   useEffect(() => {
     // Check for redirect result
@@ -104,22 +104,19 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       <Header activePage="home" />
       
-      {/* Debug Panel - Double tap to show/hide */}
-      <div 
-        className="fixed top-20 right-4 z-50"
-        onDoubleClick={() => setShowDebug(!showDebug)}
-      >
-        {showDebug && (
-          <div className="bg-black/90 text-white p-4 rounded-lg shadow-lg max-w-xs sm:max-w-md overflow-auto max-h-[80vh]">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="font-bold text-sm">Auth Debug</h3>
-              <button 
-                onClick={() => setShowDebug(false)}
-                className="text-gray-400 hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
+      {/* Debug Panel - Always visible for testing */}
+      <div className="fixed top-20 right-4 z-50">
+        <div className="bg-black/90 text-white p-4 rounded-lg shadow-lg max-w-xs sm:max-w-md overflow-auto max-h-[80vh]">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold text-sm">Auth Debug</h3>
+            <button 
+              onClick={() => setShowDebug(!showDebug)}
+              className="text-gray-400 hover:text-white"
+            >
+              {showDebug ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          {showDebug && (
             <div className="text-xs space-y-2">
               <div>
                 <span className="text-gray-400">User:</span> {currentUser ? `${currentUser.email} (${currentUser.uid})` : 'Not logged in'}
@@ -154,8 +151,8 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       
       <Hero />
