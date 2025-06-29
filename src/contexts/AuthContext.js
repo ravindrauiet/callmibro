@@ -220,90 +220,99 @@ export function AuthProvider({ children }) {
     
     try {
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
+      // Clear any cached OAuth state to ensure a fresh login flow
+      provider.setCustomParameters({ 
+        prompt: 'select_account',
+        // Force re-consent to ensure we get a fresh token
+        access_type: 'offline'
+      });
       
       const isMobile = isMobileDevice();
-      await logToServer('Device type detected', { isMobile });
+      const hostname = typeof window !== 'undefined' ? window.location.hostname : 'unknown';
+      const isLocalhost = hostname === 'localhost';
       
-      // Use redirect for mobile, popup for desktop
+      await logToServer('Authentication attempt details', { 
+        isMobile, 
+        hostname,
+        isLocalhost,
+        authDomain: auth.config.authDomain
+      });
+      
+      // Different strategies for mobile and desktop
       if (isMobile) {
-        await logToServer('Using redirect authentication for mobile (proxy domain fix)');
+        // For mobile, use redirect with special handling
+        await logToServer('Using redirect authentication for mobile');
+        
+        // For mobile, we need to set the redirect URL explicitly to match what's in Firebase console
+        // This ensures the redirect goes back to the same origin
+        const redirectUrl = `${window.location.origin}/auth/callback`;
+        await logToServer('Setting redirect URL', { redirectUrl });
+        
+        // For production, use the current domain as the auth domain
+        if (!isLocalhost) {
+          // Temporarily override the auth domain for the redirect
+          auth._config.authDomain = window.location.hostname;
+          await logToServer('Temporarily overriding authDomain', { 
+            newAuthDomain: auth._config.authDomain 
+          });
+        }
+        
         try {
           await signInWithRedirect(auth, provider);
-          // Redirect will navigate away, so no further code executes here
+          await logToServer('Redirect initiated successfully');
+          // Page will redirect, no code after this will execute
           return;
-        } catch (popupError) {
-          await logToServer('Redirect initiation failed on mobile', { 
-            error: popupError.message,
-            code: popupError.code 
+        } catch (redirectError) {
+          await logToServer('Redirect failed, trying popup as fallback', { 
+            error: redirectError.message,
+            code: redirectError.code 
           });
-          // Fallback to popup
+          
+          // Fallback to popup if redirect fails
           const result = await signInWithPopup(auth, provider);
           await logToServer('Popup fallback successful on mobile', {
             userId: result.user.uid,
             email: result.user.email
           });
-          const token = await getIdToken(result.user);
-          // Additional user doc logic same as before
-          const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-          const userData = {
-            name: result.user.displayName,
-            email: result.user.email,
-            photoURL: result.user.photoURL,
-            emailVerified: result.user.emailVerified,
-            lastLogin: serverTimestamp()
-          };
-          if (!userDoc.exists()) {
-            userData.createdAt = serverTimestamp();
-            userData.updatedAt = serverTimestamp();
-            userData.authProvider = 'google';
-            await setDoc(doc(db, 'users', result.user.uid), userData);
-          } else {
-            await setDoc(doc(db, 'users', result.user.uid), userData, { merge: true });
-          }
-          setUserProfile(userData);
-          toast.success('Logged in with Google successfully!');
-          return { result, token };
+          
+          // Process the result
+          await processAuthResult(result);
+          return { result };
         }
       } else {
-        await logToServer('Using popup authentication for desktop device');
-        const result = await signInWithPopup(auth, provider);
+        // For desktop, use popup (more reliable)
+        await logToServer('Using popup authentication for desktop');
         
-        // Get user token for secure requests
-        const token = await getIdToken(result.user);
-        
-        // Check if the user document exists
-        const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-        
-        const userData = {
-          name: result.user.displayName,
-          email: result.user.email,
-          photoURL: result.user.photoURL,
-          emailVerified: result.user.emailVerified,
-          lastLogin: serverTimestamp()
-        };
-        
-        // If not, create a new user document
-        if (!userDoc.exists()) {
-          userData.createdAt = serverTimestamp();
-          userData.updatedAt = serverTimestamp();
-          userData.authProvider = 'google';
+        try {
+          // Clear any previous auth state
+          await logToServer('Clearing previous auth state');
           
-          await setDoc(doc(db, 'users', result.user.uid), userData);
-        } else {
-          // Update lastLogin if user exists
-          await setDoc(doc(db, 'users', result.user.uid), userData, { merge: true });
+          const result = await signInWithPopup(auth, provider);
+          
+          await logToServer('Authentication successful', {
+            userId: result.user.uid,
+            email: result.user.email,
+            providerId: result.providerId
+          });
+          
+          // Process the result
+          await processAuthResult(result);
+          return { result };
+        } catch (popupError) {
+          await logToServer('Authentication failed', { 
+            error: popupError.message,
+            code: popupError.code,
+            stack: popupError.stack?.substring(0, 200)
+          });
+          
+          throw popupError;
         }
-        
-        setUserProfile(userData);
-        toast.success('Logged in with Google successfully!');
-        return { result, token };
       }
     } catch (error) {
       await logToServer('Google sign-in error', { 
         error: error.message,
         code: error.code,
-        stack: error.stack 
+        stack: error.stack?.substring(0, 200)
       });
       console.error('Google sign-in error:', error);
       handleAuthError(error);
@@ -311,6 +320,40 @@ export function AuthProvider({ children }) {
     } finally {
       setAuthInProgress(false);
     }
+  };
+  
+  // Helper function to process authentication result
+  const processAuthResult = async (result) => {
+    // Get user token for secure requests
+    const token = await getIdToken(result.user);
+    await logToServer('Token obtained successfully', { tokenLength: token.length });
+    
+    // Check if the user document exists
+    const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+    
+    const userData = {
+      name: result.user.displayName,
+      email: result.user.email,
+      photoURL: result.user.photoURL,
+      emailVerified: result.user.emailVerified,
+      lastLogin: serverTimestamp()
+    };
+    
+    if (!userDoc.exists()) {
+      userData.createdAt = serverTimestamp();
+      userData.updatedAt = serverTimestamp();
+      userData.authProvider = 'google';
+      
+      await setDoc(doc(db, 'users', result.user.uid), userData);
+      await logToServer('New user document created');
+    } else {
+      await setDoc(doc(db, 'users', result.user.uid), userData, { merge: true });
+      await logToServer('Existing user document updated');
+    }
+    
+    setUserProfile(userData);
+    toast.success('Logged in with Google successfully!');
+    return token;
   };
 
   // Facebook Sign In

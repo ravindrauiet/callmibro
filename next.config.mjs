@@ -71,9 +71,6 @@ const nextConfig = withPWA(pwaConfig)({
       'www.shutterstock.com'
     ]
   },
-  experimental: {
-    appDir: true,
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -95,10 +92,6 @@ const nextConfig = withPWA(pwaConfig)({
             value: 'nosniff',
           },
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
@@ -118,7 +111,18 @@ const nextConfig = withPWA(pwaConfig)({
   async rewrites() {
     return [
       {
+        // The main Firebase Auth handler
         source: '/__/auth/:path*',
+        destination: 'https://callmibro.firebaseapp.com/__/auth/:path*'
+      },
+      {
+        // Handle auth for www subdomain
+        source: '/www.callmibro.com/__/auth/:path*',
+        destination: 'https://callmibro.firebaseapp.com/__/auth/:path*'
+      },
+      {
+        // Handle auth for root domain
+        source: '/callmibro.com/__/auth/:path*',
         destination: 'https://callmibro.firebaseapp.com/__/auth/:path*'
       }
     ];
