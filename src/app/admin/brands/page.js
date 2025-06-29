@@ -161,10 +161,11 @@ export default function BrandsManagement() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-white">Brands Management</h2>
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>Brands Management</h2>
         <button
           onClick={() => openBrandModal()}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#e60012] hover:bg-[#d40010] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e60012]"
+          style={{ '--tw-ring-offset-color': 'var(--panel-charcoal)' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -181,10 +182,15 @@ export default function BrandsManagement() {
             placeholder="Search brands..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+            style={{ 
+              backgroundColor: 'var(--panel-gray)', 
+              borderColor: 'var(--border-color)',
+              color: 'var(--text-main)'
+            }}
           />
           <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--text-secondary)' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -194,7 +200,12 @@ export default function BrandsManagement() {
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+            style={{ 
+              backgroundColor: 'var(--panel-gray)', 
+              borderColor: 'var(--border-color)',
+              color: 'var(--text-main)'
+            }}
           >
             <option value="all">All Categories</option>
             {categories.map(category => (
@@ -205,56 +216,51 @@ export default function BrandsManagement() {
       </div>
 
       {/* Brands Table */}
-      <div className="bg-[#1a1a1a] rounded-lg shadow-md overflow-hidden">
+      <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--panel-charcoal)' }}>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-[#333]">
-            <thead className="bg-[#222]">
+          <table className="min-w-full divide-y" style={{ borderColor: 'var(--border-color)' }}>
+            <thead style={{ backgroundColor: 'var(--panel-gray)' }}>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Brand
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-[#1a1a1a] divide-y divide-[#333]">
+            <tbody className="divide-y" style={{ backgroundColor: 'var(--panel-charcoal)', borderColor: 'var(--border-color)' }}>
               {filteredBrands.length > 0 ? (
                 filteredBrands.map((brand) => (
-                  <tr key={brand.id} className="hover:bg-[#222] transition-colors">
+                  <tr key={brand.id} className="hover:bg-opacity-20 hover:bg-gray-600 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        {brand.logo ? (
-                          <div className="h-10 w-10 bg-[#222] rounded-md flex items-center justify-center overflow-hidden">
+                        <div className="flex-shrink-0 h-10 w-10 rounded-md flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--panel-gray)' }}>
+                          {brand.logo ? (
                             <img 
                               src={brand.logo} 
                               alt={brand.name} 
-                              className="h-8 w-8 object-contain"
+                              className="h-10 w-10 object-cover"
                             />
-                          </div>
-                        ) : (
-                          <div className="h-10 w-10 bg-[#222] rounded-md flex items-center justify-center text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--text-secondary)' }}>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
-                          </div>
-                        )}
+                          )}
+                        </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-white">{brand.name}</div>
+                          <div className="text-sm font-medium" style={{ color: 'var(--text-main)' }}>{brand.name}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      {brand.category}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{brand.category}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -265,18 +271,15 @@ export default function BrandsManagement() {
                         {brand.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      {brand.createdAt ? new Date(brand.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-3">
-                        <button
+                        <button 
                           onClick={() => openBrandModal(brand)}
                           className="text-blue-500 hover:text-blue-600"
                         >
                           Edit
                         </button>
-                        <button
+                        <button 
                           onClick={() => {
                             setSelectedBrand(brand)
                             setShowDeleteModal(true)
@@ -291,11 +294,8 @@ export default function BrandsManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-400">
-                    {searchTerm || filterCategory !== 'all' 
-                      ? 'No brands found matching your search criteria' 
-                      : 'No brands found. Add your first brand!'
-                    }
+                  <td colSpan={4} className="px-6 py-4 text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    {searchTerm ? 'No brands found matching your search' : 'No brands found'}
                   </td>
                 </tr>
               )}
@@ -304,62 +304,49 @@ export default function BrandsManagement() {
         </div>
       </div>
 
-      {/* Brand Modal */}
+      {/* Add/Edit Brand Modal */}
       {showBrandModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#1a1a1a] rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-medium text-white mb-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
               {selectedBrand ? 'Edit Brand' : 'Add New Brand'}
             </h3>
-            
             <form onSubmit={handleBrandSubmit} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
-                  Brand Name <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Brand Name *
                 </label>
                 <input
                   type="text"
-                  id="name"
                   value={brandForm.name}
-                  onChange={(e) => setBrandForm({...brandForm, name: e.target.value})}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  onChange={(e) => setBrandForm({ ...brandForm, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
                   required
                 />
               </div>
               
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-1">
-                  Category <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="category"
-                  value={brandForm.category}
-                  onChange={(e) => setBrandForm({...brandForm, category: e.target.value})}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
-                  required
-                >
-                  <option value="">Select Category</option>
-                  <option value="AC">AC</option>
-                  <option value="TV">TV</option>
-                  <option value="Refrigerator">Refrigerator</option>
-                  <option value="Washing Machine">Washing Machine</option>
-                  <option value="Mobile">Mobile</option>
-                  <option value="Laptop">Laptop</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              
-              <div>
-                <label htmlFor="logo" className="block text-sm font-medium text-gray-300 mb-1">
-                  Logo URL
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category *
                 </label>
                 <input
                   type="text"
-                  id="logo"
+                  value={brandForm.category}
+                  onChange={(e) => setBrandForm({ ...brandForm, category: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Logo URL
+                </label>
+                <input
+                  type="url"
                   value={brandForm.logo}
-                  onChange={(e) => setBrandForm({...brandForm, logo: e.target.value})}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
-                  placeholder="https://example.com/logo.png"
+                  onChange={(e) => setBrandForm({ ...brandForm, logo: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
                 />
               </div>
               
@@ -368,11 +355,11 @@ export default function BrandsManagement() {
                   type="checkbox"
                   id="isActive"
                   checked={brandForm.isActive}
-                  onChange={(e) => setBrandForm({...brandForm, isActive: e.target.checked})}
-                  className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
+                  onChange={(e) => setBrandForm({ ...brandForm, isActive: e.target.checked })}
+                  className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-gray-300 rounded"
                 />
-                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-300">
-                  Active (visible to customers)
+                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                  Active
                 </label>
               </div>
               
@@ -380,15 +367,15 @@ export default function BrandsManagement() {
                 <button
                   type="button"
                   onClick={() => setShowBrandModal(false)}
-                  className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#e60012] rounded-md text-white hover:bg-[#d40010] focus:outline-none"
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#e60012] rounded-md hover:bg-[#d40010]"
                 >
-                  {selectedBrand ? 'Update Brand' : 'Add Brand'}
+                  {selectedBrand ? 'Update' : 'Add'} Brand
                 </button>
               </div>
             </form>
@@ -396,27 +383,24 @@ export default function BrandsManagement() {
         </div>
       )}
 
-      {/* Delete Brand Modal */}
+      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#1a1a1a] rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-medium text-white mb-4">Confirm Delete</h3>
-            <p className="text-gray-300 mb-2">
-              Are you sure you want to delete the brand "{selectedBrand?.name}"?
-            </p>
-            <p className="text-red-400 text-sm mb-6">
-              This will also delete all models associated with this brand. This action cannot be undone.
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Delete Brand</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Are you sure you want to delete "{selectedBrand?.name}"? This action cannot be undone.
             </p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 rounded-md text-white hover:bg-red-700 focus:outline-none"
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
               >
                 Delete
               </button>

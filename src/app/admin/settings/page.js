@@ -14,25 +14,25 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState({
     general: {
       siteName: 'CallMiBro',
-      siteDescription: 'Your trusted repair service',
-      contactEmail: '',
-      contactPhone: '',
-      address: '',
-      workingHours: ''
+      siteDescription: 'Professional appliance repair services',
+      contactEmail: 'contact@callmibro.com',
+      contactPhone: '+91 98765 43210',
+      address: '123 Main Street, City, State 12345',
+      workingHours: 'Mon-Fri: 9AM-6PM, Sat: 10AM-4PM'
     },
     appearance: {
       primaryColor: '#e60012',
-      secondaryColor: '#111111',
-      showHeroBanner: true,
-      showTestimonials: true,
-      showServices: true
+      secondaryColor: '#ff6b6b',
+      enableAnimations: true,
+      enableNotifications: true
     },
     notifications: {
-      sendBookingConfirmation: true,
-      sendBookingReminder: true,
-      sendTechnicianAssigned: true,
-      sendServiceCompleted: true,
-      adminEmailNotifications: true
+      emailNotifications: true,
+      smsNotifications: false,
+      pushNotifications: true,
+      bookingConfirmations: true,
+      serviceUpdates: true,
+      promotionalEmails: false
     }
   })
 
@@ -44,10 +44,9 @@ export default function SettingsPage() {
         
         if (settingsDoc.exists()) {
           const data = settingsDoc.data()
-          setSettings(prevSettings => ({
-            general: { ...prevSettings.general, ...data.general },
-            appearance: { ...prevSettings.appearance, ...data.appearance },
-            notifications: { ...prevSettings.notifications, ...data.notifications }
+          setSettings(prev => ({
+            ...prev,
+            ...data
           }))
         }
       } catch (error) {
@@ -108,19 +107,20 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Settings</h2>
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>Settings</h2>
       </div>
 
-      <div className="bg-[#1a1a1a] rounded-lg shadow-md overflow-hidden">
+      <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--panel-charcoal)' }}>
         {/* Tabs */}
-        <div className="flex border-b border-[#333]">
+        <div className="flex border-b" style={{ borderColor: 'var(--border-color)' }}>
           <button
             onClick={() => setActiveTab('general')}
             className={`px-6 py-3 text-sm font-medium ${
               activeTab === 'general'
                 ? 'text-[#e60012] border-b-2 border-[#e60012]'
-                : 'text-gray-400 hover:text-white'
+                : 'hover:text-white'
             }`}
+            style={{ color: activeTab === 'general' ? '#e60012' : 'var(--text-secondary)' }}
           >
             General
           </button>
@@ -129,8 +129,9 @@ export default function SettingsPage() {
             className={`px-6 py-3 text-sm font-medium ${
               activeTab === 'appearance'
                 ? 'text-[#e60012] border-b-2 border-[#e60012]'
-                : 'text-gray-400 hover:text-white'
+                : 'hover:text-white'
             }`}
+            style={{ color: activeTab === 'appearance' ? '#e60012' : 'var(--text-secondary)' }}
           >
             Appearance
           </button>
@@ -139,8 +140,9 @@ export default function SettingsPage() {
             className={`px-6 py-3 text-sm font-medium ${
               activeTab === 'notifications'
                 ? 'text-[#e60012] border-b-2 border-[#e60012]'
-                : 'text-gray-400 hover:text-white'
+                : 'hover:text-white'
             }`}
+            style={{ color: activeTab === 'notifications' ? '#e60012' : 'var(--text-secondary)' }}
           >
             Notifications
           </button>
@@ -153,68 +155,93 @@ export default function SettingsPage() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                     Site Name
                   </label>
                   <input
                     type="text"
                     value={settings.general.siteName}
                     onChange={(e) => handleChange('general', 'siteName', e.target.value)}
-                    className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                    style={{ 
+                      backgroundColor: 'var(--panel-gray)', 
+                      borderColor: 'var(--border-color)',
+                      color: 'var(--text-main)'
+                    }}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                     Site Description
                   </label>
                   <input
                     type="text"
                     value={settings.general.siteDescription}
                     onChange={(e) => handleChange('general', 'siteDescription', e.target.value)}
-                    className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                    style={{ 
+                      backgroundColor: 'var(--panel-gray)', 
+                      borderColor: 'var(--border-color)',
+                      color: 'var(--text-main)'
+                    }}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                     Contact Email
                   </label>
                   <input
                     type="email"
                     value={settings.general.contactEmail}
                     onChange={(e) => handleChange('general', 'contactEmail', e.target.value)}
-                    className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                    style={{ 
+                      backgroundColor: 'var(--panel-gray)', 
+                      borderColor: 'var(--border-color)',
+                      color: 'var(--text-main)'
+                    }}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                     Contact Phone
                   </label>
                   <input
                     type="tel"
                     value={settings.general.contactPhone}
                     onChange={(e) => handleChange('general', 'contactPhone', e.target.value)}
-                    className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                    style={{ 
+                      backgroundColor: 'var(--panel-gray)', 
+                      borderColor: 'var(--border-color)',
+                      color: 'var(--text-main)'
+                    }}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Address
                 </label>
                 <textarea
                   value={settings.general.address}
                   onChange={(e) => handleChange('general', 'address', e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Working Hours
                 </label>
                 <input
@@ -222,7 +249,12 @@ export default function SettingsPage() {
                   value={settings.general.workingHours}
                   onChange={(e) => handleChange('general', 'workingHours', e.target.value)}
                   placeholder="e.g. Mon-Fri: 9AM-6PM, Sat: 10AM-4PM"
-                  className="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  style={{ 
+                    backgroundColor: 'var(--panel-gray)', 
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-main)'
+                  }}
                 />
               </div>
             </div>
@@ -232,11 +264,11 @@ export default function SettingsPage() {
           {activeTab === 'appearance' && (
             <div className="space-y-6">
               {/* Theme Toggle */}
-              <div className="p-4 border border-[#333] rounded-md">
+              <div className="p-4 border rounded-md" style={{ borderColor: 'var(--border-color)' }}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-medium text-white">Site Theme</h3>
-                    <p className="text-sm text-gray-400">Toggle between light and dark mode for the entire website</p>
+                    <h3 className="text-lg font-medium" style={{ color: 'var(--text-main)' }}>Site Theme</h3>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Toggle between light and dark mode for the entire website</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input 
@@ -246,7 +278,7 @@ export default function SettingsPage() {
                       className="sr-only peer" 
                     />
                     <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e60012]"></div>
-                    <span className="ml-3 text-sm font-medium text-gray-300">
+                    <span className="ml-3 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                       {isDarkMode ? 'Dark Mode' : 'Light Mode'}
                     </span>
                   </label>
@@ -255,7 +287,7 @@ export default function SettingsPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                     Primary Color
                   </label>
                   <div className="flex items-center">
@@ -269,12 +301,17 @@ export default function SettingsPage() {
                       type="text"
                       value={settings.appearance.primaryColor}
                       onChange={(e) => handleChange('appearance', 'primaryColor', e.target.value)}
-                      className="ml-2 w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                      className="ml-2 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                      style={{ 
+                        backgroundColor: 'var(--panel-gray)', 
+                        borderColor: 'var(--border-color)',
+                        color: 'var(--text-main)'
+                      }}
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                     Secondary Color
                   </label>
                   <div className="flex items-center">
@@ -288,7 +325,12 @@ export default function SettingsPage() {
                       type="text"
                       value={settings.appearance.secondaryColor}
                       onChange={(e) => handleChange('appearance', 'secondaryColor', e.target.value)}
-                      className="ml-2 w-full px-3 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+                      className="ml-2 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                      style={{ 
+                        backgroundColor: 'var(--panel-gray)', 
+                        borderColor: 'var(--border-color)',
+                        color: 'var(--text-main)'
+                      }}
                     />
                   </div>
                 </div>
@@ -298,136 +340,123 @@ export default function SettingsPage() {
                 <div className="flex items-center">
                   <input
                     type="checkbox"
-                    id="showHeroBanner"
-                    checked={settings.appearance.showHeroBanner}
-                    onChange={() => handleCheckboxChange('appearance', 'showHeroBanner')}
-                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
+                    id="enableAnimations"
+                    checked={settings.appearance.enableAnimations}
+                    onChange={() => handleCheckboxChange('appearance', 'enableAnimations')}
+                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-gray-300 rounded"
                   />
-                  <label htmlFor="showHeroBanner" className="ml-2 block text-sm text-gray-300">
-                    Show Hero Banner on Homepage
+                  <label htmlFor="enableAnimations" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Enable animations and transitions
                   </label>
                 </div>
-
                 <div className="flex items-center">
                   <input
                     type="checkbox"
-                    id="showTestimonials"
-                    checked={settings.appearance.showTestimonials}
-                    onChange={() => handleCheckboxChange('appearance', 'showTestimonials')}
-                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
+                    id="enableNotifications"
+                    checked={settings.appearance.enableNotifications}
+                    onChange={() => handleCheckboxChange('appearance', 'enableNotifications')}
+                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-gray-300 rounded"
                   />
-                  <label htmlFor="showTestimonials" className="ml-2 block text-sm text-gray-300">
-                    Show Testimonials on Homepage
-                  </label>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="showServices"
-                    checked={settings.appearance.showServices}
-                    onChange={() => handleCheckboxChange('appearance', 'showServices')}
-                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
-                  />
-                  <label htmlFor="showServices" className="ml-2 block text-sm text-gray-300">
-                    Show Services on Homepage
+                  <label htmlFor="enableNotifications" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Enable browser notifications
                   </label>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Notification Settings */}
+          {/* Notifications Settings */}
           {activeTab === 'notifications' && (
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="sendBookingConfirmation"
-                  checked={settings.notifications.sendBookingConfirmation}
-                  onChange={() => handleCheckboxChange('notifications', 'sendBookingConfirmation')}
-                  className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
-                />
-                <label htmlFor="sendBookingConfirmation" className="ml-2 block text-sm text-gray-300">
-                  Send booking confirmation emails to customers
-                </label>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="sendBookingReminder"
-                  checked={settings.notifications.sendBookingReminder}
-                  onChange={() => handleCheckboxChange('notifications', 'sendBookingReminder')}
-                  className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
-                />
-                <label htmlFor="sendBookingReminder" className="ml-2 block text-sm text-gray-300">
-                  Send booking reminder emails (24 hours before appointment)
-                </label>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="sendTechnicianAssigned"
-                  checked={settings.notifications.sendTechnicianAssigned}
-                  onChange={() => handleCheckboxChange('notifications', 'sendTechnicianAssigned')}
-                  className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
-                />
-                <label htmlFor="sendTechnicianAssigned" className="ml-2 block text-sm text-gray-300">
-                  Notify customers when a technician is assigned
-                </label>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="sendServiceCompleted"
-                  checked={settings.notifications.sendServiceCompleted}
-                  onChange={() => handleCheckboxChange('notifications', 'sendServiceCompleted')}
-                  className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
-                />
-                <label htmlFor="sendServiceCompleted" className="ml-2 block text-sm text-gray-300">
-                  Send service completion emails with feedback request
-                </label>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="adminEmailNotifications"
-                  checked={settings.notifications.adminEmailNotifications}
-                  onChange={() => handleCheckboxChange('notifications', 'adminEmailNotifications')}
-                  className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-[#333] rounded"
-                />
-                <label htmlFor="adminEmailNotifications" className="ml-2 block text-sm text-gray-300">
-                  Send email notifications to admin for new bookings
-                </label>
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="emailNotifications"
+                    checked={settings.notifications.emailNotifications}
+                    onChange={() => handleCheckboxChange('notifications', 'emailNotifications')}
+                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-gray-300 rounded"
+                  />
+                  <label htmlFor="emailNotifications" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Email notifications
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="smsNotifications"
+                    checked={settings.notifications.smsNotifications}
+                    onChange={() => handleCheckboxChange('notifications', 'smsNotifications')}
+                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-gray-300 rounded"
+                  />
+                  <label htmlFor="smsNotifications" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    SMS notifications
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="pushNotifications"
+                    checked={settings.notifications.pushNotifications}
+                    onChange={() => handleCheckboxChange('notifications', 'pushNotifications')}
+                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-gray-300 rounded"
+                  />
+                  <label htmlFor="pushNotifications" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Push notifications
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="bookingConfirmations"
+                    checked={settings.notifications.bookingConfirmations}
+                    onChange={() => handleCheckboxChange('notifications', 'bookingConfirmations')}
+                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-gray-300 rounded"
+                  />
+                  <label htmlFor="bookingConfirmations" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Booking confirmations
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="serviceUpdates"
+                    checked={settings.notifications.serviceUpdates}
+                    onChange={() => handleCheckboxChange('notifications', 'serviceUpdates')}
+                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-gray-300 rounded"
+                  />
+                  <label htmlFor="serviceUpdates" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Service updates and reminders
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="promotionalEmails"
+                    checked={settings.notifications.promotionalEmails}
+                    onChange={() => handleCheckboxChange('notifications', 'promotionalEmails')}
+                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] border-gray-300 rounded"
+                  />
+                  <label htmlFor="promotionalEmails" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Promotional emails and offers
+                  </label>
+                </div>
               </div>
             </div>
           )}
         </div>
+      </div>
 
-        {/* Footer with Save Button */}
-        <div className="px-6 py-4 bg-[#222] border-t border-[#333] flex justify-end">
-          <button
-            onClick={saveSettings}
-            disabled={saving}
-            className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#e60012] hover:bg-[#d40010] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e60012] ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
-          >
-            {saving ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Saving...
-              </>
-            ) : (
-              'Save Settings'
-            )}
-          </button>
-        </div>
+      {/* Save Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={saveSettings}
+          disabled={saving}
+          className="px-6 py-2 bg-[#e60012] text-white rounded-md hover:bg-[#d40010] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e60012] disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ '--tw-ring-offset-color': 'var(--panel-charcoal)' }}
+        >
+          {saving ? 'Saving...' : 'Save Settings'}
+        </button>
       </div>
     </div>
   )

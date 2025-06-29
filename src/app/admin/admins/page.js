@@ -112,12 +112,12 @@ export default function AdminUsers() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-white">Admin Users Management</h2>
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>Admin Users Management</h2>
       </div>
       
       {/* Add Admin Form */}
-      <div className="bg-[#1a1a1a] rounded-lg p-6 border border-[#333] shadow-lg">
-        <h3 className="text-xl font-bold text-white mb-4">Add New Admin</h3>
+      <div className="rounded-lg p-6 border shadow-lg" style={{ backgroundColor: 'var(--panel-charcoal)', borderColor: 'var(--border-color)' }}>
+        <h3 className="text-xl font-bold mb-4" style={{ color: 'var(--text-main)' }}>Add New Admin</h3>
         <form onSubmit={handleAddAdmin}>
           <div className="flex flex-col sm:flex-row gap-4">
             <input
@@ -125,13 +125,19 @@ export default function AdminUsers() {
               placeholder="Enter email address"
               value={newAdminEmail}
               onChange={(e) => setNewAdminEmail(e.target.value)}
-              className="flex-1 px-4 py-2 bg-[#222] border border-[#333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012] text-white"
+              className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+              style={{ 
+                backgroundColor: 'var(--panel-gray)', 
+                borderColor: 'var(--border-color)',
+                color: 'var(--text-main)'
+              }}
               required
             />
             <button
               type="submit"
               disabled={addingAdmin}
-              className="px-6 py-2 bg-[#e60012] text-white rounded-md hover:bg-[#d40010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 focus:ring-offset-[#1a1a1a] disabled:bg-[#555] disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-[#e60012] text-white rounded-md hover:bg-[#d40010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ '--tw-ring-offset-color': 'var(--panel-charcoal)' }}
             >
               {addingAdmin ? (
                 <div className="flex items-center justify-center">
@@ -147,33 +153,33 @@ export default function AdminUsers() {
       </div>
       
       {/* Admins List */}
-      <div className="bg-[#1a1a1a] rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-[#333]">
-          <h3 className="text-lg font-medium text-white">Current Admins</h3>
+      <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--panel-charcoal)' }}>
+        <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
+          <h3 className="text-lg font-medium" style={{ color: 'var(--text-main)' }}>Current Admins</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-[#333]">
-            <thead className="bg-[#222]">
+          <table className="min-w-full divide-y" style={{ borderColor: 'var(--border-color)' }}>
+            <thead style={{ backgroundColor: 'var(--panel-gray)' }}>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Added By
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Added On
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-[#1a1a1a] divide-y divide-[#333]">
+            <tbody className="divide-y" style={{ backgroundColor: 'var(--panel-charcoal)', borderColor: 'var(--border-color)' }}>
               {admins.length > 0 ? (
                 admins.map((admin) => (
-                  <tr key={admin.id} className="hover:bg-[#222] transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <tr key={admin.id} className="hover:bg-opacity-20 hover:bg-gray-600 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
                       {admin.email}
                       {admin.email === currentUser?.email && (
                         <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#e60012] text-white">
@@ -181,13 +187,13 @@ export default function AdminUsers() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
                       {admin.addedBy || 'N/A'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
                       {admin.addedAt ? new Date(admin.addedAt.seconds * 1000).toLocaleString() : 'N/A'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
                       <button
                         onClick={() => handleRemoveAdmin(admin.id, admin.email)}
                         disabled={removingAdmin === admin.id || admin.email === currentUser?.email}
@@ -202,7 +208,7 @@ export default function AdminUsers() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-400">
+                  <td colSpan={4} className="px-6 py-4 text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
                     No admins found
                   </td>
                 </tr>

@@ -113,8 +113,8 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Dashboard Overview</h2>
-        <div className="text-sm text-gray-400">
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>Dashboard Overview</h2>
+        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
           {new Date().toLocaleDateString('en-US', { 
             weekday: 'long', 
             year: 'numeric', 
@@ -192,57 +192,57 @@ export default function AdminDashboard() {
       </div>
       
       {/* Recent Bookings */}
-      <div className="bg-[#1a1a1a] rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-[#333] flex justify-between items-center">
-          <h3 className="text-lg font-medium text-white">Recent Bookings</h3>
+      <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--panel-charcoal)' }}>
+        <div className="px-6 py-4 border-b flex justify-between items-center" style={{ borderColor: 'var(--border-color)' }}>
+          <h3 className="text-lg font-medium" style={{ color: 'var(--text-main)' }}>Recent Bookings</h3>
           <Link href="/admin/bookings" className="text-sm text-[#e60012] hover:text-[#ff6b6b]">
             View All
           </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-[#333]">
-            <thead className="bg-[#222]">
+          <table className="min-w-full divide-y" style={{ borderColor: 'var(--border-color)' }}>
+            <thead style={{ backgroundColor: 'var(--panel-gray)' }}>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Service
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Customer
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-[#1a1a1a] divide-y divide-[#333]">
+            <tbody className="divide-y" style={{ backgroundColor: 'var(--panel-charcoal)', borderColor: 'var(--border-color)' }}>
               {recentBookings.length > 0 ? (
                 recentBookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-[#222] transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <tr key={booking.id} className="hover:bg-opacity-20 hover:bg-gray-600 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
                       {booking.id.substring(0, 8)}...
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
                       {booking.serviceName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
                       {booking.contactInfo?.name || 'N/A'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
                       {booking.schedule?.date ? new Date(booking.schedule.date).toLocaleDateString() : 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge status={booking.status} />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
                       <Link 
                         href={`/admin/bookings/${booking.id}`}
                         className="text-[#e60012] hover:text-[#ff6b6b]"
@@ -254,7 +254,7 @@ export default function AdminDashboard() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-400">
+                  <td colSpan={6} className="px-6 py-4 text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
                     No recent bookings found
                   </td>
                 </tr>
@@ -295,7 +295,19 @@ export default function AdminDashboard() {
 function StatCard({ title, value, icon, color, link }) {
   return (
     <Link href={link} className="block">
-      <div className="bg-[#1a1a1a] rounded-lg shadow-md p-6 border border-[#333] hover:border-[#444] transition-colors">
+      <div className="rounded-lg shadow-md p-6 border transition-colors" 
+        style={{ 
+          backgroundColor: 'var(--panel-charcoal)', 
+          borderColor: 'var(--border-color)',
+          '--hover-border-color': 'var(--panel-gray)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = 'var(--hover-border-color)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = 'var(--border-color)'
+        }}
+      >
         <div className="flex items-center">
           <div className={`p-3 rounded-md bg-gradient-to-br ${color}`}>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -303,8 +315,8 @@ function StatCard({ title, value, icon, color, link }) {
             </svg>
           </div>
           <div className="ml-5">
-            <p className="text-sm font-medium text-gray-400">{title}</p>
-            <p className="text-2xl font-semibold text-white mt-1">{value}</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{title}</p>
+            <p className="text-2xl font-semibold mt-1" style={{ color: 'var(--text-main)' }}>{value}</p>
           </div>
         </div>
       </div>
@@ -315,14 +327,26 @@ function StatCard({ title, value, icon, color, link }) {
 function QuickAction({ title, description, icon, link, color }) {
   return (
     <Link href={link} className="block">
-      <div className="bg-[#1a1a1a] rounded-lg shadow-md p-6 border border-[#333] hover:border-[#444] transition-colors h-full">
+      <div className="rounded-lg shadow-md p-6 border transition-colors h-full" 
+        style={{ 
+          backgroundColor: 'var(--panel-charcoal)', 
+          borderColor: 'var(--border-color)',
+          '--hover-border-color': 'var(--panel-gray)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = 'var(--hover-border-color)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = 'var(--border-color)'
+        }}
+      >
         <div className={`p-3 rounded-md bg-gradient-to-br ${color} inline-flex`}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-white mt-4">{title}</h3>
-        <p className="text-sm text-gray-400 mt-1">{description}</p>
+        <h3 className="text-lg font-medium mt-4" style={{ color: 'var(--text-main)' }}>{title}</h3>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{description}</p>
       </div>
     </Link>
   )

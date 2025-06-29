@@ -80,22 +80,22 @@ export default function AdminLogin() {
 
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#111]">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-color)' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#e60012]"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#111] px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: 'var(--bg-color)' }}>
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex items-center justify-center">
             <span className="text-[#e60012] font-bold text-3xl">●</span>
-            <span className="ml-2 font-medium text-xl text-white">CallMiBro</span>
+            <span className="ml-2 font-medium text-xl" style={{ color: 'var(--text-main)' }}>CallMiBro</span>
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-white">Admin Login</h2>
-          <p className="mt-2 text-sm text-gray-400">
+          <h2 className="mt-6 text-3xl font-extrabold" style={{ color: 'var(--text-main)' }}>Admin Login</h2>
+          <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
             Sign in to access the admin dashboard
           </p>
         </div>
@@ -118,7 +118,12 @@ export default function AdminLogin() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-[#333] placeholder-gray-500 text-white bg-[#1a1a1a] rounded-t-md focus:outline-none focus:ring-[#e60012] focus:border-[#e60012] focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-3 border placeholder-gray-500 rounded-t-md focus:outline-none focus:ring-[#e60012] focus:border-[#e60012] focus:z-10 sm:text-sm"
+                style={{ 
+                  backgroundColor: 'var(--panel-charcoal)', 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
                 placeholder="Email address"
               />
             </div>
@@ -132,7 +137,12 @@ export default function AdminLogin() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-[#333] placeholder-gray-500 text-white bg-[#1a1a1a] rounded-b-md focus:outline-none focus:ring-[#e60012] focus:border-[#e60012] focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-3 border placeholder-gray-500 rounded-b-md focus:outline-none focus:ring-[#e60012] focus:border-[#e60012] focus:z-10 sm:text-sm"
+                style={{ 
+                  backgroundColor: 'var(--panel-charcoal)', 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)'
+                }}
                 placeholder="Password"
               />
             </div>
@@ -143,6 +153,7 @@ export default function AdminLogin() {
               type="submit"
               disabled={loading}
               className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#d40010] hover:to-[#e55b5b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e60012] ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              style={{ '--tw-ring-offset-color': 'var(--bg-color)' }}
             >
               {loading ? (
                 <span className="flex items-center">
