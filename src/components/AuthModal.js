@@ -7,7 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { toast } from 'react-hot-toast'
 
 export default function AuthModal({ isOpen, onClose }) {
-  const { login, signup, resetPassword, googleSignIn, facebookSignIn, manualRedirectCheck, clearPendingAuthState } = useAuth();
+  const { login, signup, resetPassword, googleSignIn, facebookSignIn, manualRedirectCheck, clearPendingAuthState, authInProgress } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [forgotPassword, setForgotPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
