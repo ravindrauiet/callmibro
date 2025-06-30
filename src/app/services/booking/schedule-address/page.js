@@ -199,7 +199,7 @@ export default function ScheduleAddressPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
       {/* Progress Indicator */}
       <div className="py-4 border-b" style={{ background: 'var(--panel-dark)', borderColor: 'var(--border-color)' }}>
         <div className="container mx-auto px-4">
@@ -263,7 +263,7 @@ export default function ScheduleAddressPage() {
               {/* Date Selection */}
               <div className="mb-6">
                 <label className="block mb-2" style={{ color: 'var(--text-secondary)' }}>Select Date</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-7 gap-2">
                   {availableDates.map((date) => {
                     const formattedDate = new Date(date).toLocaleDateString('en-US', {
                       weekday: 'short',
@@ -275,16 +275,22 @@ export default function ScheduleAddressPage() {
                       <button
                         key={date}
                         type="button"
-                        className={`py-3 px-2 rounded-md text-center ${
-                          selectedDate === date
-                            ? 'bg-red-600 text-white'
-                            : 'hover:bg-[#333]'
-                        }`}
+                        className={`py-3 px-2 rounded-md text-center transition-colors`}
                         style={{ 
-                          background: selectedDate === date ? undefined : 'var(--panel-charcoal)',
-                          color: 'var(--text-main)'
+                          background: selectedDate === date ? 'var(--accent-color)' : 'var(--panel-charcoal)',
+                          color: selectedDate === date ? 'white' : 'var(--text-main)'
                         }}
                         onClick={() => setSelectedDate(date)}
+                        onMouseEnter={(e) => {
+                          if (selectedDate !== date) {
+                            e.target.style.backgroundColor = isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)'
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (selectedDate !== date) {
+                            e.target.style.backgroundColor = 'var(--panel-charcoal)'
+                          }
+                        }}
                       >
                         {formattedDate}
                       </button>

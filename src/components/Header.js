@@ -6,18 +6,62 @@ import AuthModal from './AuthModal'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { toast } from 'react-hot-toast'
+import { db } from '../firebase/config'
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 
 export default function Header({ activePage }) {
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [shopOwnerData, setShopOwnerData] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   
   const { currentUser, logout, userProfile } = useAuth()
   const { isDarkMode, toggleTheme } = useTheme()
   
   const userMenuRef = useRef(null)
   const mobileMenuRef = useRef(null)
+
+  // Check user roles (shop owner and admin)
+  useEffect(() => {
+    const checkUserRoles = async () => {
+      if (!currentUser) return
+
+      try {
+        // Check if user is a shop owner
+        const shopOwnersRef = collection(db, 'shopOwners')
+        const shopQuery = query(shopOwnersRef, where('userId', '==', currentUser.uid))
+        const shopSnapshot = await getDocs(shopQuery)
+        
+        if (!shopSnapshot.empty) {
+          const shopData = shopSnapshot.docs[0].data()
+          setShopOwnerData({
+            id: shopSnapshot.docs[0].id,
+            ...shopData
+          })
+        }
+
+        // Check if user is admin
+        if (userProfile?.isAdmin) {
+          setIsAdmin(true)
+        } else {
+          // Also check admins collection
+          const adminsRef = collection(db, 'admins')
+          const adminQuery = query(adminsRef, where('email', '==', currentUser.email))
+          const adminSnapshot = await getDocs(adminQuery)
+          
+          if (!adminSnapshot.empty) {
+            setIsAdmin(true)
+          }
+        }
+      } catch (error) {
+        console.error('Error checking user roles:', error)
+      }
+    }
+
+    checkUserRoles()
+  }, [currentUser, userProfile])
 
   // Handle scroll event for header shadow
   useEffect(() => {
@@ -162,23 +206,6 @@ export default function Header({ activePage }) {
         </nav>
         
         <div className="flex items-center space-x-4">
-          {/* Theme Toggle Button */}
-          {/* <button
-            onClick={toggleTheme}
-            className="p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 focus:ring-offset-black"
-            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {isDarkMode ? (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            )}
-          </button> */}
-          
           {/* Login button or User menu */}
           {currentUser ? (
             <div className="relative hidden md:block" ref={userMenuRef}>
@@ -209,7 +236,7 @@ export default function Header({ activePage }) {
               {/* User dropdown menu */}
               {userMenuOpen && (
                 <div 
-                  className="absolute right-0 mt-2 w-56 rounded-md shadow-lg z-10 animate-fadeIn"
+                  className="absolute right-0 mt-2 w-64 rounded-md shadow-lg z-10 animate-fadeIn"
                   style={{ 
                     backgroundColor: 'var(--panel-dark)', 
                     borderColor: 'var(--border-color)',
@@ -217,50 +244,143 @@ export default function Header({ activePage }) {
                   }}
                   role="menu"
                 >
-                  <div className="p-3" style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <p className="text-sm font-medium">{userProfile?.name || currentUser.displayName || 'User'}</p>
-                    <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{currentUser.email}</p>
+                  {/* User Info Header */}
+                  <div className="p-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white font-medium text-lg">
+                        {getUserInitials()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{userProfile?.name || currentUser.displayName || 'User'}</p>
+                        <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{currentUser.email}</p>
+                        {/* Role badges */}
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {shopOwnerData && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                              Shop Owner
+                            </span>
+                          )}
+                          {isAdmin && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100">
+                              Admin
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                  
+                  {/* Menu Items */}
                   <div className="py-1">
+                    {/* Profile */}
                     <Link 
                       href="/profile" 
-                      className="flex items-center px-4 py-2 text-sm hover:bg-[#222] focus:bg-[#222] focus:outline-none transition-colors"
+                      className="flex items-center px-4 py-2 text-sm transition-colors"
                       style={{ 
                         color: 'var(--text-main)',
                         ':hover': { backgroundColor: 'var(--panel-charcoal)' }
                       }}
                       role="menuitem"
                       onClick={() => setUserMenuOpen(false)}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent'
+                      }}
                     >
-                      <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
-                      Profile
+                      My Profile
                     </Link>
+                    
+                    {/* Orders */}
                     <Link 
                       href="/orders" 
-                      className="flex items-center px-4 py-2 text-sm hover:bg-[#222] focus:bg-[#222] focus:outline-none transition-colors"
+                      className="flex items-center px-4 py-2 text-sm transition-colors"
                       style={{ 
-                        color: 'var(--text-main)',
-                        ':hover': { backgroundColor: 'var(--panel-charcoal)' }
+                        color: 'var(--text-main)'
                       }}
                       role="menuitem"
                       onClick={() => setUserMenuOpen(false)}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent'
+                      }}
                     >
-                      <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                       </svg>
                       My Orders
                     </Link>
+                    
+                    {/* Shop Owner Inventory - Only show if user is a shop owner */}
+                    {shopOwnerData && shopOwnerData.status === 'approved' && (
+                      <Link 
+                        href={`/shop-inventory/${shopOwnerData.id}`}
+                        className="flex items-center px-4 py-2 text-sm transition-colors"
+                        style={{ 
+                          color: 'var(--text-main)'
+                        }}
+                        role="menuitem"
+                        onClick={() => setUserMenuOpen(false)}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'transparent'
+                        }}
+                      >
+                        <svg className="w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        Manage Inventory
+                      </Link>
+                    )}
+                    
+                    {/* Admin Panel - Only show if user is admin */}
+                    {isAdmin && (
+                      <Link 
+                        href="/admin"
+                        className="flex items-center px-4 py-2 text-sm transition-colors"
+                        style={{ 
+                          color: 'var(--text-main)'
+                        }}
+                        role="menuitem"
+                        onClick={() => setUserMenuOpen(false)}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'transparent'
+                        }}
+                      >
+                        <svg className="w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        Admin Panel
+                      </Link>
+                    )}
+                    
+                    {/* Divider */}
+                    <div className="my-1" style={{ borderTop: '1px solid var(--border-color)' }}></div>
+                    
+                    {/* Logout */}
                     <button 
                       onClick={handleLogout}
-                      className="flex items-center w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-[#222] focus:bg-[#222] focus:outline-none transition-colors"
-                      style={{ 
-                        ':hover': { backgroundColor: 'var(--panel-charcoal)' }
-                      }}
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-red-500 transition-colors"
                       role="menuitem"
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent'
+                      }}
                     >
-                      <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                       </svg>
                       Logout
@@ -397,15 +517,29 @@ export default function Header({ activePage }) {
               <>
                 <div className="py-4 mt-2" style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white font-medium">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white font-medium">
                       {getUserInitials()}
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">{userProfile?.name || currentUser.displayName || 'User'}</p>
                       <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{currentUser.email}</p>
+                      {/* Role badges */}
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {shopOwnerData && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                            Shop Owner
+                          </span>
+                        )}
+                        {isAdmin && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100">
+                            Admin
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
+                
                 <Link 
                   href="/profile" 
                   className="flex items-center py-3"
@@ -415,8 +549,9 @@ export default function Header({ activePage }) {
                   <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  Profile
+                  My Profile
                 </Link>
+                
                 <Link 
                   href="/orders" 
                   className="flex items-center py-3"
@@ -428,6 +563,37 @@ export default function Header({ activePage }) {
                   </svg>
                   My Orders
                 </Link>
+                
+                {/* Shop Owner Inventory - Mobile */}
+                {shopOwnerData && shopOwnerData.status === 'approved' && (
+                  <Link 
+                    href={`/shop-inventory/${shopOwnerData.id}`}
+                    className="flex items-center py-3"
+                    style={{ borderBottom: '1px solid var(--border-color)' }}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    Manage Inventory
+                  </Link>
+                )}
+                
+                {/* Admin Panel - Mobile */}
+                {isAdmin && (
+                  <Link 
+                    href="/admin"
+                    className="flex items-center py-3"
+                    style={{ borderBottom: '1px solid var(--border-color)' }}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Admin Panel
+                  </Link>
+                )}
+                
                 <button 
                   className="flex items-center py-3 text-left text-red-500 w-full"
                   onClick={() => {

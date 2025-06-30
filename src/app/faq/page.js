@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { db } from '@/firebase/config';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { FiSearch, FiPlus, FiMinus } from 'react-icons/fi';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Fallback FAQ data in case Firebase fails
 const fallbackFaqs = [
@@ -49,6 +50,7 @@ export default function FAQPage() {
   const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
     async function fetchFaqs() {
@@ -93,12 +95,12 @@ export default function FAQPage() {
     : faqs;
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
       {/* Hero Banner */}
-      <div className="bg-[#1a1a1a] py-16">
+      <div style={{ backgroundColor: 'var(--panel-charcoal)' }} className="py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-2">Frequently Asked Questions</h1>
-          <p className="text-gray-400">Got questions? We've got answers.</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Got questions? We've got answers.</p>
         </div>
       </div>
 
@@ -112,27 +114,38 @@ export default function FAQPage() {
               placeholder="Search FAQs…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-black border border-[#333] rounded-md py-3 px-4 pl-12 text-white focus:outline-none focus:border-red-500"
+              className="w-full rounded-md py-3 px-4 pl-12 focus:outline-none focus:border-red-500"
+              style={{ 
+                backgroundColor: 'var(--bg-main)', 
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-main)'
+              }}
             />
-            <span className="absolute left-4 top-3.5 text-gray-400">
+            <span style={{ color: 'var(--text-secondary)' }} className="absolute left-4 top-3.5">
               <FiSearch size={20} />
             </span>
           </div>
         </div>
 
         {/* FAQ Accordion */}
-        <div className="max-w-3xl mx-auto bg-[#1a1a1a] rounded-lg overflow-hidden">
+        <div className="max-w-3xl mx-auto rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--panel-charcoal)' }}>
           {loading ? (
             <div className="py-16 text-center">
-              <p className="text-gray-400">Loading FAQs...</p>
+              <p style={{ color: 'var(--text-secondary)' }}>Loading FAQs...</p>
             </div>
           ) : filteredFaqs.length > 0 ? (
-            <div className="divide-y divide-[#333]">
+            <div style={{ borderTop: '1px solid var(--border-color)' }}>
               {filteredFaqs.map((faq) => (
-                <div key={faq.id} className="border-b border-[#333] last:border-b-0">
+                <div key={faq.id} style={{ borderBottom: '1px solid var(--border-color)' }} className="last:border-b-0">
                   <button
-                    className="flex justify-between items-center w-full text-left py-5 px-6 hover:bg-[#222] transition-colors"
+                    className="flex justify-between items-center w-full text-left py-5 px-6 transition-colors"
                     onClick={() => toggleFaq(faq.id)}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent'
+                    }}
                   >
                     <span className="font-medium text-lg pr-8">{faq.question}</span>
                     <span className={`text-red-500 transition-transform ${expandedId === faq.id ? 'transform rotate-180' : ''}`}>
@@ -140,8 +153,8 @@ export default function FAQPage() {
                     </span>
                   </button>
                   {expandedId === faq.id && (
-                    <div className="bg-[#0d0d0d] py-4 px-6">
-                      <p className="text-gray-300">{faq.answer}</p>
+                    <div style={{ backgroundColor: 'var(--bg-main)' }} className="py-4 px-6">
+                      <p style={{ color: 'var(--text-secondary)' }}>{faq.answer}</p>
                     </div>
                   )}
                 </div>
@@ -149,7 +162,7 @@ export default function FAQPage() {
             </div>
           ) : (
             <div className="py-16 text-center">
-              <p className="text-gray-400">No FAQs found matching your search</p>
+              <p style={{ color: 'var(--text-secondary)' }}>No FAQs found matching your search</p>
               {searchQuery && (
                 <button 
                   onClick={() => setSearchQuery('')}
@@ -163,9 +176,9 @@ export default function FAQPage() {
         </div>
 
         {/* Still have questions */}
-        <div className="mt-12 bg-black border border-[#333] rounded-lg p-8 text-center">
+        <div className="mt-12 rounded-lg p-8 text-center" style={{ backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)' }}>
           <h2 className="text-2xl font-semibold mb-4">Can't find what you're looking for?</h2>
-          <p className="text-gray-400 mb-6">Our support team is ready to help you with any questions you may have.</p>
+          <p style={{ color: 'var(--text-secondary)' }} className="mb-6">Our support team is ready to help you with any questions you may have.</p>
           <a href="/contact" className="bg-red-600 hover:bg-red-700 text-white py-3 px-8 rounded-md transition-colors inline-block">
             Contact Support
           </a>

@@ -200,14 +200,20 @@ export default function FilterSearchBar({ onFiltersChange }) {
               <button
                 key={filter.id}
                 onClick={() => handleFilterChange('category', filter.id)}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                  activeFilter === filter.id
-                    ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white'
-                    : 'hover:bg-[#333]'
-                }`}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap`}
                 style={{ 
                   backgroundColor: activeFilter === filter.id ? '' : 'var(--panel-gray)',
                   color: activeFilter === filter.id ? 'white' : 'var(--text-secondary)'
+                }}
+                onMouseEnter={(e) => {
+                  if (activeFilter !== filter.id) {
+                    e.target.style.backgroundColor = isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-light)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeFilter !== filter.id) {
+                    e.target.style.backgroundColor = 'var(--panel-gray)'
+                  }
                 }}
               >
                 {filter.name}

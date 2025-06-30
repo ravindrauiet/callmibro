@@ -72,6 +72,7 @@ export default function OrdersPage() {
   const router = useRouter();
   const { currentUser } = useAuth();
   const ordersPerPage = 5;
+  const { isDarkMode } = useTheme();
 
   // Create sample orders for testing if needed
   const createSampleOrders = async () => {
@@ -325,17 +326,17 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-[#111] text-white">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
       {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-[#0a0a0a] to-[#1a1a1a] py-16">
+      <div style={{ backgroundColor: 'var(--panel-charcoal)' }} className="py-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Order History</h1>
-          <p className="text-gray-400">Track your past purchases and services</p>
+          <h1 className="text-4xl font-bold mb-2">My Orders</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Track your service bookings and product orders</p>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-12">
         {error && (
           <div className="bg-gradient-to-r from-red-900 to-red-800 text-red-100 p-4 rounded-lg mb-6">
             <p>{error}</p>
@@ -382,111 +383,97 @@ export default function OrdersPage() {
             </div>
 
             {/* Orders Table */}
-            <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] rounded-xl overflow-hidden border border-[#222] shadow-lg">
-              {loading ? (
-                <div className="py-16 text-center">
-                  <div className="animate-spin w-12 h-12 border-4 border-t-transparent rounded-full mx-auto mb-4 bg-gradient-to-r from-[#e60012] to-[#ff6b6b]"></div>
-                  <p className="text-gray-400">Loading orders...</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  {currentOrders.length > 0 ? (
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-gradient-to-r from-[#161616] to-[#0d0d0d]">
-                          <th className="px-6 py-4 text-left text-gray-300">Order ID</th>
-                          <th className="px-6 py-4 text-left text-gray-300">Type</th>
-                          <th className="px-6 py-4 text-left text-gray-300">Date</th>
-                          <th className="px-6 py-4 text-left text-gray-300">Items</th>
-                          <th className="px-6 py-4 text-left text-gray-300">Total</th>
-                          <th className="px-6 py-4 text-left text-gray-300">Status</th>
+            <div className="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                {loading ? (
+                  <div className="py-16 text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#e60012] mx-auto"></div>
+                    <p style={{ color: 'var(--text-secondary)' }} className="mt-4">Loading orders...</p>
+                  </div>
+                ) : (
+                  <table className="w-full">
+                    <thead style={{ backgroundColor: 'var(--panel-charcoal)' }}>
+                      <tr>
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Order ID</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Type</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Date</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Items</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Total</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentOrders.map((order, index) => (
+                        <tr 
+                          key={order.id}
+                          className="cursor-pointer transition-all"
+                          style={{ borderTop: '1px solid var(--border-color)' }}
+                          onClick={() => handleOrderClick(order)}
+                          onMouseEnter={(e) => {
+                            e.target.closest('tr').style.backgroundColor = isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.closest('tr').style.backgroundColor = 'transparent'
+                          }}
+                        >
+                          <td className="px-6 py-4 font-medium bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">{order.id.slice(0, 8)}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${order.orderType === 'service' ? 'bg-blue-900 text-blue-100' : 'bg-purple-900 text-purple-100'}`}>
+                              {order.orderType === 'service' ? 'Service' : 'Product'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">{order.date}</td>
+                          <td className="px-6 py-4" style={{ color: 'var(--text-secondary)' }}>
+                            {order.items && order.items.length > 0 ? (
+                              <ul className="list-disc list-inside">
+                                {order.items.slice(0, 2).map((item, i) => (
+                                  <li key={i}>{typeof item === 'string' ? item : item.name}</li>
+                                ))}
+                                {order.items.length > 2 && (
+                                  <li>+{order.items.length - 2} more</li>
+                                )}
+                              </ul>
+                            ) : (
+                              'No items'
+                            )}
+                          </td>
+                          <td className="px-6 py-4 font-medium bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">
+                            {typeof order.total === 'number' ? `₹${order.total}` : order.total}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium shadow-sm ${getStatusStyle(order.status)}`}>
+                              {order.status}
+                            </span>
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {currentOrders.map((order, index) => (
-                          <tr 
-                            key={order.id}
-                            className="border-t border-[#222] cursor-pointer hover:bg-[#161616] transition-all"
-                            onClick={() => handleOrderClick(order)}
-                          >
-                            <td className="px-6 py-4 font-medium bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">{order.id.slice(0, 8)}</td>
-                            <td className="px-6 py-4">
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${order.orderType === 'service' ? 'bg-blue-900 text-blue-100' : 'bg-purple-900 text-purple-100'}`}>
-                                {order.orderType === 'service' ? 'Service' : 'Product'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">{order.date}</td>
-                            <td className="px-6 py-4 text-gray-400">
-                              {order.items && order.items.length > 0 ? (
-                                <ul className="list-disc list-inside">
-                                  {order.items.slice(0, 2).map((item, i) => (
-                                    <li key={i}>{typeof item === 'string' ? item : item.name}</li>
-                                  ))}
-                                  {order.items.length > 2 && (
-                                    <li>+{order.items.length - 2} more</li>
-                                  )}
-                                </ul>
-                              ) : (
-                                'No items'
-                              )}
-                            </td>
-                            <td className="px-6 py-4 font-medium bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">
-                              {typeof order.total === 'number' ? `₹${order.total}` : order.total}
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`px-3 py-1 rounded-full text-sm font-medium shadow-sm ${getStatusStyle(order.status)}`}>
-                                {order.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <div className="py-16 text-center">
-                      {searchTerm || statusFilter !== 'All' ? (
-                        <>
-                          <p className="text-gray-400 mb-4">No orders found matching your filters</p>
-                          <button 
-                            onClick={() => {
-                              setSearchTerm('');
-                              setStatusFilter('All');
-                            }}
-                            className="text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text hover:underline transition-all"
-                          >
-                            Clear filters
-                          </button>
-                        </>
-                      ) : (
-                        <div className="px-4">
-                          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] flex items-center justify-center opacity-70">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                            </svg>
-                          </div>
-                          <h4 className="text-xl font-medium mb-2">No orders yet</h4>
-                          <p className="text-gray-400 mb-6">Your order history will appear here after you make a purchase.</p>
-                          <button 
-                            onClick={() => router.push('/spare-parts')}
-                            className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#ff6b6b] hover:to-[#e60012] text-white transition-all px-6 py-3 rounded-lg font-medium shadow-md"
-                          >
-                            Shop Now
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
             </div>
 
-            {/* Pagination - only show if we have orders */}
+            {/* Pagination */}
             {filteredOrders.length > 0 && (
               <div className="flex justify-center items-center mt-8 space-x-2">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="p-2 rounded-lg hover:bg-[#1a1a1a] disabled:opacity-50 transition-all border border-[#222]"
+                  className="p-2 rounded-lg disabled:opacity-50 transition-all"
+                  style={{ 
+                    border: '1px solid var(--border-color)',
+                    backgroundColor: 'var(--panel-gray)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.backgroundColor = isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-light)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.backgroundColor = 'var(--panel-gray)'
+                    }
+                  }}
                 >
                   &lt;
                 </button>
@@ -497,8 +484,22 @@ export default function OrdersPage() {
                     className={`w-10 h-10 rounded-lg transition-all ${
                       currentPage === page 
                         ? 'bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white' 
-                        : 'hover:bg-[#1a1a1a] border border-[#222]'
+                        : ''
                     }`}
+                    style={currentPage !== page ? {
+                      border: '1px solid var(--border-color)',
+                      backgroundColor: 'var(--panel-gray)'
+                    } : {}}
+                    onMouseEnter={(e) => {
+                      if (currentPage !== page) {
+                        e.target.style.backgroundColor = isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-light)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (currentPage !== page) {
+                        e.target.style.backgroundColor = 'var(--panel-gray)'
+                      }
+                    }}
                   >
                     {page}
                   </button>
@@ -506,7 +507,21 @@ export default function OrdersPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="p-2 rounded-lg hover:bg-[#1a1a1a] disabled:opacity-50 transition-all border border-[#222]"
+                  className="p-2 rounded-lg disabled:opacity-50 transition-all"
+                  style={{ 
+                    border: '1px solid var(--border-color)',
+                    backgroundColor: 'var(--panel-gray)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.backgroundColor = isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-light)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.backgroundColor = 'var(--panel-gray)'
+                    }
+                  }}
                 >
                   &gt;
                 </button>
