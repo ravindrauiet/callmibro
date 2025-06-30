@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { db } from '@/firebase/config'
-import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, doc, setDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { toast } from 'react-hot-toast'
@@ -43,19 +43,59 @@ export default function ShopRegistration() {
     { name: '', category: '', quantity: '', price: '' }
   ])
   
-  // Redirect if not logged in
+  // Check if user is already a shop owner and redirect if logged in
   useEffect(() => {
-    if (!currentUser) {
-      router.push('/')
-      toast.error('Please log in to register your shop')
-    } else {
-      // Pre-fill data if user is logged in
-      setFormData(prev => ({
-        ...prev,
-        ownerName: userProfile?.name || currentUser.displayName || '',
-        shopEmail: currentUser.email || ''
-      }))
+    const checkShopOwnerStatus = async () => {
+      if (!currentUser) {
+        router.push('/')
+        toast.error('Please log in to register your shop')
+        return
+      }
+      
+      try {
+        // Check if user is already a shop owner
+        const shopOwnersRef = collection(db, 'shopOwners')
+        const q = query(shopOwnersRef, where('userId', '==', currentUser.uid))
+        const querySnapshot = await getDocs(q)
+        
+        if (!querySnapshot.empty) {
+          const shopOwnerDoc = querySnapshot.docs[0]
+          const shopOwnerData = shopOwnerDoc.data()
+          
+          // If shop owner exists and is approved, redirect to inventory
+          if (shopOwnerData.status === 'approved') {
+            toast('You are already a registered shop owner')
+            router.push(`/shop-inventory/${shopOwnerDoc.id}`)
+            return
+          }
+          
+          // If shop owner exists but is pending/rejected, show appropriate message
+          if (shopOwnerData.status === 'pending') {
+            toast('Your shop registration is pending approval')
+            router.push('/profile')
+            return
+          }
+          
+          if (shopOwnerData.status === 'rejected') {
+            toast('Your shop registration was rejected. Please contact support.')
+            router.push('/profile')
+            return
+          }
+        }
+        
+        // If not a shop owner, pre-fill form data
+        setFormData(prev => ({
+          ...prev,
+          ownerName: userProfile?.name || currentUser.displayName || '',
+          shopEmail: currentUser.email || ''
+        }))
+      } catch (error) {
+        console.error('Error checking shop owner status:', error)
+        toast.error('Error checking shop owner status')
+      }
     }
+    
+    checkShopOwnerStatus()
   }, [currentUser, router, userProfile])
   
   // Get user's location
@@ -192,7 +232,7 @@ export default function ShopRegistration() {
       <Header />
       <main className="min-h-screen py-16 px-4 sm:px-8" style={{ backgroundColor: 'var(--bg-color)', color: 'var(--text-main)' }}>
         <div className="container mx-auto max-w-3xl">
-          <div className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] p-1 rounded-xl">
+          <div className="bg-gradient-to-r p-1 rounded-xl">
             <div className="rounded-lg p-6 sm:p-8" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
               <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center" style={{ color: 'var(--text-main)' }}>Register Your Repair Shop</h1>
               
