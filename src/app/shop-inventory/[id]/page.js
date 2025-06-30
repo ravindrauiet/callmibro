@@ -18,12 +18,13 @@ export default function ShopInventoryPage({ params }) {
   
   const [shopData, setShopData] = useState(null)
   const [inventory, setInventory] = useState([])
+  const [filteredInventory, setFilteredInventory] = useState([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [currentItem, setCurrentItem] = useState(null)
   
-  // Enhanced form data with structured fields
+  // Enhanced form data with more fields
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -31,7 +32,38 @@ export default function ShopInventoryPage({ params }) {
     model: '',
     quantity: '',
     price: '',
-    description: ''
+    costPrice: '',
+    description: '',
+    sku: '',
+    minStockLevel: '',
+    maxStockLevel: '',
+    supplier: '',
+    location: '',
+    condition: 'new',
+    warranty: '',
+    tags: ''
+  })
+  
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('')
+  const [brandFilter, setBrandFilter] = useState('')
+  const [stockFilter, setStockFilter] = useState('')
+  const [sortBy, setSortBy] = useState('name')
+  const [sortOrder, setSortOrder] = useState('asc')
+  
+  // Bulk operations
+  const [selectedItems, setSelectedItems] = useState([])
+  const [showBulkActions, setShowBulkActions] = useState(false)
+  
+  // Analytics states
+  const [analytics, setAnalytics] = useState({
+    totalItems: 0,
+    totalValue: 0,
+    lowStockItems: 0,
+    outOfStockItems: 0,
+    categories: {},
+    topBrands: []
   })
   
   // Autocomplete data
@@ -60,6 +92,111 @@ export default function ShopInventoryPage({ params }) {
     'Washing Machine Repair',
     'Other'
   ]
+
+  // Condition options
+  const conditionOptions = [
+    { value: 'new', label: 'New' },
+    { value: 'refurbished', label: 'Refurbished' },
+    { value: 'used', label: 'Used' },
+    { value: 'damaged', label: 'Damaged' }
+  ]
+
+  // Calculate analytics
+  const calculateAnalytics = (inventoryData) => {
+    const totalItems = inventoryData.length
+    const totalValue = inventoryData.reduce((sum, item) => sum + (item.quantity * item.price), 0)
+    const lowStockItems = inventoryData.filter(item => 
+      item.quantity <= (item.minStockLevel || 5)
+    ).length
+    const outOfStockItems = inventoryData.filter(item => item.quantity === 0).length
+    
+    // Category distribution
+    const categories = {}
+    inventoryData.forEach(item => {
+      categories[item.category] = (categories[item.category] || 0) + 1
+    })
+    
+    // Top brands
+    const brandCounts = {}
+    inventoryData.forEach(item => {
+      brandCounts[item.brand] = (brandCounts[item.brand] || 0) + 1
+    })
+    const topBrands = Object.entries(brandCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([brand, count]) => ({ brand, count }))
+    
+    setAnalytics({
+      totalItems,
+      totalValue,
+      lowStockItems,
+      outOfStockItems,
+      categories,
+      topBrands
+    })
+  }
+
+  // Filter and sort inventory
+  const filterAndSortInventory = () => {
+    let filtered = [...inventory]
+    
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(item =>
+        (item.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.brand || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.model || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.sku || '').toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+    
+    // Apply category filter
+    if (categoryFilter) {
+      filtered = filtered.filter(item => item.category === categoryFilter)
+    }
+    
+    // Apply brand filter
+    if (brandFilter) {
+      filtered = filtered.filter(item => item.brand === brandFilter)
+    }
+    
+    // Apply stock filter
+    if (stockFilter) {
+      switch (stockFilter) {
+        case 'low':
+          filtered = filtered.filter(item => item.quantity <= (item.minStockLevel || 5))
+          break
+        case 'out':
+          filtered = filtered.filter(item => item.quantity === 0)
+          break
+        case 'in':
+          filtered = filtered.filter(item => item.quantity > (item.minStockLevel || 5))
+          break
+      }
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aValue = a[sortBy]
+      let bValue = b[sortBy]
+      
+      if (sortBy === 'price' || sortBy === 'quantity' || sortBy === 'costPrice') {
+        aValue = parseFloat(aValue) || 0
+        bValue = parseFloat(bValue) || 0
+      } else {
+        aValue = String(aValue || '').toLowerCase()
+        bValue = String(bValue || '').toLowerCase()
+      }
+      
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1
+      } else {
+        return aValue < bValue ? 1 : -1
+      }
+    })
+    
+    setFilteredInventory(filtered)
+  }
 
   // Fetch shop data and inventory
   useEffect(() => {
@@ -106,6 +243,8 @@ export default function ShopInventoryPage({ params }) {
         }))
         
         setInventory(inventoryItems)
+        setFilteredInventory(inventoryItems)
+        calculateAnalytics(inventoryItems)
       } catch (error) {
         console.error('Error fetching shop data:', error)
         toast.error('Failed to load shop data')
@@ -116,6 +255,11 @@ export default function ShopInventoryPage({ params }) {
     
     fetchShopData()
   }, [currentUser, shopId, router])
+
+  // Apply filters when search/filter states change
+  useEffect(() => {
+    filterAndSortInventory()
+  }, [searchTerm, categoryFilter, brandFilter, stockFilter, sortBy, sortOrder, inventory])
 
   // Fetch categories, brands, and models for autocomplete
   useEffect(() => {
@@ -497,7 +641,16 @@ export default function ShopInventoryPage({ params }) {
       model: '',
       quantity: '',
       price: '',
-      description: ''
+      costPrice: '',
+      description: '',
+      sku: '',
+      minStockLevel: '',
+      maxStockLevel: '',
+      supplier: '',
+      location: '',
+      condition: 'new',
+      warranty: '',
+      tags: ''
     })
     setIsEditing(false)
     setIsModalOpen(true)
@@ -512,7 +665,16 @@ export default function ShopInventoryPage({ params }) {
       model: item.model || '',
       quantity: item.quantity || '',
       price: item.price || '',
-      description: item.description || ''
+      costPrice: item.costPrice || '',
+      description: item.description || '',
+      sku: item.sku || '',
+      minStockLevel: item.minStockLevel || '',
+      maxStockLevel: item.maxStockLevel || '',
+      supplier: item.supplier || '',
+      location: item.location || '',
+      condition: item.condition || 'new',
+      warranty: item.warranty || '',
+      tags: item.tags || ''
     })
     setCurrentItem(item)
     setIsEditing(true)
@@ -534,7 +696,16 @@ export default function ShopInventoryPage({ params }) {
           model: formData.model,
           quantity: parseInt(formData.quantity) || 0,
           price: parseFloat(formData.price) || 0,
+          costPrice: parseFloat(formData.costPrice) || 0,
           description: formData.description || '',
+          sku: formData.sku || '',
+          minStockLevel: parseInt(formData.minStockLevel) || 0,
+          maxStockLevel: parseInt(formData.maxStockLevel) || 0,
+          supplier: formData.supplier || '',
+          location: formData.location || '',
+          condition: formData.condition || 'new',
+          warranty: formData.warranty || '',
+          tags: formData.tags || '',
           updatedAt: serverTimestamp()
         })
         
@@ -550,7 +721,16 @@ export default function ShopInventoryPage({ params }) {
                   model: formData.model,
                   quantity: parseInt(formData.quantity) || 0,
                   price: parseFloat(formData.price) || 0,
-                  description: formData.description || ''
+                  costPrice: parseFloat(formData.costPrice) || 0,
+                  description: formData.description || '',
+                  sku: formData.sku || '',
+                  minStockLevel: parseInt(formData.minStockLevel) || 0,
+                  maxStockLevel: parseInt(formData.maxStockLevel) || 0,
+                  supplier: formData.supplier || '',
+                  location: formData.location || '',
+                  condition: formData.condition || 'new',
+                  warranty: formData.warranty || '',
+                  tags: formData.tags || '',
                 } 
               : item
           )
@@ -567,7 +747,16 @@ export default function ShopInventoryPage({ params }) {
           model: formData.model,
           quantity: parseInt(formData.quantity) || 0,
           price: parseFloat(formData.price) || 0,
+          costPrice: parseFloat(formData.costPrice) || 0,
           description: formData.description || '',
+          sku: formData.sku || '',
+          minStockLevel: parseInt(formData.minStockLevel) || 0,
+          maxStockLevel: parseInt(formData.maxStockLevel) || 0,
+          supplier: formData.supplier || '',
+          location: formData.location || '',
+          condition: formData.condition || 'new',
+          warranty: formData.warranty || '',
+          tags: formData.tags || '',
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         }
@@ -635,18 +824,19 @@ export default function ShopInventoryPage({ params }) {
   return (
     <>
       <Header />
-      <main className="min-h-screen py-16 px-4 sm:px-8" style={{ backgroundColor: 'var(--bg-color)', color: 'var(--text-main)' }}>
-        <div className="container mx-auto max-w-6xl">
+      <main className="flex-1 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: 'var(--text-main)' }}>Inventory Management</h1>
-                <p style={{ color: 'var(--text-secondary)' }}>
-                  {shopData?.shopName} - {shopData?.shopCategory}
+                <h1 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>
+                  Inventory Management
+                </h1>
+                <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  Manage your shop inventory and track stock levels
                 </p>
               </div>
-              
               <button
                 onClick={openAddModal}
                 className="mt-4 sm:mt-0 px-6 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 flex items-center"
@@ -669,14 +859,211 @@ export default function ShopInventoryPage({ params }) {
               </div>
             )}
           </div>
+
+          {/* Analytics Dashboard */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="p-6 rounded-lg shadow-md" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
+              <div className="flex items-center">
+                <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900">
+                  <svg className="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Total Items</p>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>{analytics.totalItems}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-lg shadow-md" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
+              <div className="flex items-center">
+                <div className="p-2 rounded-full bg-green-100 dark:bg-green-900">
+                  <svg className="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Total Value</p>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>₹{analytics.totalValue.toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-lg shadow-md" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
+              <div className="flex items-center">
+                <div className="p-2 rounded-full bg-yellow-100 dark:bg-yellow-900">
+                  <svg className="h-6 w-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Low Stock</p>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>{analytics.lowStockItems}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-lg shadow-md" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
+              <div className="flex items-center">
+                <div className="p-2 rounded-full bg-red-100 dark:bg-red-900">
+                  <svg className="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Out of Stock</p>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>{analytics.outOfStockItems}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Search and Filter Controls */}
+          <div className="mb-6 p-4 rounded-lg shadow-md" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Search */}
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Search</label>
+                <input
+                  type="text"
+                  placeholder="Search by name, brand, model, or SKU..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                  style={{ 
+                    backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)'
+                  }}
+                />
+              </div>
+
+              {/* Category Filter */}
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Category</label>
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                  style={{ 
+                    backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)'
+                  }}
+                >
+                  <option value="">All Categories</option>
+                  {Object.keys(analytics.categories).map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Stock Filter */}
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Stock Status</label>
+                <select
+                  value={stockFilter}
+                  onChange={(e) => setStockFilter(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                  style={{ 
+                    backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)'
+                  }}
+                >
+                  <option value="">All Items</option>
+                  <option value="low">Low Stock</option>
+                  <option value="out">Out of Stock</option>
+                  <option value="in">In Stock</option>
+                </select>
+              </div>
+
+              {/* Sort */}
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Sort By</label>
+                <select
+                  value={`${sortBy}-${sortOrder}`}
+                  onChange={(e) => {
+                    const [field, order] = e.target.value.split('-')
+                    setSortBy(field)
+                    setSortOrder(order)
+                  }}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                  style={{ 
+                    backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)'
+                  }}
+                >
+                  <option value="name-asc">Name (A-Z)</option>
+                  <option value="name-desc">Name (Z-A)</option>
+                  <option value="price-asc">Price (Low-High)</option>
+                  <option value="price-desc">Price (High-Low)</option>
+                  <option value="quantity-asc">Quantity (Low-High)</option>
+                  <option value="quantity-desc">Quantity (High-Low)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Bulk Actions */}
+          {showBulkActions && (
+            <div className="mb-4 p-4 rounded-lg shadow-md bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium" style={{ color: 'var(--text-main)' }}>
+                  {selectedItems.length} items selected
+                </span>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => {/* Implement bulk edit */}}
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Bulk Edit
+                  </button>
+                  <button
+                    onClick={() => {/* Implement bulk delete */}}
+                    className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                  >
+                    Bulk Delete
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedItems([])
+                      setShowBulkActions(false)
+                    }}
+                    className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Inventory Table */}
           <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
-            {inventory.length > 0 ? (
+            {filteredInventory.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y" style={{ borderColor: 'var(--border-color)' }}>
                   <thead style={{ backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)' }}>
                     <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.length === filteredInventory.length}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedItems(filteredInventory.map(item => item.id))
+                              setShowBulkActions(true)
+                            } else {
+                              setSelectedItems([])
+                              setShowBulkActions(false)
+                            }
+                          }}
+                          className="rounded border-gray-300"
+                        />
+                      </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                         Product
                       </th>
@@ -695,13 +1082,16 @@ export default function ShopInventoryPage({ params }) {
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                         Price
                       </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                        Status
+                      </th>
                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                         Actions
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)', borderColor: 'var(--border-color)' }}>
-                    {inventory.map((item) => (
+                    {filteredInventory.map((item) => (
                       <tr 
                         key={item.id} 
                         className="transition-colors duration-200"
@@ -718,7 +1108,27 @@ export default function ShopInventoryPage({ params }) {
                         }}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.includes(item.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedItems([...selectedItems, item.id])
+                                setShowBulkActions(true)
+                              } else {
+                                const newSelected = selectedItems.filter(id => id !== item.id)
+                                setSelectedItems(newSelected)
+                                setShowBulkActions(newSelected.length > 0)
+                              }
+                            }}
+                            className="rounded border-gray-300"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium" style={{ color: 'var(--text-main)' }}>{item.name}</div>
+                          {item.sku && (
+                            <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>SKU: {item.sku}</div>
+                          )}
                           {item.description && (
                             <div className="text-xs truncate max-w-[200px]" style={{ color: 'var(--text-secondary)' }}>
                               {item.description}
@@ -735,10 +1145,31 @@ export default function ShopInventoryPage({ params }) {
                           <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item.model}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item.quantity}</div>
+                          <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                            {item.quantity}
+                            {item.minStockLevel && item.quantity <= item.minStockLevel && (
+                              <span className="ml-1 text-red-500">⚠️</span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>₹{item.price}</div>
+                          {item.costPrice && (
+                            <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                              Cost: ₹{item.costPrice}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            item.quantity === 0 
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              : item.quantity <= (item.minStockLevel || 5)
+                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                              : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          }`}>
+                            {item.quantity === 0 ? 'Out of Stock' : item.quantity <= (item.minStockLevel || 5) ? 'Low Stock' : 'In Stock'}
+                          </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
@@ -786,8 +1217,12 @@ export default function ShopInventoryPage({ params }) {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--text-secondary)' }}>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
-                <h3 className="mt-4 text-lg font-medium" style={{ color: 'var(--text-main)' }}>No inventory items</h3>
-                <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>Get started by adding your first inventory item.</p>
+                <h3 className="mt-4 text-lg font-medium" style={{ color: 'var(--text-main)' }}>
+                  {inventory.length === 0 ? 'No inventory items' : 'No items match your filters'}
+                </h3>
+                <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>
+                  {inventory.length === 0 ? 'Get started by adding your first inventory item.' : 'Try adjusting your search or filter criteria.'}
+                </p>
                 <button
                   onClick={openAddModal}
                   className="mt-6 px-4 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2"
@@ -830,6 +1265,27 @@ export default function ShopInventoryPage({ params }) {
                       color: 'var(--text-main)',
                       borderColor: 'var(--border-color)'
                     }}
+                  />
+                </div>
+
+                {/* SKU */}
+                <div>
+                  <label htmlFor="sku" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                    SKU (Stock Keeping Unit)
+                  </label>
+                  <input
+                    type="text"
+                    id="sku"
+                    name="sku"
+                    value={formData.sku}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                    style={{ 
+                      backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)'
+                    }}
+                    placeholder="e.g., IPHONE13-BAT-001"
                   />
                 </div>
                 
@@ -1077,8 +1533,9 @@ export default function ShopInventoryPage({ params }) {
                     )}
                   </div>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4">
+
+                {/* Quantity and Price Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="quantity" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                       Quantity*
@@ -1102,7 +1559,7 @@ export default function ShopInventoryPage({ params }) {
                   
                   <div>
                     <label htmlFor="price" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Price (₹)*
+                      Selling Price (₹)*
                     </label>
                     <input
                       type="number"
@@ -1124,8 +1581,187 @@ export default function ShopInventoryPage({ params }) {
                 </div>
                 
                 <div>
+                  <label htmlFor="costPrice" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                    Cost Price (₹)*
+                  </label>
+                  <input
+                    type="number"
+                    id="costPrice"
+                    name="costPrice"
+                    value={formData.costPrice}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                    style={{ 
+                      backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)'
+                    }}
+                  />
+                </div>
+
+                {/* Stock Levels Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="minStockLevel" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Minimum Stock Level
+                    </label>
+                    <input
+                      type="number"
+                      id="minStockLevel"
+                      name="minStockLevel"
+                      value={formData.minStockLevel}
+                      onChange={handleChange}
+                      min="0"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                      placeholder="Default: 5"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="maxStockLevel" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Maximum Stock Level
+                    </label>
+                    <input
+                      type="number"
+                      id="maxStockLevel"
+                      name="maxStockLevel"
+                      value={formData.maxStockLevel}
+                      onChange={handleChange}
+                      min="0"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                      placeholder="Optional"
+                    />
+                  </div>
+                </div>
+
+                {/* Supplier and Location Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="supplier" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Supplier
+                    </label>
+                    <input
+                      type="text"
+                      id="supplier"
+                      name="supplier"
+                      value={formData.supplier}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                      placeholder="e.g., ABC Electronics"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="location" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Storage Location
+                    </label>
+                    <input
+                      type="text"
+                      id="location"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                      placeholder="e.g., Shelf A1, Drawer 3"
+                    />
+                  </div>
+                </div>
+
+                {/* Condition and Warranty Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="condition" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Condition
+                    </label>
+                    <select
+                      id="condition"
+                      name="condition"
+                      value={formData.condition}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                    >
+                      {conditionOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="warranty" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Warranty
+                    </label>
+                    <input
+                      type="text"
+                      id="warranty"
+                      name="warranty"
+                      value={formData.warranty}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                      placeholder="e.g., 1 year, 6 months"
+                    />
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div>
+                  <label htmlFor="tags" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                    Tags
+                  </label>
+                  <input
+                    type="text"
+                    id="tags"
+                    name="tags"
+                    value={formData.tags}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                    style={{ 
+                      backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)'
+                    }}
+                    placeholder="e.g., popular, fast-moving, seasonal (comma separated)"
+                  />
+                </div>
+                
+                {/* Description */}
+                <div>
                   <label htmlFor="description" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                    Description (Optional)
+                    Description
                   </label>
                   <textarea
                     id="description"
@@ -1139,7 +1775,8 @@ export default function ShopInventoryPage({ params }) {
                       color: 'var(--text-main)',
                       borderColor: 'var(--border-color)'
                     }}
-                  ></textarea>
+                    placeholder="Additional details about the product..."
+                  />
                 </div>
               </div>
               
