@@ -826,38 +826,57 @@ export default function ShopInventoryPage({ params }) {
       <Header />
       <main className="flex-1 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>
-                  Inventory Management
-                </h1>
-                <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                  Manage your shop inventory and track stock levels
-                </p>
-              </div>
+          {/* Header with Actions */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold" style={{ color: 'var(--text-main)' }}>
+                {shopData?.shopName || 'Shop'} Inventory
+              </h1>
+              <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>
+                Manage your inventory items and track stock levels
+              </p>
+            </div>
+            <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => {
+                  const shareUrl = `${window.location.origin}/shop-inventory/${shopId}/share`
+                  // Create QR code URL
+                  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`
+                  
+                  // Open QR code in new window
+                  const qrWindow = window.open(qrCodeUrl, '_blank', 'width=300,height=300')
+                  
+                  // Also copy link to clipboard
+                  navigator.clipboard.writeText(shareUrl).then(() => {
+                    toast.success('Inventory share link copied to clipboard! QR code opened in new window.')
+                  }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea')
+                    textArea.value = shareUrl
+                    document.body.appendChild(textArea)
+                    textArea.select()
+                    document.execCommand('copy')
+                    document.body.removeChild(textArea)
+                    toast.success('Inventory share link copied to clipboard! QR code opened in new window.')
+                  })
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                </svg>
+                Share Inventory
+              </button>
               <button
                 onClick={openAddModal}
-                className="mt-4 sm:mt-0 px-6 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 flex items-center"
+                className="px-4 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 transition-colors duration-200"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Add New Item
+                Add Item
               </button>
             </div>
-            
-            {shopData?.status === 'pending' && (
-              <div className="mt-4 p-4 bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100 rounded-lg">
-                <p className="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  Your shop registration is pending approval. You can still manage your inventory, but it won't be visible to customers until approved.
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Analytics Dashboard */}
