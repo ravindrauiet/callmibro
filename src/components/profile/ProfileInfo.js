@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { toast } from 'react-hot-toast'
 import { FiHome, FiMapPin, FiPlus, FiEdit2, FiTrash2, FiCheck } from 'react-icons/fi'
@@ -9,13 +9,13 @@ import { db } from '@/firebase/config'
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
 import Link from 'next/link'
 
-export default function ProfileInfo({ userProfile }) {
-  const { currentUser, updateUserProfile, saveUserAddress, updateUserAddress, deleteUserAddress } = useAuth()
+export default function ProfileInfo() {
+  const { currentUser, userProfile, updateUserProfile, saveUserAddress, updateUserAddress, deleteUserAddress } = useAuth()
+  const { isDarkMode } = useTheme()
   const [isEditing, setIsEditing] = useState(false)
   const [addressModalOpen, setAddressModalOpen] = useState(false)
   const [editingAddress, setEditingAddress] = useState(null)
   const [savedAddresses, setSavedAddresses] = useState([])
-  const { isDarkMode } = useTheme()
   const [formData, setFormData] = useState({
     displayName: '',
     email: '',
@@ -27,7 +27,7 @@ export default function ProfileInfo({ userProfile }) {
     fullAddress: '',
     isDefault: false
   })
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [shopOwnerData, setShopOwnerData] = useState(null)
   const [loadingShopData, setLoadingShopData] = useState(true)
 
@@ -55,31 +55,46 @@ export default function ProfileInfo({ userProfile }) {
     }
     
     // Check if user is a shop owner
-    const checkShopOwner = async () => {
+    const fetchShopOwnerData = async () => {
       if (!currentUser) return
       
-      setLoadingShopData(true)
       try {
-        const shopQuery = query(
-          collection(db, 'shopOwners'),
-          where('userId', '==', currentUser.uid)
-        )
+        setLoadingShopData(true)
         
-        const shopSnapshot = await getDocs(shopQuery)
+        // Query the shopOwners collection for this user
+        const shopOwnersRef = doc(db, 'shopOwners', currentUser.uid)
+        const shopOwnersSnapshot = await getDoc(shopOwnersRef)
         
-        if (!shopSnapshot.empty) {
-          const shopData = shopSnapshot.docs[0].data()
-          shopData.id = shopSnapshot.docs[0].id
-          setShopOwnerData(shopData)
+        // If no document exists with the user's ID, try querying by userId field
+        if (!shopOwnersSnapshot.exists()) {
+          // Query all shop owners where userId matches the current user's ID
+          const shopOwnersCollection = collection(db, 'shopOwners')
+          const q = query(shopOwnersCollection, where('userId', '==', currentUser.uid))
+          const querySnapshot = await getDocs(q)
+          
+          if (!querySnapshot.empty) {
+            // Get the first shop owner document
+            const shopOwnerDoc = querySnapshot.docs[0]
+            setShopOwnerData({
+              id: shopOwnerDoc.id,
+              ...shopOwnerDoc.data()
+            })
+          }
+        } else {
+          // Document exists with user's ID as the document ID
+          setShopOwnerData({
+            id: shopOwnersSnapshot.id,
+            ...shopOwnersSnapshot.data()
+          })
         }
       } catch (error) {
-        console.error('Error checking shop owner status:', error)
+        console.error('Error fetching shop owner data:', error)
       } finally {
         setLoadingShopData(false)
       }
     }
     
-    checkShopOwner()
+    fetchShopOwnerData()
   }, [currentUser, userProfile])
 
   const handleChange = (e) => {
@@ -238,209 +253,139 @@ export default function ProfileInfo({ userProfile }) {
     }
   }
 
-  if (!currentUser || !userProfile) {
+  if (!currentUser) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-        </div>
+      <div className="p-6 rounded-lg shadow-md" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)', color: 'var(--text-main)' }}>
+        <p className="text-center">Please log in to view your profile.</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Profile Information</h2>
-        {!isEditing && (
-          <button 
-            onClick={() => setIsEditing(true)}
-            className="text-[#e60012] hover:text-[#ff6b6b] font-medium"
-          >
-            Edit
-          </button>
-        )}
-      </div>
-      
-      {isEditing ? (
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-1">
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="displayName"
-                value={formData.displayName}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-1">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={formData.email}
-                disabled
-                className="w-full px-4 py-2 border rounded-lg bg-gray-100 dark:bg-gray-700"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium mb-1">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium mb-1">
-                Shipping Address
-              </label>
-              <textarea
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                rows="3"
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
-              ></textarea>
-            </div>
-            
-            <div className="flex space-x-4 pt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-6 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2"
-              >
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setIsEditing(false)}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
-              >
-                Cancel
-              </button>
-            </div>
+    <div className="space-y-6">
+      {/* Profile Card */}
+      <div className="p-6 rounded-lg shadow-md" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)', color: 'var(--text-main)' }}>
+        <div className="flex items-center space-x-4">
+          <div className="h-16 w-16 rounded-full bg-gradient-to-r from-[#e60012] to-[#ff6b6b] flex items-center justify-center text-white text-xl font-bold">
+            {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : 'U'}
           </div>
-        </form>
-      ) : (
-        <div className="space-y-4">
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Full Name</p>
-            <p className="font-medium">{userProfile.name || 'Not provided'}</p>
+            <h2 className="text-xl font-semibold" style={{ color: 'var(--text-main)' }}>
+              {currentUser.displayName || 'User'}
+            </h2>
+            <p style={{ color: 'var(--text-secondary)' }}>{currentUser.email}</p>
           </div>
-          
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Email Address</p>
-            <p className="font-medium">{formData.email}</p>
-            {!currentUser.emailVerified && (
-              <p className="text-sm text-amber-600 mt-1">
-                Email not verified. Please check your inbox.
+        </div>
+        
+        <div className="mt-6 pt-6 border-t" style={{ borderColor: 'var(--border-color)' }}>
+          <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--text-main)' }}>Account Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Name</p>
+              <p style={{ color: 'var(--text-main)' }}>{userProfile?.name || currentUser.displayName || 'Not set'}</p>
+            </div>
+            <div>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Phone</p>
+              <p style={{ color: 'var(--text-main)' }}>{userProfile?.phone || 'Not set'}</p>
+            </div>
+            <div>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Email</p>
+              <p style={{ color: 'var(--text-main)' }}>{currentUser.email}</p>
+            </div>
+            <div>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Member Since</p>
+              <p style={{ color: 'var(--text-main)' }}>
+                {userProfile?.createdAt 
+                  ? new Date(userProfile.createdAt.seconds * 1000).toLocaleDateString() 
+                  : new Date().toLocaleDateString()}
               </p>
-            )}
+            </div>
           </div>
-          
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Phone Number</p>
-            <p className="font-medium">{userProfile.phone || 'Not provided'}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Shipping Address</p>
-            <p className="font-medium">{formData.address || 'Not provided'}</p>
-          </div>
-          
-          {/* Shop Owner Section */}
-          <div className="pt-4 mt-4 border-t">
-            <h3 className="font-medium text-lg mb-3">Shop Owner Status</h3>
+        </div>
+        
+        {/* Shop Owner Section */}
+        {shopOwnerData && (
+          <div className="mt-6 pt-6 border-t" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium" style={{ color: 'var(--text-main)' }}>Shop Owner Information</h3>
+              <span className={`px-2 py-1 text-xs rounded-full ${
+                shopOwnerData.status === 'approved' 
+                  ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' 
+                  : shopOwnerData.status === 'rejected'
+                  ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
+              }`}>
+                {shopOwnerData.status.charAt(0).toUpperCase() + shopOwnerData.status.slice(1)}
+              </span>
+            </div>
             
-            {loadingShopData ? (
-              <div className="animate-pulse flex space-x-4">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Shop Name</p>
+                <p style={{ color: 'var(--text-main)' }}>{shopOwnerData.shopName}</p>
               </div>
-            ) : shopOwnerData ? (
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
-                    Registered Shop Owner
-                  </span>
-                  
-                  {shopOwnerData.status === 'pending' && (
-                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100">
-                      Pending Approval
-                    </span>
-                  )}
-                  
-                  {shopOwnerData.status === 'approved' && (
-                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
-                      Approved
-                    </span>
-                  )}
-                </div>
-                
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Shop Name</p>
-                  <p className="font-medium">{shopOwnerData.shopName}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Category</p>
-                  <p>{shopOwnerData.shopCategory}</p>
-                </div>
-                
-                {shopOwnerData.status === 'approved' && (
-                  <div className="pt-2">
-                    <Link 
-                      href={`/shop-inventory/${shopOwnerData.id}`}
-                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-                      </svg>
-                      Manage Inventory
-                    </Link>
-                  </div>
-                )}
+              <div>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Category</p>
+                <p style={{ color: 'var(--text-main)' }}>{shopOwnerData.shopCategory}</p>
               </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-gray-600 dark:text-gray-300">
-                  You haven't registered as a shop owner yet.
-                </p>
-                
+              <div className="md:col-span-2">
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Address</p>
+                <p style={{ color: 'var(--text-main)' }}>{shopOwnerData.shopAddress}</p>
+              </div>
+            </div>
+            
+            {shopOwnerData.status === 'approved' && (
+              <div className="mt-4">
                 <Link 
-                  href="/shop-registration"
-                  className="inline-flex items-center px-4 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2"
+                  href={`/shop-inventory/${shopOwnerData.id}`}
+                  className="inline-flex items-center px-4 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] transition-colors"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                  Manage Inventory
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                   </svg>
-                  Register Your Shop
                 </Link>
               </div>
             )}
+            
+            {shopOwnerData.status === 'pending' && (
+              <div className="mt-4 p-4 bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100 rounded-lg">
+                <p className="text-sm">
+                  Your shop registration is pending approval. We'll notify you once it's approved.
+                </p>
+              </div>
+            )}
+            
+            {shopOwnerData.status === 'rejected' && (
+              <div className="mt-4 p-4 bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 rounded-lg">
+                <p className="text-sm">
+                  Your shop registration was rejected. Please contact support for more information.
+                </p>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+        
+        {!shopOwnerData && !loading && (
+          <div className="mt-6 pt-6 border-t" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium" style={{ color: 'var(--text-main)' }}>Become a Shop Owner</h3>
+            </div>
+            <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
+              Register your repair shop with CallMiBro and reach more customers.
+            </p>
+            <Link 
+              href="/shop-registration"
+              className="inline-flex items-center px-4 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] transition-colors"
+            >
+              Register Your Shop
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   )
 } 

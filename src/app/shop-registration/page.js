@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { db } from '@/firebase/config'
 import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import Header from '@/components/Header'
@@ -21,6 +22,7 @@ const shopCategories = [
 
 export default function ShopRegistration() {
   const { currentUser, userProfile } = useAuth()
+  const { isDarkMode } = useTheme()
   const router = useRouter()
   
   const [formData, setFormData] = useState({
@@ -188,20 +190,20 @@ export default function ShopRegistration() {
   return (
     <>
       <Header />
-      <main className="min-h-screen py-16 px-4 sm:px-8">
+      <main className="min-h-screen py-16 px-4 sm:px-8" style={{ backgroundColor: 'var(--bg-color)', color: 'var(--text-main)' }}>
         <div className="container mx-auto max-w-3xl">
           <div className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] p-1 rounded-xl">
-            <div className="bg-white dark:bg-gray-900 rounded-lg p-6 sm:p-8">
-              <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center">Register Your Repair Shop</h1>
+            <div className="rounded-lg p-6 sm:p-8" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center" style={{ color: 'var(--text-main)' }}>Register Your Repair Shop</h1>
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Owner Details */}
                 <div className="space-y-4">
-                  <h2 className="text-lg font-semibold border-b pb-2">Owner Details</h2>
+                  <h2 className="text-lg font-semibold border-b pb-2" style={{ borderColor: 'var(--border-color)', color: 'var(--text-main)' }}>Owner Details</h2>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="ownerName" className="block text-sm font-medium mb-1">
+                      <label htmlFor="ownerName" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                         Owner Name*
                       </label>
                       <input
@@ -212,11 +214,16 @@ export default function ShopRegistration() {
                         onChange={handleChange}
                         required
                         className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                        style={{ 
+                          backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                          color: 'var(--text-main)',
+                          borderColor: 'var(--border-color)'
+                        }}
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="shopEmail" className="block text-sm font-medium mb-1">
+                      <label htmlFor="shopEmail" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                         Email Address*
                       </label>
                       <input
@@ -227,9 +234,14 @@ export default function ShopRegistration() {
                         onChange={handleChange}
                         required
                         disabled
-                        className="w-full px-4 py-2 border rounded-lg bg-gray-100 dark:bg-gray-800"
+                        className="w-full px-4 py-2 border rounded-lg"
+                        style={{ 
+                          backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)',
+                          color: 'var(--text-secondary)',
+                          borderColor: 'var(--border-color)'
+                        }}
                       />
-                      <p className="text-xs mt-1 text-gray-500">
+                      <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
                         Using your account email
                       </p>
                     </div>
@@ -238,10 +250,10 @@ export default function ShopRegistration() {
                 
                 {/* Shop Details */}
                 <div className="space-y-4">
-                  <h2 className="text-lg font-semibold border-b pb-2">Shop Details</h2>
+                  <h2 className="text-lg font-semibold border-b pb-2" style={{ borderColor: 'var(--border-color)', color: 'var(--text-main)' }}>Shop Details</h2>
                   
                   <div>
-                    <label htmlFor="shopName" className="block text-sm font-medium mb-1">
+                    <label htmlFor="shopName" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                       Shop Name*
                     </label>
                     <input
@@ -252,11 +264,16 @@ export default function ShopRegistration() {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
                     />
                   </div>
                   
                   <div>
-                    <label htmlFor="shopAddress" className="block text-sm font-medium mb-1">
+                    <label htmlFor="shopAddress" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                       Shop Address*
                     </label>
                     <textarea
@@ -267,12 +284,17 @@ export default function ShopRegistration() {
                       required
                       rows={3}
                       className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
                     />
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="shopPhone" className="block text-sm font-medium mb-1">
+                      <label htmlFor="shopPhone" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                         Contact Number*
                       </label>
                       <input
@@ -283,11 +305,16 @@ export default function ShopRegistration() {
                         onChange={handleChange}
                         required
                         className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                        style={{ 
+                          backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                          color: 'var(--text-main)',
+                          borderColor: 'var(--border-color)'
+                        }}
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="shopCategory" className="block text-sm font-medium mb-1">
+                      <label htmlFor="shopCategory" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                         Shop Category*
                       </label>
                       <select
@@ -297,6 +324,11 @@ export default function ShopRegistration() {
                         onChange={handleChange}
                         required
                         className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                        style={{ 
+                          backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                          color: 'var(--text-main)',
+                          borderColor: 'var(--border-color)'
+                        }}
                       >
                         <option value="">Select a category</option>
                         {shopCategories.map((category) => (
@@ -310,7 +342,7 @@ export default function ShopRegistration() {
                   
                   {/* Location */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                       Shop Location
                     </label>
                     <div className="flex items-center space-x-4">
@@ -338,7 +370,7 @@ export default function ShopRegistration() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs mt-1 text-gray-500">
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
                       This helps customers find your shop on the map
                     </p>
                   </div>
@@ -346,8 +378,8 @@ export default function ShopRegistration() {
                 
                 {/* Initial Inventory (Optional) */}
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center border-b pb-2">
-                    <h2 className="text-lg font-semibold">Initial Inventory (Optional)</h2>
+                  <div className="flex justify-between items-center border-b pb-2" style={{ borderColor: 'var(--border-color)' }}>
+                    <h2 className="text-lg font-semibold" style={{ color: 'var(--text-main)' }}>Initial Inventory (Optional)</h2>
                     <button
                       type="button"
                       onClick={addInventoryItem}
@@ -358,9 +390,9 @@ export default function ShopRegistration() {
                   </div>
                   
                   {inventoryItems.map((item, index) => (
-                    <div key={index} className="p-4 border rounded-lg space-y-3">
+                    <div key={index} className="p-4 border rounded-lg space-y-3" style={{ borderColor: 'var(--border-color)' }}>
                       <div className="flex justify-between">
-                        <h3 className="font-medium">Item #{index + 1}</h3>
+                        <h3 className="font-medium" style={{ color: 'var(--text-main)' }}>Item #{index + 1}</h3>
                         {inventoryItems.length > 1 && (
                           <button
                             type="button"
@@ -374,7 +406,7 @@ export default function ShopRegistration() {
                       
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-sm font-medium mb-1">
+                          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                             Product Name
                           </label>
                           <input
@@ -382,11 +414,16 @@ export default function ShopRegistration() {
                             value={item.name}
                             onChange={(e) => handleInventoryChange(index, 'name', e.target.value)}
                             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                            style={{ 
+                              backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                              color: 'var(--text-main)',
+                              borderColor: 'var(--border-color)'
+                            }}
                           />
                         </div>
                         
                         <div>
-                          <label className="block text-sm font-medium mb-1">
+                          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                             Category
                           </label>
                           <input
@@ -394,11 +431,16 @@ export default function ShopRegistration() {
                             value={item.category}
                             onChange={(e) => handleInventoryChange(index, 'category', e.target.value)}
                             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                            style={{ 
+                              backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                              color: 'var(--text-main)',
+                              borderColor: 'var(--border-color)'
+                            }}
                           />
                         </div>
                         
                         <div>
-                          <label className="block text-sm font-medium mb-1">
+                          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                             Quantity
                           </label>
                           <input
@@ -407,11 +449,16 @@ export default function ShopRegistration() {
                             onChange={(e) => handleInventoryChange(index, 'quantity', e.target.value)}
                             min="0"
                             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                            style={{ 
+                              backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                              color: 'var(--text-main)',
+                              borderColor: 'var(--border-color)'
+                            }}
                           />
                         </div>
                         
                         <div>
-                          <label className="block text-sm font-medium mb-1">
+                          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                             Price (₹)
                           </label>
                           <input
@@ -421,6 +468,11 @@ export default function ShopRegistration() {
                             min="0"
                             step="0.01"
                             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                            style={{ 
+                              backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                              color: 'var(--text-main)',
+                              borderColor: 'var(--border-color)'
+                            }}
                           />
                         </div>
                       </div>

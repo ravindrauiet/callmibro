@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { collection, getDocs, query, where, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { toast } from 'react-hot-toast'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -27,25 +27,51 @@ export default function AdminLayout({ children }) {
       }
 
       try {
+        // First, check if user is in admins collection
         const adminsRef = collection(db, 'admins')
         const q = query(adminsRef, where('email', '==', currentUser.email))
         const querySnapshot = await getDocs(q)
 
-        if (!querySnapshot.empty) {
+        // If not found in admins collection, check if user has isAdmin flag in their profile
+        if (querySnapshot.empty) {
+          const userDocRef = doc(db, 'users', currentUser.uid)
+          const userDoc = await getDoc(userDocRef)
+          
+          if (userDoc.exists() && userDoc.data().isAdmin === true) {
+            setIsAdmin(true)
+            
+            // Add user to admins collection for future checks
+            try {
+              const adminDocRef = doc(adminsRef, currentUser.uid)
+              await setDoc(adminDocRef, {
+                email: currentUser.email,
+                name: currentUser.displayName || 'Admin User',
+                createdAt: serverTimestamp()
+              })
+            } catch (error) {
+              console.error('Error adding user to admins collection:', error)
+            }
+          } else {
+            // Only redirect to login if not already on login page
+            if (pathname !== '/admin/login') {
+              toast.error('You do not have admin access')
+              router.push('/admin/login')
+            }
+          }
+        } else {
           setIsAdmin(true)
           // If user is admin and on login page, redirect to admin dashboard
           if (pathname === '/admin/login') {
             router.push('/admin')
           }
-        } else {
-          // Only redirect to login if not already on login page
-          if (pathname !== '/admin/login') {
-            toast.error('You do not have admin access')
-            router.push('/admin/login')
-          }
         }
       } catch (error) {
         console.error('Error checking admin status:', error)
+        // Handle error by showing toast and redirecting to login
+        toast.error('Error verifying admin status')
+        if (pathname !== '/admin/login') {
+          router.push('/admin/login')
+        }
       } finally {
         setAdminLoading(false)
       }

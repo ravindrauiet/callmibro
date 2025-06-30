@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { db } from '@/firebase/config'
 import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp, query, where } from 'firebase/firestore'
 import Header from '@/components/Header'
@@ -12,6 +13,7 @@ import { toast } from 'react-hot-toast'
 export default function ShopInventoryPage({ params }) {
   const shopId = params.id
   const { currentUser } = useAuth()
+  const { isDarkMode } = useTheme()
   const router = useRouter()
   
   const [shopData, setShopData] = useState(null)
@@ -219,7 +221,7 @@ export default function ShopInventoryPage({ params }) {
     return (
       <>
         <Header />
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-color)' }}>
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#e60012]"></div>
         </div>
         <Footer />
@@ -230,14 +232,14 @@ export default function ShopInventoryPage({ params }) {
   return (
     <>
       <Header />
-      <main className="min-h-screen py-16 px-4 sm:px-8">
+      <main className="min-h-screen py-16 px-4 sm:px-8" style={{ backgroundColor: 'var(--bg-color)', color: 'var(--text-main)' }}>
         <div className="container mx-auto max-w-6xl">
           {/* Header */}
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold mb-2">Inventory Management</h1>
-                <p className="text-gray-600 dark:text-gray-400">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: 'var(--text-main)' }}>Inventory Management</h1>
+                <p style={{ color: 'var(--text-secondary)' }}>
                   {shopData?.shopName} - {shopData?.shopCategory}
                 </p>
               </div>
@@ -266,48 +268,48 @@ export default function ShopInventoryPage({ params }) {
           </div>
           
           {/* Inventory Table */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+          <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
             {inventory.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
+                <table className="min-w-full divide-y" style={{ borderColor: 'var(--border-color)' }}>
+                  <thead style={{ backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)' }}>
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                         Product
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                         Category
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                         Quantity
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                         Price
                       </th>
-                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)', borderColor: 'var(--border-color)' }}>
                     {inventory.map((item) => (
-                      <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700" style={{ borderColor: 'var(--border-color)' }}>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">{item.name}</div>
+                          <div className="text-sm font-medium" style={{ color: 'var(--text-main)' }}>{item.name}</div>
                           {item.description && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">
+                            <div className="text-xs truncate max-w-[200px]" style={{ color: 'var(--text-secondary)' }}>
                               {item.description}
                             </div>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500 dark:text-gray-400">{item.category}</div>
+                          <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item.category}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500 dark:text-gray-400">{item.quantity}</div>
+                          <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item.quantity}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500 dark:text-gray-400">₹{item.price}</div>
+                          <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>₹{item.price}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
@@ -330,11 +332,11 @@ export default function ShopInventoryPage({ params }) {
               </div>
             ) : (
               <div className="py-12 text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--text-secondary)' }}>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
-                <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">No inventory items</h3>
-                <p className="mt-1 text-gray-500 dark:text-gray-400">Get started by adding your first inventory item.</p>
+                <h3 className="mt-4 text-lg font-medium" style={{ color: 'var(--text-main)' }}>No inventory items</h3>
+                <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>Get started by adding your first inventory item.</p>
                 <button
                   onClick={openAddModal}
                   className="mt-6 px-4 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2"
@@ -350,9 +352,9 @@ export default function ShopInventoryPage({ params }) {
       {/* Add/Edit Item Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+          <div className="rounded-lg shadow-xl max-w-md w-full" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
+            <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
+              <h3 className="text-lg font-medium" style={{ color: 'var(--text-main)' }}>
                 {isEditing ? 'Edit Inventory Item' : 'Add New Inventory Item'}
               </h3>
             </div>
@@ -360,7 +362,7 @@ export default function ShopInventoryPage({ params }) {
             <form onSubmit={handleSubmit}>
               <div className="px-6 py-4 space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="name" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                     Product Name*
                   </label>
                   <input
@@ -370,12 +372,17 @@ export default function ShopInventoryPage({ params }) {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                    style={{ 
+                      backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)'
+                    }}
                   />
                 </div>
                 
                 <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="category" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                     Category*
                   </label>
                   <input
@@ -385,13 +392,18 @@ export default function ShopInventoryPage({ params }) {
                     value={formData.category}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                    style={{ 
+                      backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)'
+                    }}
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="quantity" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                       Quantity*
                     </label>
                     <input
@@ -402,12 +414,17 @@ export default function ShopInventoryPage({ params }) {
                       onChange={handleChange}
                       required
                       min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
                     />
                   </div>
                   
                   <div>
-                    <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="price" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                       Price (₹)*
                     </label>
                     <input
@@ -419,13 +436,18 @@ export default function ShopInventoryPage({ params }) {
                       required
                       min="0"
                       step="0.01"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="description" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                     Description (Optional)
                   </label>
                   <textarea
@@ -434,16 +456,26 @@ export default function ShopInventoryPage({ params }) {
                     value={formData.description}
                     onChange={handleChange}
                     rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                    style={{ 
+                      backgroundColor: isDarkMode ? 'var(--panel-gray)' : 'var(--panel-light)',
+                      color: 'var(--text-main)',
+                      borderColor: 'var(--border-color)'
+                    }}
                   ></textarea>
                 </div>
               </div>
               
-              <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 flex justify-end space-x-3 rounded-b-lg">
+              <div className="px-6 py-4 flex justify-end space-x-3 rounded-b-lg" style={{ backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)' }}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="px-4 py-2 border rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  style={{ 
+                    backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)',
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)'
+                  }}
                 >
                   Cancel
                 </button>

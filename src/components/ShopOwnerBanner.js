@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import AuthModal from './AuthModal'
 
 export default function ShopOwnerBanner() {
   const { currentUser } = useAuth()
+  const { isDarkMode } = useTheme()
   const [authModalOpen, setAuthModalOpen] = useState(false)
   
   return (
