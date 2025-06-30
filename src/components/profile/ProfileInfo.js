@@ -5,6 +5,9 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { toast } from 'react-hot-toast'
 import { FiHome, FiMapPin, FiPlus, FiEdit2, FiTrash2, FiCheck } from 'react-icons/fi'
+import { db } from '@/firebase/config'
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
+import Link from 'next/link'
 
 export default function ProfileInfo({ userProfile }) {
   const { currentUser, updateUserProfile, saveUserAddress, updateUserAddress, deleteUserAddress } = useAuth()
@@ -25,6 +28,8 @@ export default function ProfileInfo({ userProfile }) {
     isDefault: false
   })
   const [loading, setLoading] = useState(false)
+  const [shopOwnerData, setShopOwnerData] = useState(null)
+  const [loadingShopData, setLoadingShopData] = useState(true)
 
   // Initialize form data when userProfile or currentUser changes
   useEffect(() => {
@@ -48,7 +53,34 @@ export default function ProfileInfo({ userProfile }) {
         address: ''
       })
     }
-  }, [userProfile, currentUser])
+    
+    // Check if user is a shop owner
+    const checkShopOwner = async () => {
+      if (!currentUser) return
+      
+      setLoadingShopData(true)
+      try {
+        const shopQuery = query(
+          collection(db, 'shopOwners'),
+          where('userId', '==', currentUser.uid)
+        )
+        
+        const shopSnapshot = await getDocs(shopQuery)
+        
+        if (!shopSnapshot.empty) {
+          const shopData = shopSnapshot.docs[0].data()
+          shopData.id = shopSnapshot.docs[0].id
+          setShopOwnerData(shopData)
+        }
+      } catch (error) {
+        console.error('Error checking shop owner status:', error)
+      } finally {
+        setLoadingShopData(false)
+      }
+    }
+    
+    checkShopOwner()
+  }, [currentUser, userProfile])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -206,336 +238,206 @@ export default function ProfileInfo({ userProfile }) {
     }
   }
 
-  return (
-    <div className="rounded-xl p-6 shadow-lg" style={{ 
-      background: isDarkMode 
-        ? 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))' 
-        : 'var(--panel-dark)',
-      borderColor: 'var(--border-color)',
-      borderWidth: '1px'
-    }}>
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-semibold bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">Profile Information</h3>
-        <button 
-          onClick={() => setIsEditing(!isEditing)}
-          className="text-transparent bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text hover:underline transition-all"
-          disabled={loading}
-        >
-          {isEditing ? 'Cancel' : 'Edit'}
-        </button>
+  if (!currentUser || !userProfile) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+        </div>
       </div>
+    )
+  }
 
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">Profile Information</h2>
+        {!isEditing && (
+          <button 
+            onClick={() => setIsEditing(true)}
+            className="text-[#e60012] hover:text-[#ff6b6b] font-medium"
+          >
+            Edit
+          </button>
+        )}
+      </div>
+      
       {isEditing ? (
-        <form onSubmit={handleSubmit} className="animate-fadeIn">
+        <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Full Name</label>
+              <label htmlFor="name" className="block text-sm font-medium mb-1">
+                Full Name
+              </label>
               <input
                 type="text"
+                id="name"
                 name="displayName"
                 value={formData.displayName}
                 onChange={handleChange}
-                className="w-full rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
-                style={{ 
-                  backgroundColor: 'var(--panel-gray)',
-                  color: 'var(--text-main)',
-                  borderColor: 'var(--border-color)',
-                  borderWidth: '1px'
-                }}
-                required
-                disabled={loading}
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Email Address</label>
+              <label htmlFor="email" className="block text-sm font-medium mb-1">
+                Email Address
+              </label>
               <input
                 type="email"
-                name="email"
+                id="email"
                 value={formData.email}
                 disabled
-                className="w-full rounded-lg p-3 opacity-70"
-                style={{ 
-                  backgroundColor: 'var(--panel-gray)',
-                  color: 'var(--text-main)',
-                  borderColor: 'var(--border-color)',
-                  borderWidth: '1px'
-                }}
+                className="w-full px-4 py-2 border rounded-lg bg-gray-100 dark:bg-gray-700"
               />
-              <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Email cannot be changed</p>
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Phone Number</label>
+              <label htmlFor="phone" className="block text-sm font-medium mb-1">
+                Phone Number
+              </label>
               <input
                 type="tel"
+                id="phone"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
-                style={{ 
-                  backgroundColor: 'var(--panel-gray)',
-                  color: 'var(--text-main)',
-                  borderColor: 'var(--border-color)',
-                  borderWidth: '1px'
-                }}
-                required
-                disabled={loading}
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Shipping Address</label>
+              <label htmlFor="address" className="block text-sm font-medium mb-1">
+                Shipping Address
+              </label>
               <textarea
+                id="address"
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
                 rows="3"
-                className="w-full rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
-                style={{ 
-                  backgroundColor: 'var(--panel-gray)',
-                  color: 'var(--text-main)',
-                  borderColor: 'var(--border-color)',
-                  borderWidth: '1px'
-                }}
-                required
-                disabled={loading}
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
               ></textarea>
             </div>
             
-            <button
-              type="submit"
-              className="mt-2 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#ff6b6b] hover:to-[#e60012] text-white px-6 py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-md w-full"
-              disabled={loading}
-            >
-              {loading ? 'Saving...' : 'Save Changes'}
-            </button>
+            <div className="flex space-x-4 pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2"
+              >
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </form>
       ) : (
-        <div className="space-y-6">
-          <div className="rounded-lg p-4" style={{ 
-            backgroundColor: 'var(--panel-gray)',
-            borderColor: 'var(--border-color)',
-            borderWidth: '1px'
-          }}>
-            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Full Name</p>
-            <p className="font-medium" style={{ color: 'var(--text-main)' }}>{userProfile?.name || currentUser?.displayName || 'Not set'}</p>
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Full Name</p>
+            <p className="font-medium">{userProfile.name || 'Not provided'}</p>
           </div>
           
-          <div className="rounded-lg p-4" style={{ 
-            backgroundColor: 'var(--panel-gray)',
-            borderColor: 'var(--border-color)',
-            borderWidth: '1px'
-          }}>
-            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Email Address</p>
-            <p className="font-medium" style={{ color: 'var(--text-main)' }}>{userProfile?.email || currentUser?.email || 'Not set'}</p>
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Email Address</p>
+            <p className="font-medium">{formData.email}</p>
+            {!currentUser.emailVerified && (
+              <p className="text-sm text-amber-600 mt-1">
+                Email not verified. Please check your inbox.
+              </p>
+            )}
           </div>
           
-          <div className="rounded-lg p-4" style={{ 
-            backgroundColor: 'var(--panel-gray)',
-            borderColor: 'var(--border-color)',
-            borderWidth: '1px'
-          }}>
-            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Phone Number</p>
-            <p className="font-medium" style={{ color: 'var(--text-main)' }}>{userProfile?.phone || 'Not set'}</p>
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Phone Number</p>
+            <p className="font-medium">{userProfile.phone || 'Not provided'}</p>
           </div>
           
-          <div className="rounded-lg p-4" style={{ 
-            backgroundColor: 'var(--panel-gray)',
-            borderColor: 'var(--border-color)',
-            borderWidth: '1px'
-          }}>
-            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Shipping Address</p>
-            <p className="font-medium" style={{ color: 'var(--text-main)' }}>{userProfile?.address || 'Not set'}</p>
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Shipping Address</p>
+            <p className="font-medium">{formData.address || 'Not provided'}</p>
           </div>
           
-          <button
-            onClick={() => setIsEditing(true)}
-            className="mt-2 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#ff6b6b] hover:to-[#e60012] text-white px-6 py-3 rounded-lg transition-all font-medium shadow-md w-full"
-          >
-            Edit Profile Information
-          </button>
-        </div>
-      )}
-
-      {/* Saved Addresses Section */}
-      <div className="mt-10 pt-8" style={{ borderTopWidth: '1px', borderColor: 'var(--border-color)' }}>
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">
-            Saved Addresses
-          </h3>
-          <button 
-            onClick={() => openAddressModal()}
-            className="flex items-center gap-1 text-white bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#d40010] hover:to-[#e55b5b] px-3 py-2 rounded-md transition-all text-sm font-medium"
-            disabled={loading}
-          >
-            <FiPlus size={16} />
-            Add New
-          </button>
-        </div>
-
-        {savedAddresses && savedAddresses.length > 0 ? (
-          <div className="space-y-4">
-            {savedAddresses.map((address) => (
-              <div key={address.id} className="rounded-lg p-4 relative" style={{ 
-                backgroundColor: 'var(--panel-gray)',
-                borderColor: 'var(--border-color)',
-                borderWidth: '1px'
-              }}>
-                <div className="flex justify-between">
-                  <div className="flex items-center gap-2">
-                    <FiHome size={18} className="text-[#e60012]" />
-                    <p className="font-medium" style={{ color: 'var(--text-main)' }}>{address.name}</p>
-                    {address.isDefault && (
-                      <span className="bg-[#e60012]/20 text-[#ff6b6b] text-xs px-2 py-0.5 rounded-full">
-                        Default
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button 
-                      onClick={() => openAddressModal(address)}
-                      className="hover:text-[#e60012]" 
-                      style={{ color: 'var(--text-secondary)' }}
-                      title="Edit"
-                    >
-                      <FiEdit2 size={16} />
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteAddress(address.id)}
-                      className="hover:text-red-500" 
-                      style={{ color: 'var(--text-secondary)' }}
-                      title="Delete"
-                    >
-                      <FiTrash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-                <p className="mt-2 pl-6" style={{ color: 'var(--text-secondary)' }}>{address.fullAddress}</p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-lg p-6 text-center" style={{ 
-            backgroundColor: 'var(--panel-gray)',
-            borderColor: 'var(--border-color)',
-            borderWidth: '1px'
-          }}>
-            <FiMapPin size={32} className="mx-auto mb-3" style={{ color: 'var(--text-secondary)' }} />
-            <p style={{ color: 'var(--text-secondary)' }}>You haven't saved any addresses yet</p>
-            <button
-              onClick={() => openAddressModal()}
-              className="mt-4 text-[#e60012] hover:text-[#ff6b6b] text-sm font-medium"
-            >
-              + Add New Address
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Address Modal */}
-      {addressModalOpen && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="rounded-xl p-6 max-w-md w-full animate-fadeIn" style={{ 
-            backgroundColor: 'var(--panel-dark)',
-            borderColor: 'var(--border-color)',
-            borderWidth: '1px'
-          }}>
-            <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-main)' }}>
-              {editingAddress ? 'Edit Address' : 'Add New Address'}
-            </h3>
+          {/* Shop Owner Section */}
+          <div className="pt-4 mt-4 border-t">
+            <h3 className="font-medium text-lg mb-3">Shop Owner Status</h3>
             
-            <form onSubmit={handleAddressSubmit}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Address Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={addressForm.name}
-                    onChange={handleAddressChange}
-                    placeholder="Home, Work, etc."
-                    className="w-full rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
-                    style={{ 
-                      backgroundColor: 'var(--panel-gray)',
-                      color: 'var(--text-main)',
-                      borderColor: 'var(--border-color)',
-                      borderWidth: '1px'
-                    }}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Full Address</label>
-                    <button 
-                      type="button" 
-                      onClick={getCurrentLocation}
-                      className="text-xs flex items-center gap-1 text-[#e60012] hover:text-[#ff6b6b]"
-                    >
-                      <FiMapPin size={12} />
-                      Use my location
-                    </button>
-                  </div>
-                  <textarea
-                    name="fullAddress"
-                    value={addressForm.fullAddress}
-                    onChange={handleAddressChange}
-                    placeholder="Enter complete address"
-                    rows="3"
-                    className="w-full rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
-                    style={{ 
-                      backgroundColor: 'var(--panel-gray)',
-                      color: 'var(--text-main)',
-                      borderColor: 'var(--border-color)',
-                      borderWidth: '1px'
-                    }}
-                    required
-                    disabled={loading}
-                  ></textarea>
-                </div>
-                
+            {loadingShopData ? (
+              <div className="animate-pulse flex space-x-4">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+              </div>
+            ) : shopOwnerData ? (
+              <div className="space-y-3">
                 <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="isDefault"
-                    name="isDefault"
-                    checked={addressForm.isDefault}
-                    onChange={handleAddressCheckbox}
-                    className="h-4 w-4 text-[#e60012] focus:ring-[#e60012] rounded"
-                    style={{ 
-                      backgroundColor: 'var(--panel-gray)',
-                      borderColor: 'var(--border-color)'
-                    }}
-                  />
-                  <label htmlFor="isDefault" className="ml-2 block text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Set as default address
-                  </label>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                    Registered Shop Owner
+                  </span>
+                  
+                  {shopOwnerData.status === 'pending' && (
+                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100">
+                      Pending Approval
+                    </span>
+                  )}
+                  
+                  {shopOwnerData.status === 'approved' && (
+                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                      Approved
+                    </span>
+                  )}
                 </div>
+                
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Shop Name</p>
+                  <p className="font-medium">{shopOwnerData.shopName}</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Category</p>
+                  <p>{shopOwnerData.shopCategory}</p>
+                </div>
+                
+                {shopOwnerData.status === 'approved' && (
+                  <div className="pt-2">
+                    <Link 
+                      href={`/shop-inventory/${shopOwnerData.id}`}
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                      </svg>
+                      Manage Inventory
+                    </Link>
+                  </div>
+                )}
               </div>
-              
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setAddressModalOpen(false)}
-                  className="flex-1 text-white px-4 py-2 rounded-lg transition-all font-medium"
-                  style={{ backgroundColor: 'var(--panel-gray)' }}
-                  disabled={loading}
+            ) : (
+              <div className="space-y-3">
+                <p className="text-gray-600 dark:text-gray-300">
+                  You haven't registered as a shop owner yet.
+                </p>
+                
+                <Link 
+                  href="/shop-registration"
+                  className="inline-flex items-center px-4 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] hover:from-[#d40010] hover:to-[#e55b5b] text-white px-4 py-2 rounded-lg transition-all font-medium"
-                  disabled={loading}
-                >
-                  {loading ? 'Saving...' : 'Save Address'}
-                </button>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
+                  Register Your Shop
+                </Link>
               </div>
-            </form>
+            )}
           </div>
         </div>
       )}
