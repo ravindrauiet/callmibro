@@ -144,38 +144,48 @@ export default function ProfilePdfButton({ shopName, contactNumber, inventory, b
             URL.revokeObjectURL(url)
             setIsGenerating(false)
             
-            // Generate WhatsApp share message
-            const totalItems = inventory.length
-            const totalValue = inventory.reduce((sum, item) => sum + (item.price || 0), 0)
+            // Create a PDF file
+            const pdfBlob = new Blob([pdfContent], { type: 'application/pdf' })
+            const fileName = `${shopName.replace(/\s+/g, '_')}_Inventory_${new Date().toISOString().split('T')[0]}.pdf`
             
-            let whatsappMessage = `🏪 *${shopName}* - Inventory List\n\n`
-            whatsappMessage += `📦 Total Items: ${totalItems}\n`
-            whatsappMessage += `💰 Total Value: ₹${totalValue.toLocaleString('en-IN')}\n`
-            whatsappMessage += `📞 Contact: ${contactNumber || 'Not available'}\n\n`
-            whatsappMessage += `*Available Items:*\n\n`
+            // Create a file object for sharing
+            const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' })
             
-            // Add items grouped by brand
-            Object.entries(brandGroups).forEach(([brand, items]) => {
-              whatsappMessage += `📦 *${brand}* (${items.length} items)\n`
-              items.forEach(item => {
-                const quantityText = item.quantity === 0 ? '❌ Out of Stock' : 
-                                   item.quantity <= 5 ? '⚠️ Low Stock' : '✅ In Stock'
-                whatsappMessage += `• ${item.name || 'N/A'}`
-                if (item.sku) whatsappMessage += ` (SKU: ${item.sku})`
-                whatsappMessage += ` - ₹${item.price ? item.price.toLocaleString('en-IN') : '0'} - ${quantityText}\n`
+            // Check if Web Share API is supported and can share files
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+              navigator.share({
+                title: `${shopName} - Inventory List`,
+                text: `Check out the inventory list from ${shopName}`,
+                files: [pdfFile]
               })
-              whatsappMessage += '\n'
-            })
+              .then(() => console.log('PDF shared successfully'))
+              .catch(error => {
+                console.error('Error sharing PDF:', error)
+                // Fallback to WhatsApp direct link
+                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shopName} - Inventory List`)}`
+                window.open(whatsappUrl, '_blank')
+              })
+            } else {
+              // Fallback for browsers that don't support file sharing
+              // Create a direct WhatsApp link
+              const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shopName} - Inventory List is ready! Please check your downloads folder for the PDF file.`)}`
+              window.open(whatsappUrl, '_blank')
+              
+              // Also download the file
+              const pdfUrl = URL.createObjectURL(pdfBlob)
+              const downloadLink = document.createElement('a')
+              downloadLink.href = pdfUrl
+              downloadLink.download = fileName
+              document.body.appendChild(downloadLink)
+              downloadLink.click()
+              document.body.removeChild(downloadLink)
+              
+              // Clean up
+              setTimeout(() => {
+                URL.revokeObjectURL(pdfUrl)
+              }, 1000)
+            }
             
-            whatsappMessage += `\n📅 Generated on: ${new Date().toLocaleDateString('en-IN')}\n`
-            whatsappMessage += `🔗 Powered by CallMiBro`
-            
-            // Encode the message for WhatsApp URL
-            const encodedMessage = encodeURIComponent(whatsappMessage)
-            const whatsappUrl = `https://wa.me/?text=${encodedMessage}`
-            
-            // Open WhatsApp
-            window.open(whatsappUrl, '_blank')
           }, 2000)
         }, 1000)
       }
