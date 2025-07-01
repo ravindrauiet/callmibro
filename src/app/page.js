@@ -16,6 +16,7 @@ const Timeline = lazy(() => import('../components/Timeline'))
 const Testimonial = lazy(() => import('../components/Testimonial'))
 const Footer = lazy(() => import('../components/Footer'))
 const ShopOwnerBanner = lazy(() => import('../components/ShopOwnerBanner'))
+const FeaturedShops = lazy(() => import('../components/FeaturedShops'))
 
 // Loading fallbacks
 const ServicesSkeleton = () => (
@@ -177,6 +178,11 @@ export default function Home() {
       
       <Suspense fallback={<GenericSkeleton />}>
         <Shop />
+      </Suspense>
+      
+      {/* Featured Repair Shops */}
+      <Suspense fallback={<GenericSkeleton />}>
+        <FeaturedShops />
       </Suspense>
       
       {/* Shop Owner Registration Banner */}
