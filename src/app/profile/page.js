@@ -7,6 +7,7 @@ import Footer from '../../components/Footer'
 import ProfileInfo from '../../components/profile/ProfileInfo'
 import Bookings from '../../components/profile/Bookings'
 import OrderHistory from '../../components/profile/OrderHistory'
+import SharePdfButton from '../../components/SharePdfButton'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { toast } from 'react-hot-toast'
@@ -22,6 +23,8 @@ export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState(null)
   const [userBookings, setUserBookings] = useState([])
   const [userOrders, setUserOrders] = useState([])
+  const [shopOwnerData, setShopOwnerData] = useState(null)
+  const [shopInventory, setShopInventory] = useState([])
   const [loading, setLoading] = useState(true)
   const [updateLoading, setUpdateLoading] = useState(false)
   const [error, setError] = useState('')
@@ -128,6 +131,31 @@ export default function ProfilePage() {
           ...doc.data()
         }))
         setUserOrders(ordersData)
+
+        // Fetch shop owner data if user is a shop owner
+        const shopOwnersRef = collection(db, 'shopOwners')
+        const shopQuery = query(shopOwnersRef, where('userId', '==', currentUser.uid))
+        const shopSnapshot = await getDocs(shopQuery)
+        
+        if (!shopSnapshot.empty) {
+          const shopDoc = shopSnapshot.docs[0]
+          const shopData = {
+            id: shopDoc.id,
+            ...shopDoc.data()
+          }
+          setShopOwnerData(shopData)
+          
+          // Fetch inventory if shop is approved and has inventory
+          if (shopData.status === 'approved' && shopData.hasInventory) {
+            const inventoryRef = collection(db, 'shopOwners', shopDoc.id, 'inventory')
+            const inventorySnap = await getDocs(inventoryRef)
+            const inventoryData = inventorySnap.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }))
+            setShopInventory(inventoryData)
+          }
+        }
       } catch (error) {
         console.error('Error fetching user data:', error)
         setError('Failed to load user data. Please try again.')
@@ -278,6 +306,61 @@ export default function ProfilePage() {
             
             {/* Content area */}
             <div className="lg:w-2/3">
+              {/* Shop Owner Stats Section */}
+              {shopOwnerData && shopOwnerData.status === 'approved' && (
+                <div className="mb-6 p-6 rounded-xl shadow-lg" style={{ 
+                  background: isDarkMode 
+                    ? 'linear-gradient(to bottom, var(--panel-dark), var(--panel-charcoal))' 
+                    : 'var(--panel-dark)',
+                  borderColor: 'var(--border-color)',
+                  borderWidth: '1px'
+                }}>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-main)' }}>
+                        🏪 {shopOwnerData.shopName}
+                      </h3>
+                      <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
+                        📞 {shopOwnerData.shopPhone || 'Contact not available'}
+                      </p>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        📍 {shopOwnerData.shopAddress || 'Address not available'}
+                      </p>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="text-center sm:text-right">
+                        <div className="text-2xl font-bold bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">
+                          {shopInventory.length}
+                        </div>
+                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                          Inventory Items
+                        </div>
+                      </div>
+                      
+                      <div className="text-center sm:text-right">
+                        <div className="text-2xl font-bold bg-gradient-to-r from-[#e60012] to-[#ff6b6b] bg-clip-text text-transparent">
+                          ₹{shopInventory.reduce((sum, item) => sum + (item.quantity * item.price), 0).toLocaleString('en-IN')}
+                        </div>
+                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                          Total Value
+                        </div>
+                      </div>
+                      
+                      {shopInventory.length > 0 && (
+                        <SharePdfButton 
+                          shopName={shopOwnerData.shopName}
+                          contactNumber={shopOwnerData.shopPhone}
+                          inventory={shopInventory}
+                          buttonText="Download Report"
+                          className="self-center"
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {/* Tabs */}
               <div className="mb-6" style={{ 
                 borderBottomWidth: '1px', 

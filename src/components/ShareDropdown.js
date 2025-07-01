@@ -4,6 +4,7 @@ import ShareUrlButton from './ShareUrlButton'
 import ShareQrCodeButton from './ShareQrCodeButton'
 import ShareWhatsAppUrlButton from './ShareWhatsAppUrlButton'
 import ShareWhatsAppListButton from './ShareWhatsAppListButton'
+import ProfilePdfButton from './ProfilePdfButton'
 
 export default function ShareDropdown({ shopId, shopName, contactNumber, inventory }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -109,6 +110,16 @@ export default function ShareDropdown({ shopId, shopName, contactNumber, invento
                 contactNumber={contactNumber} 
                 inventory={inventory} 
                 buttonText="WhatsApp (as List)" 
+                className="w-full justify-center"
+              />
+            </div>
+            
+            <div className="px-3 py-1">
+              <ProfilePdfButton 
+                shopName={shopName} 
+                contactNumber={contactNumber} 
+                inventory={inventory} 
+                buttonText="Download PDF" 
                 className="w-full justify-center"
               />
             </div>

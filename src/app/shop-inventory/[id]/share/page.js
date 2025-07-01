@@ -10,6 +10,7 @@ import ShareUrlButton from '@/components/ShareUrlButton'
 import ShareQrCodeButton from '@/components/ShareQrCodeButton'
 import ShareWhatsAppUrlButton from '@/components/ShareWhatsAppUrlButton'
 import ShareWhatsAppListButton from '@/components/ShareWhatsAppListButton'
+import SharePdfButton from '@/components/SharePdfButton'
 
 export default function ShopInventorySharePage({ params }) {
   const shopId = params.id
@@ -224,6 +225,7 @@ export default function ShopInventorySharePage({ params }) {
                 <ShareQrCodeButton url={shareUrl} />
                 <ShareWhatsAppUrlButton url={shareUrl} shopName={shopData.shopName} />
                 <ShareWhatsAppListButton shopName={shopData.shopName} contactNumber={shopData.contactNumber} inventory={filteredInventory} />
+                <SharePdfButton shopName={shopData.shopName} contactNumber={shopData.contactNumber} inventory={filteredInventory} />
               </div>
               <p className="text-lg mb-4" style={{ color: 'var(--text-secondary)' }}>
                 Available Inventory
