@@ -810,6 +810,33 @@ export default function ShopInventoryPage({ params }) {
     }
   }
 
+  // Add new function for updating quantity directly
+  const handleQuantityUpdate = async (itemId, newQuantity) => {
+    if (newQuantity < 0) return; // Don't allow negative quantities
+    
+    try {
+      const itemRef = doc(db, 'shopOwners', shopId, 'inventory', itemId);
+      await updateDoc(itemRef, {
+        quantity: newQuantity,
+        updatedAt: serverTimestamp()
+      });
+      
+      // Update local state
+      setInventory(prev => 
+        prev.map(item => 
+          item.id === itemId 
+            ? { ...item, quantity: newQuantity } 
+            : item
+        )
+      );
+      
+      toast.success('Quantity updated');
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      toast.error('Failed to update quantity');
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -1141,8 +1168,35 @@ export default function ShopInventoryPage({ params }) {
                           <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item.model}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                            {item.quantity}
+                          <div className="text-sm flex items-center" style={{ color: 'var(--text-secondary)' }}>
+                            <button 
+                              onClick={() => handleQuantityUpdate(item.id, Math.max(0, item.quantity - 1))}
+                              className="w-6 h-6 flex items-center justify-center rounded-full border mr-2 transition-colors duration-200"
+                              style={{ 
+                                borderColor: 'var(--border-color)',
+                                backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)'
+                              }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                              </svg>
+                            </button>
+                            
+                            <span className="mx-1 min-w-[24px] text-center">{item.quantity}</span>
+                            
+                            <button 
+                              onClick={() => handleQuantityUpdate(item.id, item.quantity + 1)}
+                              className="w-6 h-6 flex items-center justify-center rounded-full border ml-2 transition-colors duration-200"
+                              style={{ 
+                                borderColor: 'var(--border-color)',
+                                backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)'
+                              }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12M6 12h12" />
+                              </svg>
+                            </button>
+                            
                             {item.minStockLevel && item.quantity <= item.minStockLevel && (
                               <span className="ml-1 text-red-500">⚠️</span>
                             )}
