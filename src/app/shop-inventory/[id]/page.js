@@ -8,6 +8,7 @@ import { db } from '@/firebase/config'
 import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp, query, where, orderBy } from 'firebase/firestore'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import ShareDropdown from '@/components/ShareDropdown'
 import { toast } from 'react-hot-toast'
 
 export default function ShopInventoryPage({ params }) {
@@ -837,36 +838,12 @@ export default function ShopInventoryPage({ params }) {
               </p>
             </div>
             <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => {
-                  const shareUrl = `${window.location.origin}/shop-inventory/${shopId}/share`
-                  // Create QR code URL
-                  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`
-                  
-                  // Open QR code in new window
-                  const qrWindow = window.open(qrCodeUrl, '_blank', 'width=300,height=300')
-                  
-                  // Also copy link to clipboard
-                  navigator.clipboard.writeText(shareUrl).then(() => {
-                    toast.success('Inventory share link copied to clipboard! QR code opened in new window.')
-                  }).catch(() => {
-                    // Fallback for older browsers
-                    const textArea = document.createElement('textarea')
-                    textArea.value = shareUrl
-                    document.body.appendChild(textArea)
-                    textArea.select()
-                    document.execCommand('copy')
-                    document.body.removeChild(textArea)
-                    toast.success('Inventory share link copied to clipboard! QR code opened in new window.')
-                  })
-                }}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                </svg>
-                Share Inventory
-              </button>
+              <ShareDropdown 
+                shopId={shopId}
+                shopName={shopData?.shopName || 'Shop'}
+                contactNumber={shopData?.contactNumber}
+                inventory={filteredInventory}
+              />
               <button
                 onClick={openAddModal}
                 className="px-4 py-2 bg-[#e60012] text-white rounded-lg hover:bg-[#d10010] focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 transition-colors duration-200"

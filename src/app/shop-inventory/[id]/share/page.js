@@ -6,6 +6,10 @@ import { db } from '@/firebase/config'
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from 'firebase/firestore'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import ShareUrlButton from '@/components/ShareUrlButton'
+import ShareQrCodeButton from '@/components/ShareQrCodeButton'
+import ShareWhatsAppUrlButton from '@/components/ShareWhatsAppUrlButton'
+import ShareWhatsAppListButton from '@/components/ShareWhatsAppListButton'
 
 export default function ShopInventorySharePage({ params }) {
   const shopId = params.id
@@ -50,6 +54,9 @@ export default function ShopInventorySharePage({ params }) {
   const [brandFilter, setBrandFilter] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [sortOrder, setSortOrder] = useState('asc')
+  
+  // Define share URL
+  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/shop-inventory/${shopId}/share` : ''
   
   // Fetch shop data and inventory
   useEffect(() => {
@@ -211,53 +218,12 @@ export default function ShopInventorySharePage({ params }) {
               <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-main)' }}>
                 {shopData.shopName}
               </h1>
-              {/* Share via... */}
+              {/* Enhanced Share Options */}
               <div className="no-print flex flex-wrap justify-center gap-3 mb-4">
-                {/* WhatsApp */}
-                <a
-                  href={`https://wa.me/?text=${encodeURIComponent(`Check out the inventory at ${window?.location?.origin}/shop-inventory/${shopId}/share`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M20.52 3.48A12.07 12.07 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.16 1.6 5.97L0 24l6.22-1.63A12.07 12.07 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.21-1.25-6.23-3.48-8.52zM12 22c-1.85 0-3.67-.5-5.24-1.44l-.37-.22-3.69.97.99-3.59-.24-.37A9.94 9.94 0 0 1 2 12c0-5.52 4.48-10 10-10s10 4.48 10 10-4.48 10-10 10zm5.2-7.8c-.28-.14-1.65-.81-1.9-.9-.25-.09-.43-.14-.61.14-.18.28-.7.9-.86 1.08-.16.18-.32.2-.6.07-.28-.14-1.18-.44-2.25-1.4-.83-.74-1.39-1.65-1.55-1.93-.16-.28-.02-.43.12-.57.13-.13.28-.34.42-.51.14-.17.18-.29.28-.48.09-.19.05-.36-.02-.5-.07-.14-.61-1.47-.84-2.01-.22-.53-.45-.46-.61-.47-.16-.01-.35-.01-.54-.01-.19 0-.5.07-.76.34-.26.27-1 1-.97 2.43.03 1.43 1.03 2.81 1.18 3.01.15.2 2.03 3.1 4.93 4.22.69.3 1.23.48 1.65.61.69.22 1.32.19 1.81.12.55-.08 1.65-.67 1.89-1.32.23-.65.23-1.2.16-1.32-.07-.12-.25-.19-.53-.33z"/></svg>
-                  WhatsApp
-                </a>
-                {/* SMS */}
-                <a
-                  href={`sms:?body=${encodeURIComponent(`Check out the inventory at ${window?.location?.origin}/shop-inventory/${shopId}/share`)}`}
-                  className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                  SMS
-                </a>
-                {/* Web Share API */}
-                {typeof window !== 'undefined' && navigator.share && (
-                  <button
-                    onClick={() => {
-                      navigator.share({
-                        title: shopData.shopName,
-                        text: `Check out the inventory at`,
-                        url: `${window.location.origin}/shop-inventory/${shopId}/share`
-                      })
-                    }}
-                    className="flex items-center px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors duration-200"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 8a3 3 0 11-6 0 3 3 0 016 0zm6 8a6 6 0 00-12 0h12z" /></svg>
-                    Share...
-                  </button>
-                )}
-                {/* Copy Link */}
-                <button
-                  onClick={() => {
-                    const shareUrl = `${window.location.origin}/shop-inventory/${shopId}/share`
-                    navigator.clipboard.writeText(shareUrl)
-                  }}
-                  className="flex items-center px-3 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors duration-200"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16h8M8 12h8m-7 8h6a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v7a2 2 0 002 2z" /></svg>
-                  Copy Link
-                </button>
+                <ShareUrlButton url={shareUrl} />
+                <ShareQrCodeButton url={shareUrl} />
+                <ShareWhatsAppUrlButton url={shareUrl} shopName={shopData.shopName} />
+                <ShareWhatsAppListButton shopName={shopData.shopName} contactNumber={shopData.contactNumber} inventory={filteredInventory} />
               </div>
               <p className="text-lg mb-4" style={{ color: 'var(--text-secondary)' }}>
                 Available Inventory
