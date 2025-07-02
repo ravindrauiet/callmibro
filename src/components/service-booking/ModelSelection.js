@@ -8,15 +8,29 @@ import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ModelSelection({ service, brand, onModelSelect }) {
   const [models, setModels] = useState([])
+  const [filteredModels, setFilteredModels] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedModelId, setSelectedModelId] = useState(null)
   const [error, setError] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
   const { isDarkMode } = useTheme()
   
   // Check if online
   const checkNetwork = () => {
     return navigator.onLine;
   };
+  
+  // Filter models based on search term
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredModels(models);
+    } else {
+      const filtered = models.filter(model =>
+        model.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredModels(filtered);
+    }
+  }, [searchTerm, models]);
   
   // Helper function to remove price from model data
   const removePriceFromModels = (modelsData) => {
@@ -40,7 +54,9 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
       // Check if we're online
       if (!checkNetwork()) {
         console.log('Network connection unavailable, using fallback models');
-        setModels(removePriceFromModels(getModels()));
+        const fallbackModels = removePriceFromModels(getModels());
+        setModels(fallbackModels);
+        setFilteredModels(fallbackModels);
         setError('Network connection unavailable');
         toast.error('Network connection unavailable. Using default models.');
         setLoading(false);
@@ -94,7 +110,9 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
                 price: null
               }));
               
-              setModels(removePriceFromModels(modelsData));
+              const legacyModels = removePriceFromModels(modelsData);
+              setModels(legacyModels);
+              setFilteredModels(legacyModels);
               toast.warning('Using legacy model data. Please run migration tool.');
               setLoading(false);
               return;
@@ -115,13 +133,16 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         if (modelsData.length === 0) {
           // Fallback to hardcoded models if no models found in database
           console.log('No models found in database, using fallback');
-          setModels(removePriceFromModels(getModels()))
+          const fallbackModels = removePriceFromModels(getModels());
+          setModels(fallbackModels);
+          setFilteredModels(fallbackModels);
           if (brand.id !== 'default') {
             toast.warning(`Using default models for ${brand.name}`)
           }
         } else {
           console.log('Found models in database:', modelsData.length);
-          setModels(modelsData)
+          setModels(modelsData);
+          setFilteredModels(modelsData);
         }
       } catch (error) {
         console.error('Error fetching models:', error)
@@ -134,7 +155,9 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         setError(error.message || 'Failed to load models');
         
         // Fallback to hardcoded models on error
-        setModels(removePriceFromModels(getModels()))
+        const fallbackModels = removePriceFromModels(getModels());
+        setModels(fallbackModels);
+        setFilteredModels(fallbackModels);
         
         // Show more specific error message based on error type
         if (error.name === 'FirebaseError') {
@@ -243,7 +266,8 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'iphone-7', name: 'iPhone 7', price: '₹3,200' },
         { id: 'iphone-se-3', name: 'iPhone SE (3rd gen)', price: '₹3,500' },
         { id: 'iphone-se-2', name: 'iPhone SE (2nd gen)', price: '₹3,200' },
-        { id: 'iphone-se-1', name: 'iPhone SE (1st gen)', price: '₹2,800' }
+        { id: 'iphone-se-1', name: 'iPhone SE (1st gen)', price: '₹2,800' },
+        { id: 'other', name: 'Other iPhone Model', price: null }
       ];
     } else if (brand.id === 'samsung' && normalizedService === 'mobilescreenrepair') {
       return [
@@ -263,7 +287,8 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'galaxy-s20-ultra', name: 'Galaxy S20 Ultra', price: '₹10,500' },
         { id: 'galaxy-s20-plus', name: 'Galaxy S20+', price: '₹8,800' },
         { id: 'galaxy-s20', name: 'Galaxy S20', price: '₹7,200' },
-        { id: 'galaxy-s20-fe', name: 'Galaxy S20 FE', price: '₹6,500' }
+        { id: 'galaxy-s20-fe', name: 'Galaxy S20 FE', price: '₹6,500' },
+        { id: 'other', name: 'Other Samsung Model', price: null }
       ];
     } else if (brand.id === 'lg' && normalizedService === 'tvdiagnostics') {
       return [
@@ -291,7 +316,8 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'lg-uhd-up80', name: 'LG UHD UP80', price: '₹1,800' },
         { id: 'lg-uhd-up75', name: 'LG UHD UP75', price: '₹1,500' },
         { id: 'lg-uhd-up70', name: 'LG UHD UP70', price: '₹1,200' },
-        { id: 'lg-smart-tv', name: 'LG Smart TV (Basic)', price: '₹1,000' }
+        { id: 'lg-smart-tv', name: 'LG Smart TV (Basic)', price: '₹1,000' },
+        { id: 'other', name: 'Other LG TV Model', price: null }
       ];
     } else if (brand.id === 'daikin' && normalizedService === 'acgasrefill') {
       return [
@@ -323,7 +349,8 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'daikin-packaged-11-ton', name: 'Daikin Packaged AC (11 Ton)', price: '₹6,300' },
         { id: 'daikin-window-1-ton', name: 'Daikin Window AC (1 Ton)', price: '₹1,800' },
         { id: 'daikin-window-1.5-ton', name: 'Daikin Window AC (1.5 Ton)', price: '₹2,100' },
-        { id: 'daikin-window-2-ton', name: 'Daikin Window AC (2 Ton)', price: '₹2,400' }
+        { id: 'daikin-window-2-ton', name: 'Daikin Window AC (2 Ton)', price: '₹2,400' },
+        { id: 'other', name: 'Other Daikin AC Model', price: null }
       ];
     } else if (brand.id === 'jbl' && normalizedService === 'speakerrepair') {
       return [
@@ -356,7 +383,8 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'jbl-tune-710bt', name: 'JBL Tune 710BT Headphones', price: '₹1,200' },
         { id: 'jbl-tune-510bt', name: 'JBL Tune 510BT Headphones', price: '₹1,000' },
         { id: 'jbl-tune-760nc', name: 'JBL Tune 760NC Headphones', price: '₹1,500' },
-        { id: 'jbl-tune-660nc', name: 'JBL Tune 660NC Headphones', price: '₹1,300' }
+        { id: 'jbl-tune-660nc', name: 'JBL Tune 660NC Headphones', price: '₹1,300' },
+        { id: 'other', name: 'Other JBL Model', price: null }
       ];
     } else if (brand.id === 'sony' && normalizedService === 'speakerrepair') {
       return [
@@ -389,7 +417,8 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'sony-mhc-v43d', name: 'Sony MHC-V43D', price: '₹3,800' },
         { id: 'sony-mhc-v13', name: 'Sony MHC-V13', price: '₹3,500' },
         { id: 'sony-wh-1000xm5', name: 'Sony WH-1000XM5 Headphones', price: '₹2,200' },
-        { id: 'sony-wh-1000xm4', name: 'Sony WH-1000XM4 Headphones', price: '₹2,000' }
+        { id: 'sony-wh-1000xm4', name: 'Sony WH-1000XM4 Headphones', price: '₹2,000' },
+        { id: 'other', name: 'Other Sony Model', price: null }
       ];
     } else if (brand.id === 'bose' && normalizedService === 'speakerrepair') {
       return [
@@ -417,7 +446,8 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'bose-smart-soundbar-300', name: 'Bose Smart Soundbar 300', price: '₹3,500' },
         { id: 'bose-quietcomfort-45', name: 'Bose QuietComfort 45 Headphones', price: '₹2,200' },
         { id: 'bose-quietcomfort-35-ii', name: 'Bose QuietComfort 35 II Headphones', price: '₹2,000' },
-        { id: 'bose-noise-cancelling-700', name: 'Bose Noise Cancelling 700 Headphones', price: '₹2,500' }
+        { id: 'bose-noise-cancelling-700', name: 'Bose Noise Cancelling 700 Headphones', price: '₹2,500' },
+        { id: 'other', name: 'Other Bose Model', price: null }
       ];
     } else if (brand.id === 'marshall' && normalizedService === 'speakerrepair') {
       return [
@@ -442,7 +472,8 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'marshall-stanmore', name: 'Marshall Stanmore', price: '₹2,800' },
         { id: 'marshall-major-iv', name: 'Marshall Major IV Headphones', price: '₹1,800' },
         { id: 'marshall-major-iii', name: 'Marshall Major III Headphones', price: '₹1,500' },
-        { id: 'marshall-monitor-ii', name: 'Marshall Monitor II ANC Headphones', price: '₹2,200' }
+        { id: 'marshall-monitor-ii', name: 'Marshall Monitor II ANC Headphones', price: '₹2,200' },
+        { id: 'other', name: 'Other Marshall Model', price: null }
       ];
     } else if (brand.id === 'xiaomi' && normalizedService === 'mobilescreenrepair') {
       return [
@@ -466,7 +497,8 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'xiaomi-note-10', name: 'Redmi Note 10', price: '₹4,000' },
         { id: 'xiaomi-k60', name: 'Redmi K60', price: '₹6,500' },
         { id: 'xiaomi-k50', name: 'Redmi K50', price: '₹6,000' },
-        { id: 'xiaomi-k40', name: 'Redmi K40', price: '₹5,500' }
+        { id: 'xiaomi-k40', name: 'Redmi K40', price: '₹5,500' },
+        { id: 'other', name: 'Other Xiaomi Model', price: null }
       ];
     } else if (brand.id === 'samsung' && normalizedService === 'tvdiagnostics') {
       return [
@@ -486,7 +518,8 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'samsung-q60c', name: 'Samsung Q60C QLED 4K', price: '₹3,800' },
         { id: 'samsung-bu8000', name: 'Samsung BU8000 Crystal UHD 4K', price: '₹3,500' },
         { id: 'samsung-bu7000', name: 'Samsung BU7000 Crystal UHD 4K', price: '₹3,200' },
-        { id: 'samsung-ls03b', name: 'Samsung The Frame LS03B', price: '₹4,500' }
+        { id: 'samsung-ls03b', name: 'Samsung The Frame LS03B', price: '₹4,500' },
+        { id: 'other', name: 'Other Samsung TV Model', price: null }
       ];
     } else if (brand.id === 'voltas' && normalizedService === 'acgasrefill') {
       return [
@@ -501,7 +534,8 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'voltas-123v-1-ton', name: 'Voltas 123V DZX 1 Ton 3 Star Fixed Speed Split AC', price: '₹1,600' },
         { id: 'voltas-183v-1.5-ton', name: 'Voltas 183V DZX 1.5 Ton 3 Star Fixed Speed Split AC', price: '₹1,900' },
         { id: 'voltas-123v-czp-1-ton', name: 'Voltas 123V CZP 1 Ton 3 Star Fixed Speed Window AC', price: '₹1,500' },
-        { id: 'voltas-183v-czp-1.5-ton', name: 'Voltas 183V CZP 1.5 Ton 3 Star Fixed Speed Window AC', price: '₹1,800' }
+        { id: 'voltas-183v-czp-1.5-ton', name: 'Voltas 183V CZP 1.5 Ton 3 Star Fixed Speed Window AC', price: '₹1,800' },
+        { id: 'other', name: 'Other Voltas AC Model', price: null }
       ];
     } else if (brand.id === 'harmankardon' && normalizedService === 'speakerrepair') {
       return [
@@ -519,11 +553,12 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'harman-kardon-citation-surround', name: 'Harman Kardon Citation Surround', price: '₹2,800' },
         { id: 'harman-kardon-citation-sub', name: 'Harman Kardon Citation Sub', price: '₹3,000' },
         { id: 'harman-kardon-soundsticks-4', name: 'Harman Kardon SoundSticks 4', price: '₹2,500' },
-        { id: 'harman-kardon-soundsticks-3', name: 'Harman Kardon SoundSticks 3', price: '₹2,200' }
+        { id: 'harman-kardon-soundsticks-3', name: 'Harman Kardon SoundSticks 3', price: '₹2,200' },
+        { id: 'other', name: 'Other Harman Kardon Model', price: null }
       ];
     } else {
       // Generic models for other brands/services
-      return [
+      const genericModels = [
         { id: 'model-premium-plus', name: 'Premium Plus Model', price: '₹8,500' },
         { id: 'model-premium', name: 'Premium Model', price: '₹6,500' },
         { id: 'model-standard-plus', name: 'Standard Plus Model', price: '₹5,500' },
@@ -532,6 +567,11 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
         { id: 'model-basic', name: 'Basic Model', price: '₹3,500' },
         { id: 'model-entry', name: 'Entry Level Model', price: '₹2,500' }
       ];
+      
+      // Add "Other" option
+      genericModels.push({ id: 'other', name: 'Other Model', price: null });
+      
+      return genericModels;
     }
   };
 
@@ -600,8 +640,46 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
     }}>
       <h3 className="text-xl font-semibold mb-4">Select Model for {brand.name}</h3>
       
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search for your model..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-3 pl-10 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+            style={{
+              backgroundColor: 'var(--panel-dark)',
+              borderColor: 'var(--border-color)',
+              color: 'var(--text-main)'
+            }}
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5" style={{ color: 'var(--text-secondary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            >
+              <svg className="h-5 w-5" style={{ color: 'var(--text-secondary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+        {searchTerm && (
+          <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
+            Found {filteredModels.length} model{filteredModels.length !== 1 ? 's' : ''}
+          </p>
+        )}
+      </div>
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {models.map((model) => (
+        {filteredModels.map((model) => (
           <div
             key={model.id}
             onClick={() => handleModelSelect(model)}
@@ -616,7 +694,13 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
             }}
           >
             <div className="flex items-center mb-3">
-              {model.photoURL ? (
+              {model.id === 'other' ? (
+                <div className="w-12 h-12 mr-3 flex items-center justify-center rounded-full bg-[#e60012]/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+              ) : model.photoURL ? (
                 <div className="w-12 h-12 mr-3 flex items-center justify-center">
                   <img
                     src={model.photoURL}
@@ -649,6 +733,20 @@ export default function ModelSelection({ service, brand, onModelSelect }) {
           </div>
         ))}
       </div>
+      
+      {!loading && filteredModels.length === 0 && searchTerm && (
+        <div className="text-center py-8">
+          <p style={{ color: 'var(--text-secondary)' }} className="mb-4">
+            No models found matching "{searchTerm}"
+          </p>
+          <button
+            onClick={() => setSearchTerm('')}
+            className="text-[#e60012] hover:underline"
+          >
+            Clear search
+          </button>
+        </div>
+      )}
     </div>
   );
 } 

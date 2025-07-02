@@ -8,15 +8,29 @@ import { useTheme } from '@/contexts/ThemeContext'
 
 export default function BrandSelection({ service, onBrandSelect }) {
   const [brands, setBrands] = useState([])
+  const [filteredBrands, setFilteredBrands] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedBrandId, setSelectedBrandId] = useState(null)
   const [error, setError] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
   const { isDarkMode } = useTheme()
 
   // Check if online
   const checkNetwork = () => {
     return navigator.onLine;
   };
+
+  // Filter brands based on search term
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredBrands(brands);
+    } else {
+      const filtered = brands.filter(brand =>
+        brand.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredBrands(filtered);
+    }
+  }, [searchTerm, brands]);
 
   // Fetch brands from database
   useEffect(() => {
@@ -27,7 +41,9 @@ export default function BrandSelection({ service, onBrandSelect }) {
       // Check if we're online
       if (!checkNetwork()) {
         console.log('Network connection unavailable, using fallback brands');
-        setBrands(getBrands());
+        const fallbackBrands = getBrands();
+        setBrands(fallbackBrands);
+        setFilteredBrands(fallbackBrands);
         setError('Network connection unavailable');
         toast.error('Network connection unavailable. Using default brands.');
         setLoading(false);
@@ -97,11 +113,14 @@ export default function BrandSelection({ service, onBrandSelect }) {
         if (brandsData.length === 0) {
           // Fallback to hardcoded brands if no brands found in database
           console.log('No brands found in database, using fallback');
-          setBrands(getBrands());
+          const fallbackBrands = getBrands();
+          setBrands(fallbackBrands);
+          setFilteredBrands(fallbackBrands);
           toast.warning('Using default brands for this service');
         } else {
           console.log('Found brands in database:', brandsData.length);
           setBrands(brandsData);
+          setFilteredBrands(brandsData);
         }
       } catch (error) {
         console.error('Error fetching brands:', error);
@@ -114,7 +133,9 @@ export default function BrandSelection({ service, onBrandSelect }) {
         setError(error.message || 'Failed to load brands');
         
         // Fallback to hardcoded brands on error
-        setBrands(getBrands());
+        const fallbackBrands = getBrands();
+        setBrands(fallbackBrands);
+        setFilteredBrands(fallbackBrands);
         
         // Show more specific error message based on error type
         if (error.name === 'FirebaseError') {
@@ -147,9 +168,11 @@ export default function BrandSelection({ service, onBrandSelect }) {
     
     const normalizedService = normalizeServiceName(service);
     
+    let brandList = [];
+    
     switch(normalizedService) {
       case 'mobilescreenrepair':
-        return [
+        brandList = [
           { id: 'apple', name: 'Apple' },
           { id: 'samsung', name: 'Samsung' },
           { id: 'xiaomi', name: 'Xiaomi' },
@@ -175,8 +198,9 @@ export default function BrandSelection({ service, onBrandSelect }) {
           { id: 'sony', name: 'Sony' },
           { id: 'lg', name: 'LG' }
         ];
+        break;
       case 'tvdiagnostics':
-        return [
+        brandList = [
           { id: 'samsung', name: 'Samsung' },
           { id: 'lg', name: 'LG' },
           { id: 'sony', name: 'Sony' },
@@ -202,8 +226,9 @@ export default function BrandSelection({ service, onBrandSelect }) {
           { id: 'hitachi', name: 'Hitachi' },
           { id: 'nokia', name: 'Nokia' }
         ];
+        break;
       case 'acgasrefill':
-        return [
+        brandList = [
           { id: 'daikin', name: 'Daikin' },
           { id: 'hitachi', name: 'Hitachi' },
           { id: 'lg', name: 'LG' },
@@ -229,8 +254,9 @@ export default function BrandSelection({ service, onBrandSelect }) {
           { id: 'york', name: 'York' },
           { id: 'fujitsu', name: 'Fujitsu' }
         ];
+        break;
       case 'batteryreplacement':
-        return [
+        brandList = [
           { id: 'apple', name: 'Apple' },
           { id: 'samsung', name: 'Samsung' },
           { id: 'xiaomi', name: 'Xiaomi' },
@@ -256,8 +282,9 @@ export default function BrandSelection({ service, onBrandSelect }) {
           { id: 'gionee', name: 'Gionee' },
           { id: 'tecno', name: 'TECNO' }
         ];
+        break;
       case 'speakerrepair':
-        return [
+        brandList = [
           { id: 'bose', name: 'Bose' },
           { id: 'sony', name: 'Sony' },
           { id: 'jbl', name: 'JBL' },
@@ -283,8 +310,9 @@ export default function BrandSelection({ service, onBrandSelect }) {
           { id: 'jvc', name: 'JVC' },
           { id: 'logitech', name: 'Logitech' }
         ];
+        break;
       case 'laptoprepair':
-        return [
+        brandList = [
           { id: 'apple', name: 'Apple' },
           { id: 'dell', name: 'Dell' },
           { id: 'hp', name: 'HP' },
@@ -310,8 +338,9 @@ export default function BrandSelection({ service, onBrandSelect }) {
           { id: 'micromax', name: 'Micromax' },
           { id: 'xiaomi', name: 'Xiaomi' }
         ];
+        break;
       case 'refrigeratorrepair':
-        return [
+        brandList = [
           { id: 'samsung', name: 'Samsung' },
           { id: 'lg', name: 'LG' },
           { id: 'whirlpool', name: 'Whirlpool' },
@@ -337,10 +366,11 @@ export default function BrandSelection({ service, onBrandSelect }) {
           { id: 'croma', name: 'Croma' },
           { id: 'sansui', name: 'Sansui' }
         ];
+        break;
       default:
         // Show toast for default brands
         toast.warning(`Using default brands for service: ${service}`);
-        return [
+        brandList = [
           { id: 'samsung', name: 'Samsung' },
           { id: 'lg', name: 'LG' },
           { id: 'apple', name: 'Apple' },
@@ -354,7 +384,13 @@ export default function BrandSelection({ service, onBrandSelect }) {
           { id: 'dell', name: 'Dell' },
           { id: 'hp', name: 'HP' }
         ];
+        break;
     }
+    
+    // Add "Other" option at the end
+    brandList.push({ id: 'other', name: 'Other' });
+    
+    return brandList;
   };
 
   const handleBrandSelect = (brand) => {
@@ -385,13 +421,51 @@ export default function BrandSelection({ service, onBrandSelect }) {
     }}>
       <h2 className="text-xl font-medium mb-4">Select Brand</h2>
       
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search for your brand..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-3 pl-10 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+            style={{
+              backgroundColor: 'var(--panel-dark)',
+              borderColor: 'var(--border-color)',
+              color: 'var(--text-main)'
+            }}
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5" style={{ color: 'var(--text-secondary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            >
+              <svg className="h-5 w-5" style={{ color: 'var(--text-secondary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+        {searchTerm && (
+          <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
+            Found {filteredBrands.length} brand{filteredBrands.length !== 1 ? 's' : ''}
+          </p>
+        )}
+      </div>
+      
       {loading ? (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#e60012]"></div>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {brands.map(brand => (
+          {filteredBrands.map(brand => (
             <div 
               key={brand.id}
               onClick={() => handleBrandSelect(brand)}
@@ -405,7 +479,13 @@ export default function BrandSelection({ service, onBrandSelect }) {
                 borderColor: selectedBrandId === brand.id ? undefined : 'var(--border-color)' 
               }}
             >
-              {brand.logo ? (
+              {brand.id === 'other' ? (
+                <div className="h-12 w-12 flex items-center justify-center rounded-full mb-2 bg-[#e60012]/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#e60012]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+              ) : brand.logo ? (
                 <img 
                   src={brand.logo} 
                   alt={brand.name} 
@@ -434,6 +514,20 @@ export default function BrandSelection({ service, onBrandSelect }) {
               </div>
             </div>
           ))}
+        </div>
+      )}
+      
+      {!loading && filteredBrands.length === 0 && searchTerm && (
+        <div className="text-center py-8">
+          <p style={{ color: 'var(--text-secondary)' }} className="mb-4">
+            No brands found matching "{searchTerm}"
+          </p>
+          <button
+            onClick={() => setSearchTerm('')}
+            className="text-[#e60012] hover:underline"
+          >
+            Clear search
+          </button>
         </div>
       )}
     </div>
