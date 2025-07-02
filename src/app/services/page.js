@@ -4,6 +4,7 @@ import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import RepairServices from '../../components/RepairServices'
 import ExpertsBenefits from '../../components/ExpertsBenefits'
+import ExpressBookingModal from '../../components/ExpressBookingModal'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -11,6 +12,8 @@ import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ServicesPage() {
   const [isVisible, setIsVisible] = useState(false)
+  const [showExpressBookingModal, setShowExpressBookingModal] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState(null)
   const { isDarkMode } = useTheme()
   
   useEffect(() => {
@@ -19,12 +22,25 @@ export default function ServicesPage() {
 
   // Popular service categories with icons
   const popularCategories = [
-    { name: "Mobile Phones", icon: "/icons/mobile-screen.svg", color: "from-[#e60012] to-[#ff6b6b]" },
-    { name: "TVs", icon: "/icons/tv.svg", color: "from-[#e60012] to-[#ff6b6b]" },
-    { name: "ACs", icon: "/icons/ac.svg", color: "from-[#e60012] to-[#ff6b6b]" },
-    { name: "Refrigerators", icon: "/icons/battery2.svg", color: "from-[#e60012] to-[#ff6b6b]" },
-    { name: "Audio", icon: "/icons/speaker.svg", color: "from-[#e60012] to-[#ff6b6b]" }
+    { name: "Mobile Phones", icon: "/icons/mobile-screen.svg", color: "from-[#e60012] to-[#ff6b6b]", category: "Mobile Phones" },
+    { name: "TVs", icon: "/icons/tv.svg", color: "from-[#e60012] to-[#ff6b6b]", category: "TVs" },
+    { name: "ACs", icon: "/icons/ac.svg", color: "from-[#e60012] to-[#ff6b6b]", category: "ACs" },
+    { name: "Refrigerators", icon: "/icons/battery2.svg", color: "from-[#e60012] to-[#ff6b6b]", category: "Refrigerators" },
+    { name: "Audio", icon: "/icons/speaker.svg", color: "from-[#e60012] to-[#ff6b6b]", category: "Audio" }
   ];
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category)
+    
+    const repairSection = document.getElementById('repair-services-section')
+    if (repairSection) {
+      repairSection.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
+  const resetCategory = () => {
+    setSelectedCategory(null)
+  }
 
   return (
     <main className="min-h-screen">
@@ -70,17 +86,20 @@ export default function ServicesPage() {
             
             {/* Enhanced CTA buttons with hover effects */}
             <div className="flex flex-wrap justify-center gap-4 mb-16">
-              <Link href="/services/booking" className="relative overflow-hidden group">
+              <button 
+                onClick={() => setShowExpressBookingModal(true)}
+                className="relative overflow-hidden group"
+              >
                 <span className="absolute inset-0 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] rounded-full"></span>
                 <span className="relative block bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white px-8 py-4 rounded-full font-medium transform transition-all group-hover:shadow-lg group-hover:shadow-[#e60012]/20 group-hover:scale-[1.02]">
                   <span className="flex items-center">
-                    Book Now
+                    Express Booking
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 transform group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </span>
                 </span>
-              </Link>
+              </button>
               
               <Link href="#service-pricing" className="relative group">
                 <span className="absolute inset-0 rounded-full transform transition-all" 
@@ -106,15 +125,17 @@ export default function ServicesPage() {
               <h2 className="text-xl font-bold mb-6 text-center">Popular Service Categories</h2>
               <div className="flex flex-wrap justify-center gap-4">
                 {popularCategories.map((category, index) => (
-                  <Link 
+                  <button 
                     key={index}
-                    href={`#${category.name.toLowerCase().replace(/\s+/g, '-')}`}
-                    className="border rounded-xl p-4 flex flex-col items-center transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 hover:scale-105 w-[120px] h-[120px]"
+                    onClick={() => handleCategoryClick(category.category)}
+                    className={`border rounded-xl p-4 flex flex-col items-center transition-all hover:border-[#e60012] hover:shadow-lg hover:shadow-[#e60012]/10 hover:scale-105 w-[120px] h-[120px] cursor-pointer ${
+                      selectedCategory === category.category ? 'border-[#e60012] shadow-lg shadow-[#e60012]/20' : ''
+                    }`}
                     style={{ 
                       background: isDarkMode 
                         ? 'linear-gradient(to bottom right, var(--panel-dark), var(--panel-charcoal))' 
                         : 'linear-gradient(to bottom right, var(--panel-charcoal), var(--panel-gray))',
-                      borderColor: 'var(--border-color)',
+                      borderColor: selectedCategory === category.category ? '#e60012' : 'var(--border-color)',
                       transitionDelay: `${index * 50}ms`
                     }}
                   >
@@ -128,7 +149,7 @@ export default function ServicesPage() {
                       />
                     </div>
                     <span className="text-sm font-medium text-center">{category.name}</span>
-                  </Link>
+                  </button>
                 ))}
               </div>
             </div>
@@ -167,7 +188,7 @@ export default function ServicesPage() {
       </section>
       
       {/* Enhanced Service Finder Section */}
-      <RepairServices />
+      <RepairServices initialCategory={selectedCategory} onReset={resetCategory} />
       
       {/* Enhanced Benefits Section */}
       <ExpertsBenefits />
@@ -373,6 +394,12 @@ export default function ServicesPage() {
       </section>
       
       <Footer />
+      
+      {/* Express Booking Modal */}
+      <ExpressBookingModal 
+        isOpen={showExpressBookingModal}
+        onClose={() => setShowExpressBookingModal(false)}
+      />
     </main>
   )
 } 

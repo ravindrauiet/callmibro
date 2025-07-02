@@ -63,8 +63,8 @@ const servicesData = [
   }
 ]
 
-export default function RepairServices() {
-  const [deviceCategory, setDeviceCategory] = useState('Device Category')
+export default function RepairServices({ initialCategory = null, onReset }) {
+  const [deviceCategory, setDeviceCategory] = useState(initialCategory || 'Device Category')
   const [subCategory, setSubCategory] = useState('Sub-Category')
   const [location, setLocation] = useState('Location')
   const [filteredServices, setFilteredServices] = useState([])
@@ -94,8 +94,12 @@ export default function RepairServices() {
   }, []);
   
   const subCategories = useMemo(() => {
-    return ['Sub-Category', ...new Set(servicesData.map(service => service.subCategory))];
-  }, []);
+    if (deviceCategory === 'Device Category') {
+      return ['Sub-Category'];
+    }
+    const filteredServices = servicesData.filter(service => service.category === deviceCategory);
+    return ['Sub-Category', ...new Set(filteredServices.map(service => service.subCategory))];
+  }, [deviceCategory]);
 
   // Filter services based on selected filters
   useEffect(() => {
@@ -117,6 +121,14 @@ export default function RepairServices() {
     setDeviceCategory(e.target.value);
     setSubCategory('Sub-Category');
   };
+
+  // Handle initial category prop changes
+  useEffect(() => {
+    if (initialCategory && initialCategory !== deviceCategory) {
+      setDeviceCategory(initialCategory);
+      setSubCategory('Sub-Category');
+    }
+  }, [initialCategory, deviceCategory]);
 
   return (
     <section id="repair-services-section" className="py-20 sm:py-28 px-4 sm:px-8 relative overflow-hidden">
@@ -159,6 +171,7 @@ export default function RepairServices() {
               <label style={{ color: 'var(--text-secondary)' }} className="text-sm mb-2 font-medium">Device Category</label>
               <div className="relative">
                 <select 
+                  id="device-category-select"
                   className="w-full appearance-none border rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-[#e60012] focus:ring-1 focus:ring-[#e60012]"
                   style={{ 
                     background: 'var(--bg-color)', 
@@ -272,6 +285,7 @@ export default function RepairServices() {
                 onClick={() => {
                   setDeviceCategory('Device Category');
                   setSubCategory('Sub-Category');
+                  if (onReset) onReset();
                 }}
                 className="text-[#e60012] font-medium hover:text-white hover:underline"
               >
