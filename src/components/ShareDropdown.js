@@ -6,12 +6,17 @@ import ShareWhatsAppUrlButton from './ShareWhatsAppUrlButton'
 import ShareWhatsAppListButton from './ShareWhatsAppListButton'
 import ProfilePdfButton from './ProfilePdfButton'
 
-export default function ShareDropdown({ shopId, shopName, contactNumber, inventory }) {
+export default function ShareDropdown({ shopId, shopName, contactNumber, inventory, selectedItems = [] }) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
   const { isDarkMode } = useTheme()
   
-  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/shop-inventory/${shopId}/share` : ''
+  // Create URL with selected items if any are selected
+  const shareUrl = typeof window !== 'undefined' 
+    ? selectedItems.length > 0 
+      ? `${window.location.origin}/shop-inventory/${shopId}/share?items=${selectedItems.join(',')}`
+      : `${window.location.origin}/shop-inventory/${shopId}/share`
+    : ''
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -54,7 +59,7 @@ export default function ShareDropdown({ shopId, shopName, contactNumber, invento
         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
         </svg>
-        Share Inventory
+        {selectedItems.length > 0 ? `Share (${selectedItems.length} selected)` : 'Share Inventory'}
         <svg 
           className={`ml-2 h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
           fill="none" 
@@ -108,8 +113,8 @@ export default function ShareDropdown({ shopId, shopName, contactNumber, invento
               <ShareWhatsAppListButton 
                 shopName={shopName} 
                 contactNumber={contactNumber} 
-                inventory={inventory} 
-                buttonText="WhatsApp (as List)" 
+                inventory={selectedItems.length > 0 ? inventory.filter(item => selectedItems.includes(item.id)) : inventory} 
+                buttonText={selectedItems.length > 0 ? `WhatsApp (${selectedItems.length} selected)` : "WhatsApp (as List)"} 
                 className="w-full justify-center"
               />
             </div>
@@ -118,8 +123,8 @@ export default function ShareDropdown({ shopId, shopName, contactNumber, invento
               <ProfilePdfButton 
                 shopName={shopName} 
                 contactNumber={contactNumber} 
-                inventory={inventory} 
-                buttonText="Download PDF" 
+                inventory={selectedItems.length > 0 ? inventory.filter(item => selectedItems.includes(item.id)) : inventory} 
+                buttonText={selectedItems.length > 0 ? `Download PDF (${selectedItems.length} selected)` : "Download PDF"} 
                 className="w-full justify-center"
               />
             </div>

@@ -3,7 +3,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-export default function InvoiceGenerator({ shopName, contactNumber, inventory, buttonText = 'Generate Invoice', className = '' }) {
+export default function InvoiceGenerator({ shopName, contactNumber, inventory, buttonText = 'Generate Invoice', className = '', externalSelectedItems = [] }) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedItems, setSelectedItems] = useState([])
@@ -67,6 +67,15 @@ export default function InvoiceGenerator({ shopName, contactNumber, inventory, b
       orderNumber: generateOrderNumber(),
       deliveryDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0] // 7 days from now
     }))
+    
+    // If external selected items are provided, use them
+    if (externalSelectedItems.length > 0) {
+      const externalItems = inventory.filter(item => externalSelectedItems.includes(item.id))
+      setSelectedItems(externalItems.map(item => ({ ...item, quantity: 1 })))
+    } else {
+      setSelectedItems([])
+    }
+    
     setIsModalOpen(true)
   }
 

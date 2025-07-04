@@ -173,22 +173,23 @@ export default function Home() {
       </Suspense>
       
       <Suspense fallback={<GenericSkeleton />}>
-        <BundleDeals />
-      </Suspense>
-      
-      <Suspense fallback={<GenericSkeleton />}>
         <Shop />
-      </Suspense>
-      
-      {/* Featured Repair Shops */}
-      <Suspense fallback={<GenericSkeleton />}>
-        <FeaturedShops />
       </Suspense>
       
       {/* Shop Owner Registration Banner */}
       <Suspense fallback={<GenericSkeleton />}>
         <ShopOwnerBanner />
       </Suspense>
+
+      <Suspense fallback={<GenericSkeleton />}>
+        <BundleDeals />
+      </Suspense>
+
+      {/* Featured Repair Shops */}
+      <Suspense fallback={<GenericSkeleton />}>
+        <FeaturedShops />
+      </Suspense>
+
       
       <Suspense fallback={<GenericSkeleton />}>
         <Testimonial />

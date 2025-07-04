@@ -55,9 +55,27 @@ export default function ShopInventorySharePage({ params }) {
   const [brandFilter, setBrandFilter] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [sortOrder, setSortOrder] = useState('asc')
+  const [selectedItems, setSelectedItems] = useState([])
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
   
-  // Define share URL
-  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/shop-inventory/${shopId}/share` : ''
+  // Define share URL - include selected items if any
+  const shareUrl = typeof window !== 'undefined' 
+    ? selectedItems.length > 0 
+      ? `${window.location.origin}/shop-inventory/${shopId}/share?items=${selectedItems.join(',')}`
+      : `${window.location.origin}/shop-inventory/${shopId}/share`
+    : ''
+  
+  // Get selected items from URL parameters
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const itemsParam = urlParams.get('items')
+      if (itemsParam) {
+        const itemIds = itemsParam.split(',').filter(id => id.trim() !== '')
+        setSelectedItems(itemIds)
+      }
+    }
+  }, [])
   
   // Fetch shop data and inventory
   useEffect(() => {
@@ -101,6 +119,11 @@ export default function ShopInventorySharePage({ params }) {
   useEffect(() => {
     let filtered = [...inventory]
     
+    // If selected items are specified in URL, only show those items
+    if (selectedItems.length > 0) {
+      filtered = filtered.filter(item => selectedItems.includes(item.id))
+    }
+    
     // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter(item =>
@@ -142,7 +165,7 @@ export default function ShopInventorySharePage({ params }) {
     })
     
     setFilteredInventory(filtered)
-  }, [inventory, searchTerm, categoryFilter, brandFilter, sortBy, sortOrder])
+  }, [inventory, searchTerm, categoryFilter, brandFilter, sortBy, sortOrder, selectedItems])
   
   // Get unique categories and brands for filters
   const categories = [...new Set(inventory.map(item => item.category).filter(Boolean))]
@@ -220,16 +243,48 @@ export default function ShopInventorySharePage({ params }) {
                 {shopData.shopName}
               </h1>
               {/* Enhanced Share Options */}
-              <div className="no-print flex flex-wrap justify-center gap-3 mb-4">
-                <ShareUrlButton url={shareUrl} />
-                <ShareQrCodeButton url={shareUrl} />
-                <ShareWhatsAppUrlButton url={shareUrl} shopName={shopData.shopName} />
-                <ShareWhatsAppListButton shopName={shopData.shopName} contactNumber={shopData.contactNumber} inventory={filteredInventory} />
-                <SharePdfButton shopName={shopData.shopName} contactNumber={shopData.contactNumber} inventory={filteredInventory} />
+              <div className="no-print mb-4">
+                {/* Mobile: Horizontally scrollable */}
+                <div className="md:hidden overflow-x-auto pb-4">
+                  <div className="flex space-x-3 min-w-max px-4">
+                    <ShareUrlButton url={shareUrl} buttonText="Copy Link" className="whitespace-nowrap" />
+                    <ShareQrCodeButton url={shareUrl} buttonText="QR Code" className="whitespace-nowrap" />
+                    <ShareWhatsAppUrlButton url={shareUrl} shopName={shopData.shopName} buttonText="WhatsApp URL" className="whitespace-nowrap" />
+                    <ShareWhatsAppListButton shopName={shopData.shopName} contactNumber={shopData.contactNumber} inventory={filteredInventory} buttonText="WhatsApp List" className="whitespace-nowrap" />
+                    <SharePdfButton shopName={shopData.shopName} contactNumber={shopData.contactNumber} inventory={filteredInventory} buttonText="PDF" className="whitespace-nowrap" />
+                  </div>
+                </div>
+                
+                {/* Desktop: Horizontal layout */}
+                <div className="hidden md:flex flex-wrap justify-center gap-3">
+                  <ShareUrlButton url={shareUrl} />
+                  <ShareQrCodeButton url={shareUrl} />
+                  <ShareWhatsAppUrlButton url={shareUrl} shopName={shopData.shopName} />
+                  <ShareWhatsAppListButton shopName={shopData.shopName} contactNumber={shopData.contactNumber} inventory={filteredInventory} />
+                  <SharePdfButton shopName={shopData.shopName} contactNumber={shopData.contactNumber} inventory={filteredInventory} />
+                </div>
               </div>
               <p className="text-lg mb-4" style={{ color: 'var(--text-secondary)' }}>
-                Available Inventory
+                {selectedItems.length > 0 ? `Selected Items (${selectedItems.length})` : 'Available Inventory'}
               </p>
+              {selectedItems.length > 0 && (
+                <div className="mb-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                  {/* <p className="text-sm text-center mb-2" style={{ color: 'var(--text-main)' }}>
+                    📋 Showing only selected items from the shared link
+                  </p> */}
+                  {/* <div className="text-center">
+                    <a 
+                      href={`/shop-inventory/${shopId}/share`}
+                      className="inline-flex items-center px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                      </svg>
+                      View All Items
+                    </a>
+                  </div> */}
+                </div>
+              )}
               {shopData.address && (
                 <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
                   📍 {shopData.address}
@@ -245,7 +300,133 @@ export default function ShopInventorySharePage({ params }) {
           
           {/* Filters */}
           <div className="no-print mb-6 p-4 rounded-lg shadow-md" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Mobile: Simplified search and filter button */}
+            <div className="md:hidden space-y-3">
+              {/* Search Bar */}
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Search Products</label>
+                <input
+                  type="text"
+                  placeholder="Search by name, brand, model..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                  style={{ 
+                    backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)'
+                  }}
+                />
+              </div>
+              
+              {/* Filter Button */}
+              <button
+                onClick={() => setShowMobileFilters(!showMobileFilters)}
+                className="w-full flex items-center justify-center px-4 py-2 border rounded-md transition-colors"
+                style={{ 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)',
+                  backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)',
+                  ':hover': {
+                    backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)'
+                  }
+                }}
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filters & Sort
+                <span className="ml-2 text-xs px-2 py-1 rounded-full" style={{ 
+                  backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)',
+                  color: 'var(--text-main)'
+                }}>
+                  {[categoryFilter, brandFilter, sortBy].filter(Boolean).length}
+                </span>
+              </button>
+              
+              {/* Mobile Filter Panel */}
+              {showMobileFilters && (
+                <div className="space-y-3 p-3 rounded-lg border" style={{ 
+                  backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)',
+                  borderColor: 'var(--border-color)'
+                }}>
+                  {/* Category Filter */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Category
+                    </label>
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                    >
+                      <option value="">All Categories</option>
+                      {categories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Brand Filter */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Brand
+                    </label>
+                    <select
+                      value={brandFilter}
+                      onChange={(e) => setBrandFilter(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                    >
+                      <option value="">All Brands</option>
+                      {brands.map(brand => (
+                        <option key={brand} value={brand}>{brand}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Sort */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Sort By
+                    </label>
+                    <select
+                      value={`${sortBy}-${sortOrder}`}
+                      onChange={(e) => {
+                        const [field, order] = e.target.value.split('-')
+                        setSortBy(field)
+                        setSortOrder(order)
+                      }}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                    >
+                      <option value="name-asc">Name (A-Z)</option>
+                      <option value="name-desc">Name (Z-A)</option>
+                      <option value="price-asc">Price (Low-High)</option>
+                      <option value="price-desc">Price (High-Low)</option>
+                      <option value="brand-asc">Brand (A-Z)</option>
+                      <option value="category-asc">Category (A-Z)</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Desktop: Full filter grid */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Search */}
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
@@ -314,13 +495,13 @@ export default function ShopInventorySharePage({ params }) {
                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Sort By
                 </label>
-                <select
-                  value={`${sortBy}-${sortOrder}`}
-                  onChange={(e) => {
-                    const [field, order] = e.target.value.split('-')
-                    setSortBy(field)
-                    setSortOrder(order)
-                  }}
+                                  <select
+                    value={`${sortBy}-${sortOrder}`}
+                    onChange={(e) => {
+                      const [field, order] = e.target.value.split('-')
+                      setSortBy(field)
+                      setSortOrder(order)
+                    }}
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
                   style={{ 
                     backgroundColor: isDarkMode ? '#374151' : '#ffffff',
@@ -342,7 +523,10 @@ export default function ShopInventorySharePage({ params }) {
           {/* Results Count and Actions */}
           <div className="no-print mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Showing {filteredInventory.length} of {inventory.length} available items
+              {selectedItems.length > 0 
+                ? `Showing ${filteredInventory.length} selected items`
+                : `Showing ${filteredInventory.length} of ${inventory.length} available items`
+              }
             </p>
             <button
               onClick={() => window.print()}

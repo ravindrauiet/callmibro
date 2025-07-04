@@ -875,12 +875,14 @@ export default function ShopInventoryPage({ params }) {
                 shopName={shopData?.shopName || 'Shop'}
                 contactNumber={shopData?.contactNumber}
                 inventory={filteredInventory}
+                selectedItems={selectedItems}
               />
               <InvoiceGenerator
                 shopName={shopData?.shopName || 'Shop'}
                 contactNumber={shopData?.contactNumber}
                 inventory={filteredInventory}
-                buttonText="Generate Invoice"
+                buttonText={selectedItems.length > 0 ? `Generate Invoice (${selectedItems.length} selected)` : "Generate Invoice"}
+                externalSelectedItems={selectedItems}
               />
               <button
                 onClick={openAddModal}
@@ -1221,20 +1223,50 @@ export default function ShopInventoryPage({ params }) {
           {/* Bulk Actions */}
           {showBulkActions && (
             <div className="mb-4 p-4 rounded-lg shadow-md bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <span className="text-sm font-medium" style={{ color: 'var(--text-main)' }}>
                   {selectedItems.length} items selected
                 </span>
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
                   <button
-                    onClick={() => {/* Implement bulk edit */}}
-                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                    onClick={() => {
+                      // Create URL with selected items
+                      const selectedInventory = filteredInventory.filter(item => selectedItems.includes(item.id))
+                      
+                      // Create WhatsApp message with selected items
+                      const inventoryList = selectedInventory.map(item => 
+                        `• ${item.name} (${item.brand}) - ₹${item.price} - ${item.quantity} available`
+                      ).join('\n')
+                      
+                      // Create URL with selected items
+                      const selectedIds = selectedItems.join(',')
+                      const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/shop-inventory/${shopId}/share?items=${selectedIds}` : ''
+                      
+                      const message = `${shopData?.shopName || 'Shop'} - Selected Inventory:\n\n${inventoryList}${shopData?.contactNumber ? `\n\nContact: ${shopData.contactNumber}` : ''}\n\nView online: ${shareUrl}`
+                      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
+                      
+                      // Open WhatsApp with selected items and URL
+                      window.open(whatsappUrl, '_blank')
+                    }}
+                    className="w-full sm:w-auto px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200 flex items-center justify-center"
                   >
-                    Bulk Edit
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                    </svg>
+                    Share
                   </button>
                   <button
-                    onClick={() => {/* Implement bulk delete */}}
-                    className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                    onClick={() => {
+                      if (confirm(`Are you sure you want to delete ${selectedItems.length} items? This action cannot be undone.`)) {
+                        // Bulk delete functionality
+                        selectedItems.forEach(itemId => {
+                          handleDeleteItem(itemId)
+                        })
+                        setSelectedItems([])
+                        setShowBulkActions(false)
+                      }
+                    }}
+                    className="w-full sm:w-auto px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors duration-200"
                   >
                     Bulk Delete
                   </button>
@@ -1243,7 +1275,7 @@ export default function ShopInventoryPage({ params }) {
                       setSelectedItems([])
                       setShowBulkActions(false)
                     }}
-                    className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+                    className="w-full sm:w-auto px-3 py-2 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors duration-200"
                   >
                     Cancel
                   </button>
@@ -1305,17 +1337,26 @@ export default function ShopInventoryPage({ params }) {
                     {filteredInventory.map((item) => (
                       <tr 
                         key={item.id} 
-                        className="transition-colors duration-200"
+                        className={`transition-colors duration-200 ${selectedItems.includes(item.id) ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}`}
                         style={{ 
                           borderColor: 'var(--border-color)',
                           '--hover-bg-light': 'var(--panel-gray)',
-                          '--hover-bg-dark': 'var(--panel-charcoal)'
+                          '--hover-bg-dark': 'var(--panel-charcoal)',
+                          backgroundColor: selectedItems.includes(item.id) 
+                            ? isDarkMode ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)'
+                            : isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)'
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = isDarkMode ? 'var(--hover-bg-dark)' : 'var(--hover-bg-light)'
+                          if (!selectedItems.includes(item.id)) {
+                            e.currentTarget.style.backgroundColor = isDarkMode ? 'var(--hover-bg-dark)' : 'var(--hover-bg-light)'
+                          }
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)'
+                          if (!selectedItems.includes(item.id)) {
+                            e.currentTarget.style.backgroundColor = isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)'
+                          } else {
+                            e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)'
+                          }
                         }}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
