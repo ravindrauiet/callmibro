@@ -3,6 +3,18 @@ import { useTheme } from '@/contexts/ThemeContext'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
+/**
+ * ProfilePdfButton Component
+ * 
+ * Design Notes:
+ * - Brand color (red #e60012) is used sparingly as accent only:
+ *   1. Left border of section headers
+ *   2. Top border of footer
+ *   3. Small line before summary title
+ * - Main colors are dark gray (#333333) for headers and neutral grays for content
+ * - This creates a professional, clean design with subtle brand presence
+ */
+
 // Set up worker for PDF.js
 import { pdfjs } from 'react-pdf';
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -25,6 +37,13 @@ export default function ProfilePdfButton({ shopName, contactNumber, inventory, b
         return groups
       }, {})
       
+      // Calculate summary statistics
+      const totalItems = inventory.length
+      const totalValue = inventory.reduce((sum, item) => sum + (item.quantity * item.price || 0), 0)
+      const outOfStock = inventory.filter(item => item.quantity === 0).length
+      const lowStock = inventory.filter(item => item.quantity <= 5 && item.quantity > 0).length
+      const inStock = inventory.filter(item => item.quantity > 5).length
+      
       // Create a new PDF document
       const doc = new jsPDF({
         orientation: 'portrait',
@@ -40,65 +59,121 @@ export default function ProfilePdfButton({ shopName, contactNumber, inventory, b
         creator: 'CallMiBro'
       })
       
-      // Add header
-      doc.setFillColor(230, 0, 18) // #e60012 red color
-      doc.rect(0, 0, 210, 40, 'F')
+      // Define consistent margins
+      const margin = 10
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const contentWidth = pageWidth - (margin * 2)
+      let yPos = 42
       
-      // Shop name
+      // MODERN HEADER
+      // Dark gray header bar instead of red
+      doc.setFillColor(51, 51, 51) // #333333 dark gray color
+      doc.rect(0, 0, pageWidth, 32, 'F') // increased height
+      
+      // Logo placeholder (left)
+      doc.setFillColor(255, 255, 255) // White circle for logo
+      doc.circle(margin + 8, 20, 7, 'F') // moved down
+      // Uncomment to add a real logo: doc.addImage(logoImg, 'PNG', margin, 14, 15, 15)
+      
+      // Shop name (right side of logo)
       doc.setTextColor(255, 255, 255)
-      doc.setFontSize(24)
-      doc.setFont('helvetica', 'bold')
-      doc.text(shopName, 105, 15, { align: 'center' })
-      
-      // CallMiBro text
-      doc.setFontSize(12)
-      doc.setFont('helvetica', 'normal')
-      doc.text('CallMiBro', 105, 22, { align: 'center' })
-      
-      // Contact info
-      doc.setFontSize(10)
-      doc.text(`Contact: ${contactNumber || 'Not available'}`, 105, 28, { align: 'center' })
-      doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, 105, 34, { align: 'center' })
-      
-      // Title
-      doc.setFillColor(248, 249, 250) // Light gray background
-      doc.rect(0, 40, 210, 15, 'F')
-      
-      doc.setTextColor(51, 51, 51) // #333333
       doc.setFontSize(16)
       doc.setFont('helvetica', 'bold')
-      doc.text('Available Inventory', 105, 48, { align: 'center' })
+      doc.text(shopName, margin + 20, 21) // moved down
       
-      doc.setFontSize(10)
+      // Contact info (right aligned)
+      doc.setFontSize(8)
       doc.setFont('helvetica', 'normal')
-      doc.text('Complete list of available items organized by brand', 105, 53, { align: 'center' })
+      doc.text(`Contact: ${contactNumber || 'Not available'}`, pageWidth - margin, 16, { align: 'right' })
+      doc.text(`Generated on: ${new Date().toLocaleDateString('en-IN')}`, pageWidth - margin, 21, { align: 'right' })
+      doc.text('CallMiBro', pageWidth - margin, 26, { align: 'right' })
       
-      // Starting Y position for content
-      let yPos = 60
+      // Title bar
+      doc.setFillColor(245, 245, 245) // Light gray background
+      doc.rect(0, 32, pageWidth, 12, 'F') // moved down
       
-      // For each brand group
+      doc.setTextColor(40, 40, 40) // Dark gray text
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text('INVENTORY REPORT', margin, 40) // moved down
+      
+      // SUMMARY SECTION
+      yPos = 48 // start content lower for proper gap
+      
+      // Summary title with red accent
+      doc.setDrawColor(230, 0, 18) // Red border accent
+      doc.setLineWidth(0.5)
+      doc.line(margin, yPos, margin + 5, yPos) // Small red line
+      doc.setTextColor(40, 40, 40)
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'bold')
+      doc.text('INVENTORY SUMMARY', margin + 8, yPos)
+      
+      yPos += 5
+      
+      // Summary cards grid - 5 boxes in a row
+      const cardWidth = contentWidth / 5
+      const cardHeight = 18
+      const startY = yPos
+      
+      // Create summary cards
+      const summaryItems = [
+        { label: 'Total Items', value: totalItems },
+        { label: 'In Stock', value: inStock },
+        { label: 'Low Stock', value: lowStock },
+        { label: 'Out of Stock', value: outOfStock },
+        // { label: 'Total Value', value: `INR ${totalValue.toLocaleString('en-IN')}` }
+      ]
+      
+      summaryItems.forEach((item, index) => {
+        const cardX = margin + (index * cardWidth)
+        
+        // Card background
+        doc.setFillColor(248, 248, 248) // Light gray
+        doc.rect(cardX, startY, cardWidth - 2, cardHeight, 'F')
+        
+        // Value (dark gray instead of red)
+        doc.setTextColor(51, 51, 51) // Dark gray
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'bold')
+        doc.text(String(item.value), cardX + (cardWidth - 2) / 2, startY + 8, { align: 'center' })
+        
+        // Label
+        doc.setTextColor(80, 80, 80) // Dark gray
+        doc.setFontSize(7)
+        doc.setFont('helvetica', 'normal')
+        doc.text(item.label, cardX + (cardWidth - 2) / 2, startY + 14, { align: 'center' })
+      })
+      
+      yPos += cardHeight + 5
+      
+      // BRAND SECTIONS
       Object.entries(brandGroups).forEach(([brand, items]) => {
         // Check if we need a new page
-        if (yPos > 250) {
+        if (yPos > doc.internal.pageSize.getHeight() - 30) {
           doc.addPage()
-          yPos = 20
+          yPos = margin
         }
         
-        // Brand header
-        doc.setFillColor(230, 0, 18) // #e60012
-        doc.rect(15, yPos, 180, 10, 'F')
+        // Brand header with left border
+        doc.setFillColor(245, 245, 245) // Light gray background
+        doc.rect(margin, yPos, contentWidth, 8, 'F')
         
-        doc.setTextColor(255, 255, 255)
-        doc.setFontSize(12)
+        // Red left border (keeping as brand accent)
+        doc.setFillColor(230, 0, 18)
+        doc.rect(margin, yPos, 3, 8, 'F')
+        
+        doc.setTextColor(40, 40, 40)
+        doc.setFontSize(9)
         doc.setFont('helvetica', 'bold')
-        doc.text(`${brand} (${items.length} items)`, 20, yPos + 6)
+        doc.text(`${brand} (${items.length} items)`, margin + 6, yPos + 5.5)
         
-        yPos += 12
+        yPos += 10
         
-        // Table headers
+        // Table headers (changed to dark gray instead of red)
         const headers = [['Item Name', 'SKU', 'Price', 'Qty']]
         
-        // Table data
+        // Table data with right-aligned numbers
         const data = items.map(item => {
           let stockStatus = ''
           if (item.quantity === 0) stockStatus = 'Out of Stock'
@@ -108,8 +183,8 @@ export default function ProfilePdfButton({ shopName, contactNumber, inventory, b
           return [
             item.name || 'N/A',
             item.sku || 'N/A',
-            `₹${item.price ? item.price.toLocaleString('en-IN') : '0'}`,
-            `${item.quantity || 0} (${stockStatus})`
+            { content: `INR ${item.price ? item.price.toLocaleString('en-IN') : '0'}`, styles: { halign: 'right' } },
+            { content: `${item.quantity || 0} (${stockStatus})`, styles: { halign: 'center' } }
           ]
         })
         
@@ -118,34 +193,75 @@ export default function ProfilePdfButton({ shopName, contactNumber, inventory, b
           startY: yPos,
           head: headers,
           body: data,
-          margin: { left: 15, right: 15 },
+          margin: { left: margin, right: margin },
           headStyles: {
-            fillColor: [248, 249, 250],
-            textColor: [51, 51, 51],
-            fontStyle: 'bold'
+            fillColor: [51, 51, 51], // Dark gray header instead of red
+            textColor: [255, 255, 255], // White text
+            fontStyle: 'bold',
+            cellPadding: 3
           },
           alternateRowStyles: {
-            fillColor: [248, 249, 250]
+            fillColor: [248, 248, 248] // Light gray
           },
           styles: {
-            fontSize: 10
+            fontSize: 8,
+            cellPadding: 2,
+            lineColor: [220, 220, 220], // Light border
+            lineWidth: 0.1
+          },
+          columnStyles: {
+            0: { cellWidth: contentWidth * 0.40 }, // 40% for name
+            1: { cellWidth: contentWidth * 0.20 }, // 20% for SKU
+            2: { cellWidth: contentWidth * 0.20, halign: 'right' }, // 20% for price, right-aligned
+            3: { cellWidth: contentWidth * 0.20, halign: 'center' } // 20% for quantity, centered
+          },
+          didDrawPage: function(data) {
+            // Re-add header on each page
+            doc.setFillColor(51, 51, 51) // Dark gray header
+            doc.rect(0, 0, pageWidth, 12, 'F')
+            doc.setTextColor(255, 255, 255)
+            doc.setFontSize(10)
+            doc.setFont('helvetica', 'bold')
+            doc.text(shopName, margin + 20, 8)
+            doc.setFontSize(7)
+            doc.text('Inventory Report', pageWidth - margin, 8, { align: 'right' })
+            
+            // Add page number
+            doc.setTextColor(100, 100, 100)
+            doc.setFontSize(7)
+            doc.setFont('helvetica', 'normal')
+            doc.text(`Page ${data.pageNumber}`, pageWidth - margin, doc.internal.pageSize.getHeight() - 5, { align: 'right' })
           }
         })
         
         // Update yPos for next section
-        yPos = doc.lastAutoTable.finalY + 10
+        yPos = doc.lastAutoTable.finalY + 6
       })
       
-      // Add footer on the last page
-      doc.setFillColor(52, 58, 64) // #343a40
-      doc.rect(15, doc.internal.pageSize.height - 20, 180, 15, 'F')
+      // MODERN FOOTER
+      const footerHeight = 15
+      const footerY = doc.internal.pageSize.getHeight() - footerHeight
       
+      // Footer bar (dark gray)
+      doc.setFillColor(51, 51, 51) // Dark gray
+      doc.rect(0, footerY, pageWidth, footerHeight, 'F')
+      
+      // Red accent line (keeping as brand accent)
+      doc.setFillColor(230, 0, 18) // Red
+      doc.rect(0, footerY, pageWidth, 2, 'F')
+      
+      // Left side - shop info
       doc.setTextColor(255, 255, 255)
-      doc.setFontSize(8)
+      doc.setFontSize(7)
       doc.setFont('helvetica', 'normal')
-      doc.text('CallMiBro - Professional Electronics Repair & Spare Parts', 105, doc.internal.pageSize.height - 15, { align: 'center' })
-      doc.text(`This inventory list was generated for ${shopName}`, 105, doc.internal.pageSize.height - 11, { align: 'center' })
-      doc.text(`For inquiries, please contact: ${contactNumber || 'Contact number not available'}`, 105, doc.internal.pageSize.height - 7, { align: 'center' })
+      doc.text('CallMiBro - Professional Electronics Repair', margin, footerY + 7)
+      doc.text(`Shop: ${shopName}`, margin, footerY + 12)
+      
+      // Right side - contact & thank you
+      doc.setFont('helvetica', 'bold')
+      doc.text('Thank you for your business!', pageWidth - margin, footerY + 7, { align: 'right' })
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Contact: ${contactNumber || 'Not available'}`, pageWidth - margin, footerY + 12, { align: 'right' })
       
       // Generate PDF as blob
       const pdfBlob = doc.output('blob')
