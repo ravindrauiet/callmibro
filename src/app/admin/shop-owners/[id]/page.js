@@ -193,7 +193,18 @@ export default function AdminShopOwnerDetailPage() {
                 <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Pincode</label>
                 <p className="text-sm" style={{ color: 'var(--text-main)' }}>{shopOwner.pincode}</p>
               </div>
-              {shopOwner.latitude && shopOwner.longitude && (
+              {shopOwner.location && (
+                <div>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Location (Map)</label>
+                  <p className="text-sm" style={{ color: 'var(--text-main)' }}>
+                    Latitude: {shopOwner.location.latitude}
+                  </p>
+                  <p className="text-sm" style={{ color: 'var(--text-main)' }}>
+                    Longitude: {shopOwner.location.longitude}
+                  </p>
+                </div>
+              )}
+              {shopOwner.latitude && shopOwner.longitude && !shopOwner.location && (
                 <div>
                   <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Coordinates</label>
                   <p className="text-sm" style={{ color: 'var(--text-main)' }}>

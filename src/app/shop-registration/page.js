@@ -9,6 +9,7 @@ import { collection, doc, setDoc, serverTimestamp, query, where, getDocs } from 
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { toast } from 'react-hot-toast'
+import Link from 'next/link'
 
 const shopCategories = [
   'Mobile Phone Repair',
@@ -42,6 +43,7 @@ export default function ShopRegistration() {
   const [inventoryItems, setInventoryItems] = useState([
     { name: '', category: '', quantity: '', price: '' }
   ])
+  const [agreedTerms, setAgreedTerms] = useState(false)
   
   // Check if user is already a shop owner and redirect if logged in
   useEffect(() => {
@@ -168,6 +170,11 @@ export default function ShopRegistration() {
     // Validate required fields
     if (!formData.shopName || !formData.shopAddress || !formData.shopPhone || !formData.shopCategory) {
       toast.error('Please fill in all required fields')
+      return
+    }
+    
+    if (!agreedTerms) {
+      toast.error('You must agree to the Terms & Conditions and Privacy Policy')
       return
     }
     
@@ -416,8 +423,8 @@ export default function ShopRegistration() {
                   </div>
                 </div>
                 
-                {/* Initial Inventory (Optional) */}
-                <div className="space-y-4">
+                {/* Initial Inventory (Optional) - COMMENTED OUT */}
+                {/* <div className="space-y-4">
                   <div className="flex justify-between items-center border-b pb-2" style={{ borderColor: 'var(--border-color)' }}>
                     <h2 className="text-lg font-semibold" style={{ color: 'var(--text-main)' }}>Initial Inventory (Optional)</h2>
                     <button
@@ -518,6 +525,23 @@ export default function ShopRegistration() {
                       </div>
                     </div>
                   ))}
+                </div> */}
+                
+                {/* Terms and Conditions & Privacy Policy Checkboxes */}
+                <div className="space-y-2 pt-4">
+                  <label className="flex items-center text-sm" style={{ color: 'var(--text-main)' }}>
+                    <input
+                      type="checkbox"
+                      checked={agreedTerms}
+                      onChange={e => setAgreedTerms(e.target.checked)}
+                      className="mr-2"
+                      required
+                    />
+                    I agree to the
+                    <Link href="/terms" target="_blank" className="mx-1 underline text-blue-600 hover:text-blue-800">Terms & Conditions</Link>
+                    and
+                    <Link href="/privacy" target="_blank" className="mx-1 underline text-blue-600 hover:text-blue-800">Privacy Policy</Link>
+                  </label>
                 </div>
                 
                 {/* Submit Button */}
