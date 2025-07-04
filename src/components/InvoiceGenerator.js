@@ -174,6 +174,14 @@ export default function InvoiceGenerator({ shopName, contactNumber, inventory, b
 
   // Generate PDF invoice
   const generateInvoicePDF = async () => {
+    // Add currency formatter at the top of the function
+    const formatCurrency = (amount) => {
+      return 'INR ' + Number(amount).toLocaleString('en-IN', {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2
+      });
+    };
+
     if (selectedItems.length === 0) {
       alert('Please select at least one item for the invoice.')
       return
@@ -211,122 +219,73 @@ export default function InvoiceGenerator({ shopName, contactNumber, inventory, b
       
       let currentY = margin // Track current Y position dynamically
 
-      // Professional header with accent
-      doc.setFillColor(40, 40, 40)
-      doc.rect(0, 0, pageWidth, 35, 'F')
-      
-      // Accent line
-      doc.setFillColor(230, 0, 18)
-      doc.rect(0, 0, pageWidth, 3, 'F')
+      // 1. Modern colored header with logo and invoice info
+      // Header bar
+      const headerHeight = 28;
+      doc.setFillColor(230, 0, 18); // Red
+      // Top bar
+      doc.rect(0, 0, pageWidth, headerHeight, 'F');
+      // Logo placeholder (left)
+      doc.setFillColor(255,255,255);
+      doc.circle(margin + 10, headerHeight/2, 7, 'F'); // Placeholder for logo
+      // doc.addImage(logoImg, 'PNG', margin, 6, 20, 20); // Uncomment to use real logo
+      // Shop name
+      doc.setTextColor(255,255,255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text(shopName, margin + 22, headerHeight/2 + 2);
+      // Invoice info box (right)
+      doc.setFillColor(40,40,40);
+      doc.roundedRect(pageWidth - margin - 60, 7, 60, 18, 4, 4, 'F');
+      doc.setTextColor(255,255,255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text(`Invoice #`, pageWidth - margin - 55, 15);
+      doc.setFont('helvetica', 'normal');
+      doc.text(invoiceDetails.invoiceNumber, pageWidth - margin - 55, 21);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Date', pageWidth - margin - 10, 15, {align:'right'});
+      doc.setFont('helvetica', 'normal');
+      doc.text(new Date().toLocaleDateString('en-IN'), pageWidth - margin - 10, 21, {align:'right'});
 
-      // Shop name and branding
-      doc.setTextColor(255, 255, 255)
-      doc.setFontSize(20)
-      doc.setFont('helvetica', 'bold')
-      doc.text(shopName, margin, 15)
+      currentY = headerHeight + 6;
 
-      // Contact info
-      doc.setFontSize(9)
-      doc.setFont('helvetica', 'normal')
-      doc.text(`Phone: ${contactNumber || 'N/A'}`, margin, 22)
-      doc.text(`Email: support@callmibro.com`, margin, 28)
+      // 2. Bill To and Invoice Details side by side, with icons
+      const sectionHeight = 28;
+      doc.setFillColor(245,245,245);
+      doc.roundedRect(margin, currentY, contentWidth, sectionHeight, 4, 4, 'F');
+      // Bill To (left)
+      doc.setTextColor(40,40,40);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('Bill To:', margin + 6, currentY + 8);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      let y = currentY + 14;
+      doc.text(`Name: ${clientInfo.name}`, margin + 6, y);
+      y += 6;
+      doc.text(`Phone: ${clientInfo.phone}`, margin + 6, y);
+      y += 6;
+      if (clientInfo.email) { doc.text(`Email: ${clientInfo.email}`, margin + 6, y); y += 6; }
+      if (clientInfo.address) { doc.text(`Address: ${clientInfo.address}`, margin + 6, y); }
+      // Invoice details (right)
+      let xRight = margin + contentWidth/2 + 8;
+      doc.setFont('helvetica', 'bold');
+      doc.text('Order #:', xRight, currentY + 8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(invoiceDetails.orderNumber, xRight + 28, currentY + 8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Delivery:', xRight, currentY + 16);
+      doc.setFont('helvetica', 'normal');
+      doc.text(invoiceDetails.deliveryDate || 'N/A', xRight + 28, currentY + 16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Terms:', xRight, currentY + 24);
+      doc.setFont('helvetica', 'normal');
+      doc.text(invoiceDetails.paymentTerms, xRight + 28, currentY + 24);
 
-      // Invoice details
-      doc.setFontSize(18)
-      doc.setFont('helvetica', 'bold')
-      doc.text('INVOICE', pageWidth - margin, 15, { align: 'right' })
+      currentY += sectionHeight + 8;
 
-      doc.setFontSize(9)
-      doc.setFont('helvetica', 'normal')
-      doc.text(`Invoice #: ${invoiceDetails.invoiceNumber}`, pageWidth - margin, 22, { align: 'right' })
-      doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, pageWidth - margin, 28, { align: 'right' })
-
-      currentY = 45 // Start client section after header
-
-      // Client information section with better layout
-      doc.setFillColor(248, 248, 248)
-      doc.rect(margin, currentY, contentWidth, 40, 'F')
-      doc.setDrawColor(200, 200, 200)
-      doc.setLineWidth(0.5)
-      doc.rect(margin, currentY, contentWidth, 40, 'S')
-
-      doc.setTextColor(51, 51, 51)
-      doc.setFontSize(12)
-      doc.setFont('helvetica', 'bold')
-      doc.text('Bill To:', margin + 5, currentY + 8)
-
-      doc.setFontSize(10)
-      doc.setFont('helvetica', 'normal')
-      
-      // Bill To details with better spacing
-      let billY = currentY + 16
-      let billX = margin + 5
-      
-      if (clientInfo.companyName) {
-        doc.text(clientInfo.companyName, billX, billY)
-        billY += 6
-      }
-      
-      doc.text(clientInfo.name, billX, billY)
-      billY += 6
-      
-      doc.text(clientInfo.phone, billX, billY)
-      billY += 6
-      
-      if (clientInfo.email) {
-        doc.text(clientInfo.email, billX, billY)
-        billY += 6
-      }
-      
-      if (clientInfo.address) {
-        // Handle multi-line address
-        const addressLines = doc.splitTextToSize(clientInfo.address, contentWidth - 15)
-        doc.text(addressLines, billX, billY)
-        billY += 6 * (addressLines.length || 1)
-      }
-      
-      if (clientInfo.gstNumber) {
-        doc.text(`GST: ${clientInfo.gstNumber}`, billX, billY)
-      }
-
-      currentY += 45 // Move position after client section
-
-      // Order information
-      doc.setFillColor(240, 240, 240)
-      doc.rect(margin, currentY, contentWidth, 25, 'F')
-      doc.setDrawColor(200, 200, 200)
-      doc.setLineWidth(0.5)
-      doc.rect(margin, currentY, contentWidth, 25, 'S')
-      
-      doc.setTextColor(51, 51, 51)
-      doc.setFontSize(10)
-      doc.setFont('helvetica', 'bold')
-      doc.text('Order Number:', margin + 10, currentY + 10)
-      doc.text('Order Date:', margin + 10, currentY + 20)
-      
-      doc.setFont('helvetica', 'normal')
-      doc.text(invoiceDetails.orderNumber, margin + 55, currentY + 10)
-      doc.text(new Date().toLocaleDateString('en-IN'), margin + 55, currentY + 20)
-      
-      doc.setFont('helvetica', 'bold')
-      doc.text('Delivery Date:', margin + contentWidth/2, currentY + 10)
-      doc.text('Payment Terms:', margin + contentWidth/2, currentY + 20)
-      
-      doc.setFont('helvetica', 'normal')
-      doc.text(invoiceDetails.deliveryDate || 'N/A', pageWidth - margin - 15, currentY + 10, { align: 'right' })
-      doc.text(invoiceDetails.paymentTerms || 'N/A', pageWidth - margin - 15, currentY + 20, { align: 'right' })
-
-      currentY += 30 // Move position after order info section
-
-      // Format currency for display - use 'INR' instead of '₹' for compatibility
-      const formatCurrency = (amount) => {
-        return 'INR ' + amount.toLocaleString('en-IN', {
-          maximumFractionDigits: 2,
-          minimumFractionDigits: 2
-        });
-      };
-
-      // Items table with enhanced styling and automatic pagination
+      // 3. Table with alternating row colors, bold colored header, border
       const headers = [['Item', 'Description', 'Qty', 'Unit Price', 'Total']];
       
       // Fix the undefined description issue
@@ -351,58 +310,64 @@ export default function InvoiceGenerator({ shopName, contactNumber, inventory, b
         startY: currentY,
         margin: { left: margin, right: margin },
         headStyles: {
-          fillColor: [40, 40, 40],
+          fillColor: [230, 0, 18], // Red
           textColor: [255, 255, 255],
           fontStyle: 'bold',
           fontSize: 10,
-          cellPadding: 3
+          cellPadding: 3,
+          halign: 'center',
+          valign: 'middle',
+          lineWidth: 0.5,
+          lineColor: [40,40,40]
         },
         alternateRowStyles: {
-          fillColor: [248, 248, 248]
+          fillColor: [245, 245, 245]
         },
         styles: {
-          fontSize: 8,
+          fontSize: 9,
           cellPadding: 3,
           lineColor: [200, 200, 200],
           lineWidth: 0.15,
           overflow: 'linebreak',
-          valign: 'middle'
+          valign: 'middle',
+          halign: 'left'
         },
         columnStyles: {
-          0: { cellWidth: contentWidth * 0.24 }, // 24% width for item name
-          1: { cellWidth: contentWidth * 0.33 }, // 33% width for description
-          2: { cellWidth: contentWidth * 0.10, halign: 'center' }, // 10% for quantity
-          3: { cellWidth: contentWidth * 0.15, halign: 'right' }, // 15% for unit price
-          4: { cellWidth: contentWidth * 0.18, halign: 'right' }  // 18% for total
+          0: { cellWidth: contentWidth * 0.24 },
+          1: { cellWidth: contentWidth * 0.33 },
+          2: { cellWidth: contentWidth * 0.10, halign: 'center' },
+          3: { cellWidth: contentWidth * 0.15, halign: 'right' },
+          4: { cellWidth: contentWidth * 0.18, halign: 'right' }
         },
-        // Enable automatic page break
         bodyStyles: { minCellHeight: 7 },
         didDrawPage: function (data) {
-          // Re-add header on new pages
-          doc.setFillColor(40, 40, 40)
-          doc.rect(0, 0, pageWidth, 16, 'F')
-          
-          doc.setFillColor(230, 0, 18)
-          doc.rect(0, 0, pageWidth, 2, 'F')
-          
-          // Shop name on header
-          doc.setTextColor(255, 255, 255)
-          doc.setFontSize(11)
-          doc.setFont('helvetica', 'bold')
-          doc.text(shopName, margin, 10)
-          
-          // Invoice number on header
-          doc.setFontSize(8)
-          doc.setFont('helvetica', 'normal')
-          doc.text(`Invoice: ${invoiceDetails.invoiceNumber}`, pageWidth - margin, 10, { align: 'right' })
-          
-          // Add page number at the bottom
+          // Header bar (repeat)
+          doc.setFillColor(230, 0, 18);
+          doc.rect(0, 0, pageWidth, headerHeight, 'F');
+          doc.setFillColor(255,255,255);
+          doc.circle(margin + 10, headerHeight/2, 7, 'F');
+          doc.setTextColor(255,255,255);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(16);
+          doc.text(shopName, margin + 22, headerHeight/2 + 2);
+          doc.setFillColor(40,40,40);
+          doc.roundedRect(pageWidth - margin - 60, 7, 60, 18, 4, 4, 'F');
+          doc.setTextColor(255,255,255);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(10);
+          doc.text(`Invoice #`, pageWidth - margin - 55, 15);
+          doc.setFont('helvetica', 'normal');
+          doc.text(invoiceDetails.invoiceNumber, pageWidth - margin - 55, 21);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Date', pageWidth - margin - 10, 15, {align:'right'});
+          doc.setFont('helvetica', 'normal');
+          doc.text(new Date().toLocaleDateString('en-IN'), pageWidth - margin - 10, 21, {align:'right'});
+          // Page number
           const pageNumber = `Page ${doc.internal.getNumberOfPages()}`;
-          doc.setTextColor(100, 100, 100)
-          doc.setFontSize(7)
-          doc.text(pageNumber, pageWidth - margin, pageHeight - 6, { align: 'right' })
-
-          // --- Footer: Terms & Conditions and shop info ---
+          doc.setTextColor(100, 100, 100);
+          doc.setFontSize(7);
+          doc.text(pageNumber, pageWidth - margin, pageHeight - 6, { align: 'right' });
+          // Footer: colored bar, white text, terms, shop info, thank you
           const footerY = pageHeight - 28;
           doc.setFillColor(40, 40, 40);
           doc.rect(0, footerY, pageWidth, 28, 'F');
@@ -429,6 +394,7 @@ export default function InvoiceGenerator({ shopName, contactNumber, inventory, b
           doc.text(`Phone: ${contactNumber || 'N/A'}`, pageWidth - margin, footerY + 16, { align: 'right' });
           doc.text('Email: support@callmibro.com', pageWidth - margin, footerY + 20, { align: 'right' });
           doc.text('Web: www.callmibro.com', pageWidth - margin, footerY + 24, { align: 'right' });
+          // Placeholder: QR code can be added here in the future
         }
       }
 
@@ -450,58 +416,35 @@ export default function InvoiceGenerator({ shopName, contactNumber, inventory, b
         currentY = finalY; // Continue from table end
       }
 
-      // Totals section with premium design
-      const totalsWidth = 95;
-      const totalsStartX = pageWidth - margin - totalsWidth;
-      
-      // Totals box with premium styling
-      doc.setFillColor(248, 248, 248);
-      doc.rect(totalsStartX, currentY, totalsWidth, 95, 'F');
-      
-      // Border
-      doc.setDrawColor(180, 180, 180);
-      doc.setLineWidth(0.7);
-      doc.rect(totalsStartX, currentY, totalsWidth, 95, 'S');
-      
+      // Totals section with compact two-column layout and border
+      const totalsBoxWidth = 70;
+      const totalsBoxHeight = 27; // fits 4 lines
+      const totalsStartX = pageWidth - margin - totalsBoxWidth;
+      let totalsY = currentY + 5;
+      // Draw box
+      // Light gray fill, thin border
+      const boxY = totalsY - 5;
+      doc.setFillColor(245,245,245);
+      doc.setDrawColor(180,180,180);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(totalsStartX - 5, boxY, totalsBoxWidth + 10, totalsBoxHeight, 3, 3, 'FD');
       doc.setTextColor(51, 51, 51);
-      doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-
-      let totalsY = currentY + 12;
-      doc.text('Subtotal:', totalsStartX + 10, totalsY);
-      doc.text(formatCurrency(calculateSubtotal()), pageWidth - margin - 10, totalsY, { align: 'right' });
-
-      if (calculateDiscount() > 0) {
-        totalsY += 10;
-        doc.text(`Discount (${invoiceDetails.discountType === 'percentage' ? invoiceDetails.discount + '%' : 'INR ' + invoiceDetails.discount}):`, totalsStartX + 10, totalsY);
-        doc.text(`-${formatCurrency(calculateDiscount())}`, pageWidth - margin - 10, totalsY, { align: 'right' });
-      }
-
-      if (invoiceDetails.serviceCharges > 0) {
-        totalsY += 10;
-        doc.text('Service Charges:', totalsStartX + 10, totalsY);
-        doc.text(formatCurrency(invoiceDetails.serviceCharges), pageWidth - margin - 10, totalsY, { align: 'right' });
-      }
-
-      totalsY += 10;
-      doc.text('GST (18%):', totalsStartX + 10, totalsY);
-      doc.text(formatCurrency(calculateTax()), pageWidth - margin - 10, totalsY, { align: 'right' });
-
-      // Total with emphasis - add more visual distinction
-      totalsY += 18;
-      doc.setDrawColor(100, 100, 100);
-      doc.setLineWidth(0.7);
-      doc.line(totalsStartX + 10, totalsY - 10, pageWidth - margin - 10, totalsY - 10);
-      
+      doc.setFontSize(8);
+      doc.text('Subtotal:', totalsStartX, totalsY);
+      doc.text(formatCurrency(calculateSubtotal()), pageWidth - margin, totalsY, { align: 'right' });
+      totalsY += 5;
+      doc.text('GST (18%):', totalsStartX, totalsY);
+      doc.text(formatCurrency(calculateTax()), pageWidth - margin, totalsY, { align: 'right' });
+      totalsY += 5;
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      doc.text('Total:', totalsStartX + 10, totalsY);
-      
-      // Make total amount more prominent
-      doc.setFontSize(13);
-      doc.setTextColor(230, 0, 18); // Red color for total amount
-      doc.text(formatCurrency(calculateTotal()), pageWidth - margin - 10, totalsY, { align: 'right' });
-      doc.setTextColor(51, 51, 51); // Reset text color
+      doc.setFontSize(10);
+      doc.text('Total:', totalsStartX, totalsY);
+      doc.text(formatCurrency(calculateTotal()), pageWidth - margin, totalsY, { align: 'right' });
+      totalsY += 7;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text(`Payment: ${invoiceDetails.paymentMethod} | Status: ${invoiceDetails.paymentStatus}`, totalsStartX, totalsY);
 
       // Payment information
       if (invoiceDetails.paymentStatus === 'Partial' || invoiceDetails.paymentStatus === 'Advance') {
@@ -518,38 +461,6 @@ export default function InvoiceGenerator({ shopName, contactNumber, inventory, b
         doc.text(formatCurrency(calculateRemainingAmount()), pageWidth - margin - 10, totalsY, { align: 'right' });
         doc.setTextColor(51, 51, 51); // Reset text color
       }
-
-      // Payment method and status
-      totalsY += 20;
-      
-      // Add a little style to payment info
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.3);
-      doc.line(totalsStartX + 10, totalsY - 5, pageWidth - margin - 10, totalsY - 5);
-      
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.text(`Payment Method: ${invoiceDetails.paymentMethod}`, totalsStartX + 10, totalsY);
-      
-      totalsY += 8;
-      // Style the payment status differently based on status
-      doc.text(`Status:`, totalsStartX + 10, totalsY);
-      
-      // Highlight payment status
-      const statusColors = {
-        'Paid': [0, 128, 0], // Green
-        'Partial': [255, 140, 0], // Orange
-        'Pending': [255, 0, 0], // Red
-        'Advance': [0, 0, 255], // Blue
-        'default': [51, 51, 51] // Default gray
-      };
-      
-      const statusColor = statusColors[invoiceDetails.paymentStatus] || statusColors.default;
-      doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
-      doc.setFont('helvetica', 'bold');
-      doc.text(` ${invoiceDetails.paymentStatus}`, totalsStartX + 25, totalsY);
-      doc.setTextColor(51, 51, 51); // Reset text color
-      doc.setFont('helvetica', 'normal');
 
       // Add notes section if provided
       if (invoiceDetails.notes) {
