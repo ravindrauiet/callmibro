@@ -58,9 +58,6 @@ export default function ShopInventoryPage({ params }) {
   const [selectedItems, setSelectedItems] = useState([])
   const [showBulkActions, setShowBulkActions] = useState(false)
   
-  // Mobile filters
-  const [showMobileFilters, setShowMobileFilters] = useState(false)
-  
   // Analytics states
   const [analytics, setAnalytics] = useState({
     totalItems: 0,
@@ -151,7 +148,6 @@ export default function ShopInventoryPage({ params }) {
         (item.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.brand || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.model || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.category || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.sku || '').toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
@@ -875,14 +871,12 @@ export default function ShopInventoryPage({ params }) {
                 shopName={shopData?.shopName || 'Shop'}
                 contactNumber={shopData?.contactNumber}
                 inventory={filteredInventory}
-                selectedItems={selectedItems}
               />
               <InvoiceGenerator
                 shopName={shopData?.shopName || 'Shop'}
                 contactNumber={shopData?.contactNumber}
                 inventory={filteredInventory}
-                buttonText={selectedItems.length > 0 ? `Generate Invoice (${selectedItems.length} selected)` : "Generate Invoice"}
-                externalSelectedItems={selectedItems}
+                buttonText="Generate Invoice"
               />
               <button
                 onClick={openAddModal}
@@ -897,59 +891,59 @@ export default function ShopInventoryPage({ params }) {
           </div>
 
           {/* Analytics Dashboard */}
-          <div className="mb-4">
+          <div className="mb-8">
             {/* Mobile: Horizontal scrollable cards */}
             <div className="md:hidden overflow-x-auto pb-4">
               <div className="flex space-x-4 min-w-max">
-                <div className="p-2.5 rounded-lg shadow-md min-w-[140px]" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
+                <div className="p-4 rounded-lg shadow-md min-w-[180px]" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
                   <div className="flex items-center">
-                    <div className="p-1 rounded-full bg-blue-100 dark:bg-blue-900">
+                    <div className="p-1.5 rounded-full bg-blue-100 dark:bg-blue-900">
                       <svg className="h-4 w-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
                     </div>
-                    <div className="ml-2.5">
+                    <div className="ml-3">
                       <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Total Items</p>
-                      <p className="text-base font-bold" style={{ color: 'var(--text-main)' }}>{analytics.totalItems}</p>
+                      <p className="text-lg font-bold" style={{ color: 'var(--text-main)' }}>{analytics.totalItems}</p>
                     </div>
                   </div>
                 </div>
-                <div className="p-2.5 rounded-lg shadow-md min-w-[140px]" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
+                <div className="p-4 rounded-lg shadow-md min-w-[180px]" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
                   <div className="flex items-center">
-                    <div className="p-1 rounded-full bg-green-100 dark:bg-green-900">
+                    <div className="p-1.5 rounded-full bg-green-100 dark:bg-green-900">
                       <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402 2.599-1" />
                       </svg>
                     </div>
-                    <div className="ml-2.5">
+                    <div className="ml-3">
                       <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Total Value</p>
-                      <p className="text-base font-bold" style={{ color: 'var(--text-main)' }}>₹{analytics.totalValue.toLocaleString()}</p>
+                      <p className="text-lg font-bold" style={{ color: 'var(--text-main)' }}>₹{analytics.totalValue.toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
-                <div className="p-2.5 rounded-lg shadow-md min-w-[140px]" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
+                <div className="p-4 rounded-lg shadow-md min-w-[180px]" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
                   <div className="flex items-center">
-                    <div className="p-1 rounded-full bg-yellow-100 dark:bg-yellow-900">
+                    <div className="p-1.5 rounded-full bg-yellow-100 dark:bg-yellow-900">
                       <svg className="h-4 w-4 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                       </svg>
                     </div>
-                    <div className="ml-2.5">
+                    <div className="ml-3">
                       <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Low Stock</p>
-                      <p className="text-base font-bold" style={{ color: 'var(--text-main)' }}>{analytics.lowStockItems}</p>
+                      <p className="text-lg font-bold" style={{ color: 'var(--text-main)' }}>{analytics.lowStockItems}</p>
                     </div>
                   </div>
                 </div>
-                <div className="p-2.5 rounded-lg shadow-md min-w-[140px]" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
+                <div className="p-4 rounded-lg shadow-md min-w-[180px]" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
                   <div className="flex items-center">
-                    <div className="p-1 rounded-full bg-red-100 dark:bg-red-900">
+                    <div className="p-1.5 rounded-full bg-red-100 dark:bg-red-900">
                       <svg className="h-4 w-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </div>
-                    <div className="ml-2.5">
+                    <div className="ml-3">
                       <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Out of Stock</p>
-                      <p className="text-base font-bold" style={{ color: 'var(--text-main)' }}>{analytics.outOfStockItems}</p>
+                      <p className="text-lg font-bold" style={{ color: 'var(--text-main)' }}>{analytics.outOfStockItems}</p>
                     </div>
                   </div>
                 </div>
@@ -1014,127 +1008,7 @@ export default function ShopInventoryPage({ params }) {
 
           {/* Search and Filter Controls */}
           <div className="mb-6 p-4 rounded-lg shadow-md" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
-            {/* Mobile: Simplified search and filter button */}
-            <div className="md:hidden space-y-3">
-              {/* Search Bar */}
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Search Items</label>
-                <input
-                  type="text"
-                  placeholder="Search by name, brand, model..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
-                  style={{ 
-                    backgroundColor: isDarkMode ? '#374151' : '#ffffff',
-                    color: 'var(--text-main)',
-                    borderColor: 'var(--border-color)'
-                  }}
-                />
-              </div>
-              
-              {/* Filter Button */}
-              <button
-                onClick={() => setShowMobileFilters(!showMobileFilters)}
-                className="w-full flex items-center justify-center px-4 py-2 border rounded-md transition-colors"
-                style={{ 
-                  borderColor: 'var(--border-color)',
-                  color: 'var(--text-main)',
-                  backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)',
-                  ':hover': {
-                    backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)'
-                  }
-                }}
-              >
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                Filters & Sort
-                <span className="ml-2 text-xs px-2 py-1 rounded-full" style={{ 
-                  backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)',
-                  color: 'var(--text-main)'
-                }}>
-                  {[categoryFilter, stockFilter, sortBy].filter(Boolean).length}
-                </span>
-              </button>
-              
-              {/* Mobile Filter Panel */}
-              {showMobileFilters && (
-                <div className="space-y-3 p-3 border rounded-md" style={{ 
-                  borderColor: 'var(--border-color)',
-                  backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)'
-                }}>
-                  {/* Category Filter */}
-                  <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Category</label>
-                    <select
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-[#e60012]"
-                      style={{ 
-                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
-                        color: 'var(--text-main)',
-                        borderColor: 'var(--border-color)'
-                      }}
-                    >
-                      <option value="">All Categories</option>
-                      {Object.keys(analytics.categories).map(category => (
-                        <option key={category} value={category}>{category}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Stock Filter */}
-                  <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Stock Status</label>
-                    <select
-                      value={stockFilter}
-                      onChange={(e) => setStockFilter(e.target.value)}
-                      className="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-[#e60012]"
-                      style={{ 
-                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
-                        color: 'var(--text-main)',
-                        borderColor: 'var(--border-color)'
-                      }}
-                    >
-                      <option value="">All Items</option>
-                      <option value="low">Low Stock</option>
-                      <option value="out">Out of Stock</option>
-                      <option value="in">In Stock</option>
-                    </select>
-                  </div>
-
-                  {/* Sort */}
-                  <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Sort By</label>
-                    <select
-                      value={`${sortBy}-${sortOrder}`}
-                      onChange={(e) => {
-                        const [field, order] = e.target.value.split('-')
-                        setSortBy(field)
-                        setSortOrder(order)
-                      }}
-                      className="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-[#e60012]"
-                      style={{ 
-                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
-                        color: 'var(--text-main)',
-                        borderColor: 'var(--border-color)'
-                      }}
-                    >
-                      <option value="name-asc">Name (A-Z)</option>
-                      <option value="name-desc">Name (Z-A)</option>
-                      <option value="price-asc">Price (Low-High)</option>
-                      <option value="price-desc">Price (High-Low)</option>
-                      <option value="quantity-asc">Quantity (Low-High)</option>
-                      <option value="quantity-desc">Quantity (High-Low)</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Desktop: Full filter controls */}
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Search */}
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Search</label>
@@ -1223,50 +1097,20 @@ export default function ShopInventoryPage({ params }) {
           {/* Bulk Actions */}
           {showBulkActions && (
             <div className="mb-4 p-4 rounded-lg shadow-md bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center justify-between">
                 <span className="text-sm font-medium" style={{ color: 'var(--text-main)' }}>
                   {selectedItems.length} items selected
                 </span>
-                <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
+                <div className="flex space-x-2">
                   <button
-                    onClick={() => {
-                      // Create URL with selected items
-                      const selectedInventory = filteredInventory.filter(item => selectedItems.includes(item.id))
-                      
-                      // Create WhatsApp message with selected items
-                      const inventoryList = selectedInventory.map(item => 
-                        `• ${item.name} (${item.brand}) - ₹${item.price} - ${item.quantity} available`
-                      ).join('\n')
-                      
-                      // Create URL with selected items
-                      const selectedIds = selectedItems.join(',')
-                      const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/shop-inventory/${shopId}/share?items=${selectedIds}` : ''
-                      
-                      const message = `${shopData?.shopName || 'Shop'} - Selected Inventory:\n\n${inventoryList}${shopData?.contactNumber ? `\n\nContact: ${shopData.contactNumber}` : ''}\n\nView online: ${shareUrl}`
-                      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
-                      
-                      // Open WhatsApp with selected items and URL
-                      window.open(whatsappUrl, '_blank')
-                    }}
-                    className="w-full sm:w-auto px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200 flex items-center justify-center"
+                    onClick={() => {/* Implement bulk edit */}}
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                    </svg>
-                    Share
+                    Bulk Edit
                   </button>
                   <button
-                    onClick={() => {
-                      if (confirm(`Are you sure you want to delete ${selectedItems.length} items? This action cannot be undone.`)) {
-                        // Bulk delete functionality
-                        selectedItems.forEach(itemId => {
-                          handleDeleteItem(itemId)
-                        })
-                        setSelectedItems([])
-                        setShowBulkActions(false)
-                      }
-                    }}
-                    className="w-full sm:w-auto px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors duration-200"
+                    onClick={() => {/* Implement bulk delete */}}
+                    className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
                   >
                     Bulk Delete
                   </button>
@@ -1275,7 +1119,7 @@ export default function ShopInventoryPage({ params }) {
                       setSelectedItems([])
                       setShowBulkActions(false)
                     }}
-                    className="w-full sm:w-auto px-3 py-2 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors duration-200"
+                    className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
                   >
                     Cancel
                   </button>
@@ -1337,26 +1181,17 @@ export default function ShopInventoryPage({ params }) {
                     {filteredInventory.map((item) => (
                       <tr 
                         key={item.id} 
-                        className={`transition-colors duration-200 ${selectedItems.includes(item.id) ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}`}
+                        className="transition-colors duration-200"
                         style={{ 
                           borderColor: 'var(--border-color)',
                           '--hover-bg-light': 'var(--panel-gray)',
-                          '--hover-bg-dark': 'var(--panel-charcoal)',
-                          backgroundColor: selectedItems.includes(item.id) 
-                            ? isDarkMode ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)'
-                            : isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)'
+                          '--hover-bg-dark': 'var(--panel-charcoal)'
                         }}
                         onMouseEnter={(e) => {
-                          if (!selectedItems.includes(item.id)) {
-                            e.currentTarget.style.backgroundColor = isDarkMode ? 'var(--hover-bg-dark)' : 'var(--hover-bg-light)'
-                          }
+                          e.currentTarget.style.backgroundColor = isDarkMode ? 'var(--hover-bg-dark)' : 'var(--hover-bg-light)'
                         }}
                         onMouseLeave={(e) => {
-                          if (!selectedItems.includes(item.id)) {
-                            e.currentTarget.style.backgroundColor = isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)'
-                          } else {
-                            e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)'
-                          }
+                          e.currentTarget.style.backgroundColor = isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)'
                         }}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1550,11 +1385,8 @@ export default function ShopInventoryPage({ params }) {
                 {/* SKU */}
                 <div>
                   <label htmlFor="sku" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                    Product Code / SKU
+                    SKU (Stock Keeping Unit)
                   </label>
-                  <div className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
-                    Unique identifier for your product (e.g., IPHONE13-BAT-001 for iPhone 13 Battery)
-                  </div>
                   <input
                     type="text"
                     id="sku"
@@ -1567,7 +1399,7 @@ export default function ShopInventoryPage({ params }) {
                       color: 'var(--text-main)',
                       borderColor: 'var(--border-color)'
                     }}
-                    placeholder="e.g., IPHONE13-BAT-001, LAPTOP-DELL-001"
+                    placeholder="e.g., IPHONE13-BAT-001"
                   />
                 </div>
                 
@@ -1864,7 +1696,7 @@ export default function ShopInventoryPage({ params }) {
                 
                 <div>
                   <label htmlFor="costPrice" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                    Cost Price (₹)
+                    Cost Price (₹)*
                   </label>
                   <input
                     type="number"
@@ -1872,6 +1704,7 @@ export default function ShopInventoryPage({ params }) {
                     name="costPrice"
                     value={formData.costPrice}
                     onChange={handleChange}
+                    required
                     min="0"
                     step="0.01"
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
@@ -1880,7 +1713,6 @@ export default function ShopInventoryPage({ params }) {
                       color: 'var(--text-main)',
                       borderColor: 'var(--border-color)'
                     }}
-                    placeholder="Optional"
                   />
                 </div>
 
@@ -1953,11 +1785,8 @@ export default function ShopInventoryPage({ params }) {
                   
                   <div>
                     <label htmlFor="location" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Where is this item stored?
+                      Storage Location
                     </label>
-                    <div className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
-                      Physical location in your shop (e.g., Shelf A1, Drawer 3, Back Room)
-                    </div>
                     <input
                       type="text"
                       id="location"
@@ -1970,7 +1799,7 @@ export default function ShopInventoryPage({ params }) {
                         color: 'var(--text-main)',
                         borderColor: 'var(--border-color)'
                       }}
-                      placeholder="e.g., Shelf A1, Drawer 3, Back Room"
+                      placeholder="e.g., Shelf A1, Drawer 3"
                     />
                   </div>
                 </div>

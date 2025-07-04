@@ -42,9 +42,9 @@ export default function Footer() {
   
   const support = [
     { name: "My Account", url: "/profile" },
-    { name: "Track Service", url: "/orders" },
-    { name: "Payment Support", url: "/payment" },
-    { name: "Privacy Policy", url: "/privacy-policy" }
+    { name: "Shop", url: "/shops" },
+    { name: "Terms & Conditions", url: "/terms" },
+    { name: "Privacy Policy", url: "/privacy" }
   ]
   
   return (

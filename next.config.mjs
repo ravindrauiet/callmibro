@@ -59,6 +59,12 @@ const nextConfig = withPWA(pwaConfig)({
         hostname: '*.amazonaws.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'randomuser.me',
+        port: '',
+        pathname: '/**',
       }
     ],
     domains: [
@@ -68,7 +74,8 @@ const nextConfig = withPWA(pwaConfig)({
       'lh3.googleusercontent.com',
       'graph.facebook.com',
       'platform-lookaside.fbsbx.com',
-      'www.shutterstock.com'
+      'www.shutterstock.com',
+      'randomuser.me'
     ]
   },
   eslint: {
