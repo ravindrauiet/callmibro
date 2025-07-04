@@ -74,7 +74,7 @@ export default function ShareDropdown({ shopId, shopName, contactNumber, invento
         <div 
           className="absolute right-0 mt-2 w-64 rounded-md shadow-lg z-50"
           style={{ 
-            backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)',
+            backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-dark)',
             border: `1px solid ${isDarkMode ? 'var(--border-color)' : 'var(--border-color)'}`
           }}
         >
