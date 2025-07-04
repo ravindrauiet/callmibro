@@ -9,6 +9,7 @@ import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, serverT
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ShareDropdown from '@/components/ShareDropdown'
+import InvoiceGenerator from '@/components/InvoiceGenerator'
 import { toast } from 'react-hot-toast'
 
 export default function ShopInventoryPage({ params }) {
@@ -870,6 +871,12 @@ export default function ShopInventoryPage({ params }) {
                 shopName={shopData?.shopName || 'Shop'}
                 contactNumber={shopData?.contactNumber}
                 inventory={filteredInventory}
+              />
+              <InvoiceGenerator
+                shopName={shopData?.shopName || 'Shop'}
+                contactNumber={shopData?.contactNumber}
+                inventory={filteredInventory}
+                buttonText="Generate Invoice"
               />
               <button
                 onClick={openAddModal}
