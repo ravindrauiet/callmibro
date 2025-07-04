@@ -507,7 +507,7 @@ export default function Header({ activePage }) {
             </Link>
             
             {/* Theme toggle in mobile menu */}
-            <button
+            {/* <button
               onClick={() => {
                 toggleTheme();
               }}
@@ -529,7 +529,7 @@ export default function Header({ activePage }) {
                   Switch to Dark Mode
                 </>
               )}
-            </button>
+            </button> */}
             
             {/* Mobile user menu or login button */}
             {currentUser ? (
