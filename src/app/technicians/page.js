@@ -9,6 +9,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
 import { FiStar, FiMapPin, FiClock, FiCheck } from 'react-icons/fi'
+import TechnicianBookingModal from '@/components/TechnicianBookingModal'
 
 // Fallback technicians data
 const fallbackTechnicians = [
@@ -107,6 +108,8 @@ export default function TechniciansPage() {
   const [locationFilter, setLocationFilter] = useState('')
   const [specializationFilter, setSpecializationFilter] = useState('')
   const [sortBy, setSortBy] = useState('rating')
+  const [bookingModalOpen, setBookingModalOpen] = useState(false)
+  const [selectedTechnician, setSelectedTechnician] = useState(null)
 
   useEffect(() => {
     async function fetchTechnicians() {
@@ -172,8 +175,9 @@ export default function TechniciansPage() {
     router.push(`/technicians/${technicianId}`)
   }
 
-  const handleBookNow = (technicianId) => {
-    router.push(`/services/booking?technicianId=${technicianId}`)
+  const handleBookNow = (technician) => {
+    setSelectedTechnician(technician)
+    setBookingModalOpen(true)
   }
 
   const locations = [...new Set(technicians.map(tech => tech.location))]
@@ -426,7 +430,7 @@ export default function TechniciansPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      handleBookNow(technician.id)
+                      handleBookNow(technician)
                     }}
                     className="flex-1 bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white py-2 px-4 rounded-lg text-sm font-medium hover:from-[#d4000e] hover:to-[#e65b5b] transition-all"
                   >
@@ -460,6 +464,13 @@ export default function TechniciansPage() {
       </main>
       
       <Footer />
+      
+      {/* Booking Modal */}
+      <TechnicianBookingModal
+        isOpen={bookingModalOpen}
+        onClose={() => setBookingModalOpen(false)}
+        technician={selectedTechnician}
+      />
     </div>
   )
 } 

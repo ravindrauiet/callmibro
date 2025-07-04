@@ -35,7 +35,7 @@ export default function Footer() {
   
   const company = [
     { name: "About Us", url: "/about" },
-    { name: "Our Technicians", url: "/technicians" },
+    { name: "Technicians", url: "/technicians" },
     { name: "Contact Us", url: "/contact" },
     { name: "FAQ", url: "/faq" }
   ]
@@ -89,7 +89,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <div style={{ color: 'var(--text-secondary)' }} className="text-sm">Call us 24/7</div>
-                  <a href="tel:+919876543210" className="hover:text-[#e60012] font-medium" style={{ color: 'var(--text-main)' }}>+91 98765 43210</a>
+                  <a href="tel:+919354156323" className="hover:text-[#e60012] font-medium" style={{ color: 'var(--text-main)' }}>+91 98765 43210</a>
                 </div>
               </div>
               
