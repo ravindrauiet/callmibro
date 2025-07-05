@@ -58,6 +58,9 @@ export default function ShopInventoryPage({ params }) {
   const [selectedItems, setSelectedItems] = useState([])
   const [showBulkActions, setShowBulkActions] = useState(false)
   
+  // Mobile filter state
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
+  
   // Analytics states
   const [analytics, setAnalytics] = useState({
     totalItems: 0,
@@ -1008,7 +1011,155 @@ export default function ShopInventoryPage({ params }) {
 
           {/* Search and Filter Controls */}
           <div className="mb-6 p-4 rounded-lg shadow-md" style={{ backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)' }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Mobile: Simplified search and filter button */}
+            <div className="md:hidden space-y-3">
+              {/* Search Bar */}
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Search</label>
+                <input
+                  type="text"
+                  placeholder="Search by name, brand, model, or SKU..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                  style={{ 
+                    backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                    color: 'var(--text-main)',
+                    borderColor: 'var(--border-color)'
+                  }}
+                />
+              </div>
+              
+              {/* Filter Button */}
+              <button
+                onClick={() => setShowMobileFilters(!showMobileFilters)}
+                className="w-full flex items-center justify-center px-4 py-2 border rounded-md transition-colors"
+                style={{ 
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-main)',
+                  backgroundColor: isDarkMode ? 'var(--panel-dark)' : 'var(--panel-light)',
+                  ':hover': {
+                    backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)'
+                  }
+                }}
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filters & Sort
+                <span className="ml-2 text-xs px-2 py-1 rounded-full" style={{ 
+                  backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)',
+                  color: 'var(--text-main)'
+                }}>
+                  {[categoryFilter, brandFilter, stockFilter, sortBy].filter(Boolean).length}
+                </span>
+              </button>
+              
+              {/* Mobile Filter Panel */}
+              {showMobileFilters && (
+                <div className="space-y-3 p-3 rounded-lg border" style={{ 
+                  backgroundColor: isDarkMode ? 'var(--panel-charcoal)' : 'var(--panel-gray)',
+                  borderColor: 'var(--border-color)'
+                }}>
+                  {/* Category Filter */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Category
+                    </label>
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                    >
+                      <option value="">All Categories</option>
+                      {Object.keys(analytics.categories).map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Brand Filter */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Brand
+                    </label>
+                    <select
+                      value={brandFilter}
+                      onChange={(e) => setBrandFilter(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                    >
+                      <option value="">All Brands</option>
+                      {Object.keys(analytics.topBrands).map(brand => (
+                        <option key={brand.brand} value={brand.brand}>{brand.brand}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Stock Filter */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Stock Status
+                    </label>
+                    <select
+                      value={stockFilter}
+                      onChange={(e) => setStockFilter(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                    >
+                      <option value="">All Items</option>
+                      <option value="low">Low Stock</option>
+                      <option value="out">Out of Stock</option>
+                      <option value="in">In Stock</option>
+                    </select>
+                  </div>
+                  
+                  {/* Sort */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Sort By
+                    </label>
+                    <select
+                      value={`${sortBy}-${sortOrder}`}
+                      onChange={(e) => {
+                        const [field, order] = e.target.value.split('-')
+                        setSortBy(field)
+                        setSortOrder(order)
+                      }}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                    >
+                      <option value="name-asc">Name (A-Z)</option>
+                      <option value="name-desc">Name (Z-A)</option>
+                      <option value="price-asc">Price (Low-High)</option>
+                      <option value="price-desc">Price (High-Low)</option>
+                      <option value="quantity-asc">Quantity (Low-High)</option>
+                      <option value="quantity-desc">Quantity (High-Low)</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Desktop: Full filter grid */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Search */}
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Search</label>
@@ -1385,7 +1536,7 @@ export default function ShopInventoryPage({ params }) {
                 {/* SKU */}
                 <div>
                   <label htmlFor="sku" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                    SKU (Stock Keeping Unit)
+                    SKU
                   </label>
                   <input
                     type="text"
@@ -1785,7 +1936,7 @@ export default function ShopInventoryPage({ params }) {
                   
                   <div>
                     <label htmlFor="location" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Storage Location
+                      Location
                     </label>
                     <input
                       type="text"
