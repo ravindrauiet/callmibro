@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { useTheme } from '@/contexts/ThemeContext'
+import SearchBar from './SearchBar'
 
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false)
@@ -51,6 +52,11 @@ export default function Hero() {
           <p className="mb-8 text-base sm:text-lg max-w-lg" style={{ color: 'var(--text-secondary)' }}>
             Book certified technicians for same-day repairs or browse our catalog of genuine spare parts with guaranteed quality and fast delivery.
           </p>
+          
+          {/* Search Bar */}
+          <div className="mb-8 w-full">
+            <SearchBar />
+          </div>
           
           <div className="flex flex-wrap gap-4">
             <Link 

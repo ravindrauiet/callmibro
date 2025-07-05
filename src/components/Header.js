@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import AuthModal from './AuthModal'
+import SearchModal from './SearchModal'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { toast } from 'react-hot-toast'
@@ -11,6 +12,7 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 
 export default function Header({ activePage }) {
   const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [searchModalOpen, setSearchModalOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -227,6 +229,18 @@ export default function Header({ activePage }) {
         </nav>
         
         <div className="flex items-center space-x-4">
+          {/* Search Button */}
+          <button
+            onClick={() => setSearchModalOpen(true)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:ring-offset-2 focus:ring-offset-black"
+            style={{ color: 'var(--text-secondary)' }}
+            aria-label="Search"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+          
           {/* Login button or User menu */}
           {currentUser ? (
             <div className="relative hidden md:block" ref={userMenuRef}>
@@ -751,6 +765,11 @@ export default function Header({ activePage }) {
       <AuthModal 
         isOpen={authModalOpen} 
         onClose={() => setAuthModalOpen(false)} 
+      />
+      
+      <SearchModal 
+        isOpen={searchModalOpen} 
+        onClose={() => setSearchModalOpen(false)} 
       />
       
       <style jsx global>{`
