@@ -80,6 +80,32 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <link rel="shortcut icon" href="/icons/favicon.ico" />
         
+        {/* Google Analytics 4 */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-8E3GR2023H"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-8E3GR2023H');
+            `,
+          }}
+        />
+        
+        {/* Microsoft Clarity */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(c,l,a,r,i,t,y){
+                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "ratg31mkkj");
+            `,
+          }}
+        />
+        
         {/* Structured Data for Local Business */}
         <script
           type="application/ld+json"
