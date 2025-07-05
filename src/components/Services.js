@@ -136,7 +136,7 @@ export default function Services() {
                       alt={service.title} 
                       width={30} 
                       height={30}
-                      className="brightness-[10]"
+                      className="brightness-[1]"
                       onError={handleImageError}
                     />
                   </div>
