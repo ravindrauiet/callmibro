@@ -222,6 +222,30 @@ export default function TechniciansPage() {
             </p>
           </div>
 
+          {/* Join Our Team Banner */}
+          <div className="mb-8 p-8 rounded-xl shadow-lg" style={{ 
+            background: isDarkMode 
+              ? 'linear-gradient(135deg, var(--panel-dark), var(--panel-charcoal))' 
+              : 'linear-gradient(135deg, #f8f9fa, #e9ecef)',
+            borderColor: 'var(--border-color)',
+            borderWidth: '1px'
+          }}>
+            <div className="text-center">
+              <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-main)' }}>
+                Want to Join Our Team?
+              </h2>
+              <p className="text-lg mb-6 max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+                Are you a skilled technician looking for opportunities? Join our platform and start earning by helping customers with their device repairs.
+              </p>
+              <button
+                onClick={() => router.push('/technician-registration')}
+                className="bg-gradient-to-r from-[#e60012] to-[#ff6b6b] text-white px-8 py-3 rounded-lg font-medium hover:shadow-lg hover:shadow-[#e60012]/20 transform hover:scale-105 transition-all"
+              >
+                Join Our Team
+              </button>
+            </div>
+          </div>
+
           {/* Filters Section */}
           <div className="mb-8 p-6 rounded-xl shadow-lg" style={{ 
             background: isDarkMode 

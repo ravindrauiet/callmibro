@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { db } from '@/firebase/config'
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore'
+import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore'
 import { toast } from 'react-hot-toast'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -16,6 +16,7 @@ export default function TechnicianRegistrationPage() {
   const { currentUser } = useAuth()
   const { isDarkMode } = useTheme()
   const [loading, setLoading] = useState(false)
+  const [checkingStatus, setCheckingStatus] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -25,6 +26,42 @@ export default function TechnicianRegistrationPage() {
     experience: '',
     whyJoin: ''
   })
+
+  // Check if user is logged in and if they're already a technician
+  useEffect(() => {
+    async function checkUserStatus() {
+      if (!currentUser) {
+        setCheckingStatus(false)
+        // Redirect to login if not logged in
+        toast.error('Please login to register as a technician')
+        router.push('/?showAuth=true')
+        return
+      }
+
+      try {
+        // Check if user is already a technician
+        const techniciansQuery = query(
+          collection(db, 'technicians'),
+          where('userId', '==', currentUser.uid)
+        )
+        const techniciansSnapshot = await getDocs(techniciansQuery)
+        
+        if (!techniciansSnapshot.empty) {
+          // User is already a technician, redirect to profile
+          toast.success('You are already registered as a technician!')
+          router.push('/technician-profile')
+          return
+        }
+        
+        setCheckingStatus(false)
+      } catch (error) {
+        console.error('Error checking technician status:', error)
+        setCheckingStatus(false)
+      }
+    }
+
+    checkUserStatus()
+  }, [currentUser, router])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -52,20 +89,10 @@ export default function TechnicianRegistrationPage() {
     setLoading(true)
 
     try {
-      // Check if user is already registered as a technician
-      const techniciansRef = collection(db, 'technicians')
-      const existingQuery = query(techniciansRef, where('userId', '==', currentUser.uid))
-      const existingSnapshot = await getDocs(existingQuery)
-
-      if (!existingSnapshot.empty) {
-        toast.error('You are already registered as a technician')
-        router.push('/technician-profile')
-        return
-      }
-
       // Add technician registration
       const technicianData = {
         userId: currentUser.uid,
+        userEmail: currentUser.email,
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -75,8 +102,8 @@ export default function TechnicianRegistrationPage() {
         whyJoin: formData.whyJoin,
         status: 'pending', // pending, approved, rejected
         profileCompletion: 25, // Initial completion percentage
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       }
 
       const docRef = await addDoc(collection(db, 'technicians'), technicianData)
@@ -89,6 +116,26 @@ export default function TechnicianRegistrationPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Show loading while checking user status
+  if (checkingStatus) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ 
+        background: isDarkMode 
+          ? 'linear-gradient(to bottom, var(--bg-color), var(--panel-dark))' 
+          : 'linear-gradient(to bottom, var(--bg-color), var(--panel-charcoal))'
+      }}>
+        <Header />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#e60012] mx-auto mb-4"></div>
+            <p style={{ color: 'var(--text-secondary)' }}>Checking status...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   return (

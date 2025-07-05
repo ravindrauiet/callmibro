@@ -50,8 +50,8 @@ export default function TechnicianProfilePage() {
         setTechnician(techData)
         setFormData(techData)
 
-        // Fetch bookings for this technician
-        const bookingsRef = collection(db, 'bookings')
+        // Fetch bookings for this technician from technician-bookings collection
+        const bookingsRef = collection(db, 'technician-bookings')
         const bookingsQuery = query(bookingsRef, where('technicianId', '==', techSnapshot.docs[0].id))
         const bookingsSnapshot = await getDocs(bookingsQuery)
         
@@ -92,7 +92,17 @@ export default function TechnicianProfilePage() {
     
     const completedFields = fields.filter(field => {
       const value = technician[field]
-      return value && (Array.isArray(value) ? value.length > 0 : value.toString().trim() !== '')
+      if (!value) return false
+      
+      if (Array.isArray(value)) {
+        return value.length > 0
+      }
+      
+      if (typeof value === 'string') {
+        return value.trim() !== ''
+      }
+      
+      return true
     })
     
     return Math.round((completedFields.length / fields.length) * 100)
@@ -129,7 +139,7 @@ export default function TechnicianProfilePage() {
 
   const handleBookingStatus = async (bookingId, status) => {
     try {
-      await updateDoc(doc(db, 'bookings', bookingId), {
+      await updateDoc(doc(db, 'technician-bookings', bookingId), {
         status: status,
         updatedAt: new Date()
       })
@@ -377,6 +387,64 @@ export default function TechnicianProfilePage() {
                       </p>
                     )}
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                      Specialization
+                    </label>
+                    {editMode ? (
+                      <input
+                        type="text"
+                        name="specialization"
+                        value={formData.specialization || ''}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                        style={{ 
+                          background: 'var(--panel-charcoal)',
+                          color: 'var(--text-main)',
+                          borderColor: 'var(--border-color)',
+                          border: '1px solid var(--border-color)'
+                        }}
+                        placeholder="e.g., Mobile Repair, Laptop Repair, Data Recovery"
+                      />
+                    ) : (
+                      <p className="px-4 py-3 rounded-lg" style={{ 
+                        background: 'var(--panel-charcoal)',
+                        color: 'var(--text-main)'
+                      }}>
+                        {technician.specialization || 'Not provided'}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                      Hourly Rate (₹)
+                    </label>
+                    {editMode ? (
+                      <input
+                        type="number"
+                        name="hourlyRate"
+                        value={formData.hourlyRate || ''}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                        style={{ 
+                          background: 'var(--panel-charcoal)',
+                          color: 'var(--text-main)',
+                          borderColor: 'var(--border-color)',
+                          border: '1px solid var(--border-color)'
+                        }}
+                        placeholder="500"
+                      />
+                    ) : (
+                      <p className="px-4 py-3 rounded-lg" style={{ 
+                        background: 'var(--panel-charcoal)',
+                        color: 'var(--text-main)'
+                      }}>
+                        ₹{technician.hourlyRate || 'Not specified'}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mt-6">
@@ -407,6 +475,93 @@ export default function TechnicianProfilePage() {
                     </p>
                   )}
                 </div>
+
+                <div className="mt-6">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    Working Hours
+                  </label>
+                  {editMode ? (
+                    <input
+                      type="text"
+                      name="workingHours"
+                      value={formData.workingHours || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                      style={{ 
+                        background: 'var(--panel-charcoal)',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)',
+                        border: '1px solid var(--border-color)'
+                      }}
+                      placeholder="e.g., Mon-Fri 9AM-6PM, Sat 10AM-4PM"
+                    />
+                  ) : (
+                    <p className="px-4 py-3 rounded-lg" style={{ 
+                      background: 'var(--panel-charcoal)',
+                      color: 'var(--text-main)'
+                    }}>
+                      {technician.workingHours || 'Not specified'}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-6">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    Certifications
+                  </label>
+                  {editMode ? (
+                    <textarea
+                      name="certifications"
+                      value={formData.certifications || ''}
+                      onChange={handleInputChange}
+                      rows={3}
+                      className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                      style={{ 
+                        background: 'var(--panel-charcoal)',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)',
+                        border: '1px solid var(--border-color)'
+                      }}
+                      placeholder="List your certifications, training, or qualifications..."
+                    />
+                  ) : (
+                    <p className="px-4 py-3 rounded-lg" style={{ 
+                      background: 'var(--panel-charcoal)',
+                      color: 'var(--text-main)'
+                    }}>
+                      {technician.certifications || 'No certifications listed'}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-6">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    Profile Image URL
+                  </label>
+                  {editMode ? (
+                    <input
+                      type="url"
+                      name="imageUrl"
+                      value={formData.imageUrl || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
+                      style={{ 
+                        background: 'var(--panel-charcoal)',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)',
+                        border: '1px solid var(--border-color)'
+                      }}
+                      placeholder="https://example.com/your-photo.jpg"
+                    />
+                  ) : (
+                    <p className="px-4 py-3 rounded-lg" style={{ 
+                      background: 'var(--panel-charcoal)',
+                      color: 'var(--text-main)'
+                    }}>
+                      {technician.imageUrl || 'No profile image'}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Services */}
@@ -429,9 +584,10 @@ export default function TechnicianProfilePage() {
                     <input
                       type="text"
                       name="services"
-                      value={Array.isArray(formData.services) ? formData.services.join(', ') : formData.services || ''}
+                      value={Array.isArray(formData.services) ? formData.services.join(', ') : (formData.services || '')}
                       onChange={(e) => {
-                        const services = e.target.value.split(',').map(s => s.trim()).filter(s => s)
+                        const value = e.target.value
+                        const services = value.split(',').map(s => s.trim()).filter(s => s)
                         setFormData(prev => ({ ...prev, services }))
                       }}
                       className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e60012] transition-all"
