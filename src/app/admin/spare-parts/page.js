@@ -17,24 +17,63 @@ export default function SparePartsManagement() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedSparePart, setSelectedSparePart] = useState(null)
   
+  // Available options for cascading dropdowns
+  const [availableBrands, setAvailableBrands] = useState([])
+  const [availableModels, setAvailableModels] = useState([])
+  
+  // Dropdown visibility states
+  const [showBrandDropdown, setShowBrandDropdown] = useState(false)
+  const [showModelDropdown, setShowModelDropdown] = useState(false)
+  
+  // Local state for additional images input
+  const [additionalImagesInput, setAdditionalImagesInput] = useState('')
+  
   // Form state
   const [sparePartForm, setSparePartForm] = useState({
     name: '',
+    sku: '',
     deviceCategory: '',
     brand: '',
     model: '',
     category: '',
     description: '',
     price: '',
+    discount: 0,
     imageURL: '',
+    additionalImages: [''],
     stock: 1,
     isActive: true,
     compatibility: '',
     specifications: '',
-    featured: false
+    featured: false,
+    warranty: '',
+    dimensions: '',
+    weight: '',
+    color: '',
+    material: '',
+    minOrderQuantity: 1,
+    maxOrderQuantity: 100,
+    leadTime: '',
+    returnPolicy: '',
+    installationGuide: '',
+    safetyNotes: '',
+    certifications: '',
+    countryOfOrigin: '',
+    manufacturer: ''
   })
 
-  // Predefined device categories, brands, and models
+  // Device categories mapping to model categories
+  const deviceCategoryToModelCategory = {
+    'Mobile Phones': 'Mobile',
+    'TVs': 'TV', 
+    'ACs': 'AC',
+    'Refrigerators': 'Refrigerator',
+    'Washing Machines': 'Washing Machine',
+    'Laptops': 'Laptop',
+    'Tablets': 'Mobile',
+    'Gaming Consoles': 'Other'
+  }
+
   const deviceCategories = [
     'Mobile Phones',
     'TVs', 
@@ -45,17 +84,6 @@ export default function SparePartsManagement() {
     'Tablets',
     'Gaming Consoles'
   ]
-
-  const brandOptions = {
-    'Mobile Phones': ['Apple', 'Samsung', 'Xiaomi', 'OnePlus', 'OPPO', 'Vivo', 'Realme', 'Nothing', 'Google', 'Motorola'],
-    'TVs': ['Samsung', 'LG', 'Sony', 'Panasonic', 'TCL', 'Mi', 'OnePlus', 'VU', 'Thomson', 'BPL'],
-    'ACs': ['Voltas', 'Blue Star', 'Carrier', 'Daikin', 'Hitachi', 'LG', 'Samsung', 'Panasonic', 'Whirlpool', 'Godrej'],
-    'Refrigerators': ['LG', 'Samsung', 'Whirlpool', 'Godrej', 'Haier', 'Panasonic', 'Hitachi', 'Bosch', 'BPL', 'Voltas'],
-    'Washing Machines': ['LG', 'Samsung', 'Whirlpool', 'IFB', 'Bosch', 'Haier', 'Panasonic', 'Godrej', 'BPL', 'Voltas'],
-    'Laptops': ['Dell', 'HP', 'Lenovo', 'Apple', 'ASUS', 'Acer', 'MSI', 'Razer', 'Alienware', 'Gigabyte'],
-    'Tablets': ['Apple', 'Samsung', 'Xiaomi', 'Lenovo', 'Realme', 'OPPO', 'OnePlus', 'Amazon', 'Google', 'Huawei'],
-    'Gaming Consoles': ['Sony', 'Microsoft', 'Nintendo', 'Steam', 'ASUS', 'Razer', 'Logitech', 'Corsair', 'HyperX', 'SteelSeries']
-  }
 
   // Fetch spare parts
   useEffect(() => {
@@ -100,6 +128,79 @@ export default function SparePartsManagement() {
     fetchSpareParts()
   }, [])
 
+  // Fetch brands and models from their collections
+  useEffect(() => {
+    const fetchBrandsAndModels = async () => {
+      try {
+        // Fetch brands from brands collection
+        const brandsSnapshot = await getDocs(collection(db, 'brands'))
+        const brandsData = brandsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        setBrands(brandsData)
+        
+        // Fetch models from models collection
+        const modelsSnapshot = await getDocs(collection(db, 'models'))
+        const modelsData = modelsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        setModels(modelsData)
+      } catch (error) {
+        console.error('Error fetching brands and models:', error)
+        toast.error('Failed to load brands and models')
+      }
+    }
+
+    fetchBrandsAndModels()
+  }, [])
+
+  // Update available brands when device category changes
+  useEffect(() => {
+    if (sparePartForm.deviceCategory) {
+      // Get the corresponding model category
+      const modelCategory = deviceCategoryToModelCategory[sparePartForm.deviceCategory]
+      
+      // Filter brands from brands collection that match the model category
+      const matchingBrands = brands.filter(brand => brand.category === modelCategory)
+      
+      setAvailableBrands(matchingBrands)
+      
+      // Reset brand and model when device category changes
+      setSparePartForm(prev => ({ ...prev, brand: '', model: '' }))
+    } else {
+      setAvailableBrands([])
+    }
+  }, [sparePartForm.deviceCategory, brands])
+
+  // Update available models when brand changes
+  useEffect(() => {
+    if (sparePartForm.deviceCategory && sparePartForm.brand) {
+      // Get the corresponding model category
+      const modelCategory = deviceCategoryToModelCategory[sparePartForm.deviceCategory]
+      
+      // Find the selected brand
+      const selectedBrand = brands.find(brand => brand.name === sparePartForm.brand)
+      
+      if (selectedBrand) {
+        // Filter models from models collection that match the brand and category
+        const matchingModels = models.filter(model => 
+          model.brandId === selectedBrand.id && model.category === modelCategory
+        )
+        
+        setAvailableModels(matchingModels)
+      } else {
+        setAvailableModels([])
+      }
+      
+      // Reset model when brand changes
+      setSparePartForm(prev => ({ ...prev, model: '' }))
+    } else {
+      setAvailableModels([])
+    }
+  }, [sparePartForm.deviceCategory, sparePartForm.brand, brands, models])
+
   // Filter spare parts based on search term and category filter
   const filteredSpareParts = spareParts.filter(part => {
     const matchesSearch = 
@@ -117,38 +218,74 @@ export default function SparePartsManagement() {
   // Open spare part modal for add/edit
   const openSparePartModal = (sparePart = null) => {
     if (sparePart) {
-      setSparePartForm({
-        name: sparePart.name || '',
-        deviceCategory: sparePart.deviceCategory || '',
-        brand: sparePart.brand || '',
-        model: sparePart.model || '',
-        category: sparePart.category || '',
-        description: sparePart.description || '',
-        price: sparePart.price ? sparePart.price.toString() : '',
-        imageURL: sparePart.imageURL || '',
-        stock: sparePart.stock || 1,
-        isActive: sparePart.isActive !== false,
-        compatibility: sparePart.compatibility || '',
-        specifications: sparePart.specifications || '',
-        featured: sparePart.featured || false
-      })
+              setSparePartForm({
+          name: sparePart.name || '',
+          sku: sparePart.sku || '',
+          deviceCategory: sparePart.deviceCategory || '',
+          brand: sparePart.brand || '',
+          model: sparePart.model || '',
+          category: sparePart.category || '',
+          description: sparePart.description || '',
+          price: sparePart.price ? sparePart.price.toString() : '',
+          discount: sparePart.discount || 0,
+          imageURL: sparePart.imageURL || '',
+          additionalImages: sparePart.additionalImages || [''],
+          stock: sparePart.stock || 1,
+          isActive: sparePart.isActive !== false,
+          compatibility: sparePart.compatibility || '',
+          specifications: sparePart.specifications || '',
+          featured: sparePart.featured || false,
+          warranty: sparePart.warranty || '',
+          dimensions: sparePart.dimensions || '',
+          weight: sparePart.weight || '',
+          color: sparePart.color || '',
+          material: sparePart.material || '',
+          minOrderQuantity: sparePart.minOrderQuantity || 1,
+          maxOrderQuantity: sparePart.maxOrderQuantity || 100,
+          leadTime: sparePart.leadTime || '',
+          returnPolicy: sparePart.returnPolicy || '',
+          installationGuide: sparePart.installationGuide || '',
+          safetyNotes: sparePart.safetyNotes || '',
+          certifications: sparePart.certifications || '',
+          countryOfOrigin: sparePart.countryOfOrigin || '',
+          manufacturer: sparePart.manufacturer || ''
+        })
+        setAdditionalImagesInput((sparePart.additionalImages || ['']).join(', '))
       setSelectedSparePart(sparePart)
     } else {
       setSparePartForm({
         name: '',
+        sku: '',
         deviceCategory: '',
         brand: '',
         model: '',
         category: categories.length > 0 ? categories[0] : '',
         description: '',
         price: '',
+        discount: 0,
         imageURL: '',
+        additionalImages: [''],
         stock: 1,
         isActive: true,
         compatibility: '',
         specifications: '',
-        featured: false
+        featured: false,
+        warranty: '',
+        dimensions: '',
+        weight: '',
+        color: '',
+        material: '',
+        minOrderQuantity: 1,
+        maxOrderQuantity: 100,
+        leadTime: '',
+        returnPolicy: '',
+        installationGuide: '',
+        safetyNotes: '',
+        certifications: '',
+        countryOfOrigin: '',
+        manufacturer: ''
       })
+      setAdditionalImagesInput('')
       setSelectedSparePart(null)
     }
     setShowSparePartModal(true)
@@ -167,6 +304,7 @@ export default function SparePartsManagement() {
       const sparePartData = {
         ...sparePartForm,
         price: parseFloat(sparePartForm.price) || 0,
+        discount: parseFloat(sparePartForm.discount) || 0,
         stock: parseInt(sparePartForm.stock) || 0,
         updatedAt: serverTimestamp()
       }
@@ -429,6 +567,18 @@ export default function SparePartsManagement() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                    SKU
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.sku}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, sku: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Device Category *
                   </label>
                   <select
@@ -448,29 +598,82 @@ export default function SparePartsManagement() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Brand *
                   </label>
-                  <select
-                    value={sparePartForm.brand}
-                    onChange={(e) => setSparePartForm({ ...sparePartForm, brand: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
-                    required
-                  >
-                    <option value="">Select Brand</option>
-                    {sparePartForm.deviceCategory && brandOptions[sparePartForm.deviceCategory]?.map(brand => (
-                      <option key={brand} value={brand}>{brand}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search brands..."
+                      value={sparePartForm.brand}
+                      onChange={(e) => {
+                        setSparePartForm({ ...sparePartForm, brand: e.target.value })
+                        setShowBrandDropdown(true)
+                      }}
+                      onFocus={() => setShowBrandDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowBrandDropdown(false), 200)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                      required
+                    />
+                    {showBrandDropdown && sparePartForm.brand && availableBrands.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        {availableBrands
+                          .filter(brand => brand.name.toLowerCase().includes(sparePartForm.brand.toLowerCase()))
+                          .map(brand => (
+                            <div
+                              key={brand.id}
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                              onMouseDown={(e) => {
+                                e.preventDefault()
+                                setSparePartForm(prev => ({ ...prev, brand: brand.name }))
+                                setShowBrandDropdown(false)
+                              }}
+                            >
+                              {brand.name}
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Model
                   </label>
-                  <input
-                    type="text"
-                    value={sparePartForm.model}
-                    onChange={(e) => setSparePartForm({ ...sparePartForm, model: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder={!sparePartForm.deviceCategory || !sparePartForm.brand 
+                        ? 'Select Device Category and Brand first' 
+                        : 'Search models...'}
+                      value={sparePartForm.model}
+                      onChange={(e) => {
+                        setSparePartForm({ ...sparePartForm, model: e.target.value })
+                        setShowModelDropdown(true)
+                      }}
+                      onFocus={() => setShowModelDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowModelDropdown(false), 200)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                      disabled={!sparePartForm.deviceCategory || !sparePartForm.brand}
+                    />
+                    {showModelDropdown && sparePartForm.model && availableModels.length > 0 && sparePartForm.deviceCategory && sparePartForm.brand && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        {availableModels
+                          .filter(model => model.name.toLowerCase().includes(sparePartForm.model.toLowerCase()))
+                          .map(model => (
+                            <div
+                              key={model.id}
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                              onMouseDown={(e) => {
+                                e.preventDefault()
+                                setSparePartForm(prev => ({ ...prev, model: model.name }))
+                                setShowModelDropdown(false)
+                              }}
+                            >
+                              {model.name}
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div>
@@ -501,6 +704,23 @@ export default function SparePartsManagement() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Discount (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={sparePartForm.discount}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, discount: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                    placeholder="0"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Enter discount percentage (0-100)</p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Stock
                   </label>
                   <input
@@ -521,6 +741,35 @@ export default function SparePartsManagement() {
                     onChange={(e) => setSparePartForm({ ...sparePartForm, imageURL: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Additional Images (comma-separated URLs)
+                  </label>
+                  <input
+                    type="text"
+                    value={additionalImagesInput}
+                    onChange={(e) => {
+                      setAdditionalImagesInput(e.target.value)
+                    }}
+                    onBlur={(e) => {
+                      // Process URLs only when input loses focus
+                      const urls = e.target.value
+                        .split(',')
+                        .map(url => url.trim())
+                        .filter(url => url.length > 0)
+                      setSparePartForm({ ...sparePartForm, additionalImages: urls })
+                    }}
+                    onFocus={() => {
+                      if (additionalImagesInput === '') {
+                        setAdditionalImagesInput(sparePartForm.additionalImages.join(', '))
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                    placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg, https://example.com/image3.jpg"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Enter URLs separated by commas. Example: url1, url2, url3</p>
                 </div>
               </div>
               
@@ -560,6 +809,163 @@ export default function SparePartsManagement() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
                   placeholder="Technical specifications..."
                 />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Warranty
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.warranty}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, warranty: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Dimensions
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.dimensions}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, dimensions: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Weight
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.weight}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, weight: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Color
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.color}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, color: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Material
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.material}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, material: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Min Order Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={sparePartForm.minOrderQuantity}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, minOrderQuantity: parseInt(e.target.value) || 1 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Max Order Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={sparePartForm.maxOrderQuantity}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, maxOrderQuantity: parseInt(e.target.value) || 100 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Lead Time
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.leadTime}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, leadTime: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Return Policy
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.returnPolicy}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, returnPolicy: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Installation Guide
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.installationGuide}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, installationGuide: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Safety Notes
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.safetyNotes}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, safetyNotes: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Certifications
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.certifications}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, certifications: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Country of Origin
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.countryOfOrigin}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, countryOfOrigin: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Manufacturer
+                  </label>
+                  <input
+                    type="text"
+                    value={sparePartForm.manufacturer}
+                    onChange={(e) => setSparePartForm({ ...sparePartForm, manufacturer: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#e60012] focus:border-[#e60012]"
+                  />
+                </div>
               </div>
               
               <div className="flex items-center space-x-6">
