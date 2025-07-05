@@ -46,7 +46,7 @@ export default function ExpressBookingModal({ isOpen, onClose }) {
         // Add fields that admin dashboard expects
         serviceName: 'Express Repair Service',
         contactInfo: {
-          name: currentUser.displayName || currentUser.email.split('@')[0],
+          name: currentUser.name || currentUser.email.split('@')[0],
           email: currentUser.email,
           phone: mobileNumber.trim()
         },
