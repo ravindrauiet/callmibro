@@ -405,8 +405,8 @@ export default function Header({ activePage }) {
                       </Link>
                     )}
                     
-                    {/* Become a Technician - Only show if user is not a technician */}
-                    {!technicianData && (
+                    {/* Become a Technician - COMMENTED OUT - Only technicians should see technician options */}
+                    {/* {!technicianData && (
                       <Link 
                         href="/technician-registration"
                         className="flex items-center px-4 py-2 text-sm transition-colors"
@@ -428,7 +428,7 @@ export default function Header({ activePage }) {
                         </svg>
                         Become a Technician
                       </Link>
-                    )}
+                    )} */}
                     
                     {/* Admin Panel - Only show if user is admin */}
                     {isAdmin && (
@@ -700,8 +700,8 @@ export default function Header({ activePage }) {
                   </Link>
                 )}
                 
-                {/* Become a Technician - Mobile */}
-                {!technicianData && (
+                {/* Become a Technician - Mobile - COMMENTED OUT - Only technicians should see technician options */}
+                {/* {!technicianData && (
                   <Link 
                     href="/technician-registration"
                     className="flex items-center py-3"
@@ -714,7 +714,7 @@ export default function Header({ activePage }) {
                     </svg>
                     Become a Technician
                   </Link>
-                )}
+                )} */}
                 
                 {/* Admin Panel - Mobile */}
                 {isAdmin && (
