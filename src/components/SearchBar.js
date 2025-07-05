@@ -23,7 +23,9 @@ export default function SearchBar() {
     { name: 'Services', icon: '🔧', color: 'bg-blue-500' },
     { name: 'Spare Parts', icon: '📱', color: 'bg-green-500' },
     { name: 'Shops', icon: '🏪', color: 'bg-purple-500' },
-    { name: 'My Inventory', icon: '📦', color: 'bg-orange-500' }
+    { name: 'My Inventory', icon: '📦', color: 'bg-orange-500' },
+    { name: 'Brand Pages', icon: '🏷️', color: 'bg-indigo-500' },
+    { name: 'Articles', icon: '📄', color: 'bg-teal-500' }
   ]
 
   // Static search data for demo
@@ -214,6 +216,138 @@ export default function SearchBar() {
         console.log('Error searching shops:', error)
       }
 
+      // Search brand pages
+      try {
+        const brandsQuery = query(
+          collection(db, 'brandPages'),
+          limit(20)
+        )
+        const brandsSnapshot = await getDocs(brandsQuery)
+        const brandResults = []
+        
+        brandsSnapshot.docs.forEach(doc => {
+          const data = doc.data()
+          // Check if brand name, description, or categories match search term
+          const searchLower = term.toLowerCase()
+          const brandNameMatch = data.brandName && data.brandName.toLowerCase().includes(searchLower)
+          const descriptionMatch = data.overview && data.overview.toLowerCase().includes(searchLower)
+          const categoryMatch = data.category && data.category.toLowerCase().includes(searchLower)
+          
+          if (brandNameMatch || descriptionMatch || categoryMatch) {
+            brandResults.push({
+              id: doc.id,
+              name: data.brandName,
+              category: 'Brand Pages',
+              type: 'brand',
+              url: `/brands/${data.brandName.toLowerCase().replace(/\s+/g, '-')}`,
+              description: data.overview,
+              categories: data.category ? [data.category] : []
+            })
+          }
+        })
+        
+        // Sort by relevance
+        brandResults.sort((a, b) => {
+          const searchLower = term.toLowerCase()
+          const aNameExact = a.name.toLowerCase().startsWith(searchLower)
+          const bNameExact = b.name.toLowerCase().startsWith(searchLower)
+          
+          if (aNameExact && !bNameExact) return -1
+          if (!aNameExact && bNameExact) return 1
+          return 0
+        })
+        
+        firebaseResults.push(...brandResults.slice(0, 15)) // Limit to top 15 brand results
+        console.log('Brand search results:', brandResults.length, brandResults)
+        
+        // Also add category-level results for each brand
+        const categoryResults = []
+        brandsSnapshot.docs.forEach(doc => {
+          const data = doc.data()
+          const searchLower = term.toLowerCase()
+          
+          // Check if category matches search term
+          const categoryMatch = data.category && data.category.toLowerCase().includes(searchLower)
+          
+          if (categoryMatch) {
+            categoryResults.push({
+              id: `category-${doc.id}`,
+              name: `${data.brandName} ${data.category}`,
+              category: 'Brand Pages',
+              type: 'brand-category',
+              url: `/brands/${data.brandName.toLowerCase().replace(/\s+/g, '-')}/${data.category.toLowerCase().replace(/\s+/g, '-')}`,
+              description: `${data.brandName} ${data.category} products and services`,
+              categories: [data.category]
+            })
+          }
+        })
+        
+        // Sort category results by relevance
+        categoryResults.sort((a, b) => {
+          const searchLower = term.toLowerCase()
+          const aNameExact = a.name.toLowerCase().startsWith(searchLower)
+          const bNameExact = b.name.toLowerCase().startsWith(searchLower)
+          
+          if (aNameExact && !bNameExact) return -1
+          if (!aNameExact && bNameExact) return 1
+          return 0
+        })
+        
+        firebaseResults.push(...categoryResults.slice(0, 10)) // Limit to top 10 category results
+        console.log('Category search results:', categoryResults.length, categoryResults)
+      } catch (error) {
+        console.log('Error searching brands:', error)
+      }
+
+      // Search articles
+      try {
+        const articlesQuery = query(
+          collection(db, 'modelPages'),
+          limit(20)
+        )
+        const articlesSnapshot = await getDocs(articlesQuery)
+        const articleResults = []
+        
+        articlesSnapshot.docs.forEach(doc => {
+          const data = doc.data()
+          // Check if model name, overview, or features match search term
+          const searchLower = term.toLowerCase()
+          const modelNameMatch = data.modelName && data.modelName.toLowerCase().includes(searchLower)
+          const overviewMatch = data.overview && data.overview.toLowerCase().includes(searchLower)
+          const brandNameMatch = data.brandName && data.brandName.toLowerCase().includes(searchLower)
+          const featuresMatch = data.features && Array.isArray(data.features) && 
+            data.features.some(feature => feature.toLowerCase().includes(searchLower))
+          
+          if (modelNameMatch || overviewMatch || brandNameMatch || featuresMatch) {
+            articleResults.push({
+              id: doc.id,
+              name: data.modelName,
+              category: 'Articles',
+              type: 'article',
+              url: `/brands/${data.brandName.toLowerCase().replace(/\s+/g, '-')}/${data.category.toLowerCase().replace(/\s+/g, '-')}/${data.modelName.toLowerCase().replace(/\s+/g, '-')}`,
+              description: data.overview,
+              tags: data.features || []
+            })
+          }
+        })
+        
+        // Sort by relevance
+        articleResults.sort((a, b) => {
+          const searchLower = term.toLowerCase()
+          const aNameExact = a.name.toLowerCase().startsWith(searchLower)
+          const bNameExact = b.name.toLowerCase().startsWith(searchLower)
+          
+          if (aNameExact && !bNameExact) return -1
+          if (!aNameExact && bNameExact) return 1
+          return 0
+        })
+        
+        firebaseResults.push(...articleResults.slice(0, 15)) // Limit to top 15 article results
+        console.log('Article search results:', articleResults.length, articleResults)
+      } catch (error) {
+        console.log('Error searching articles:', error)
+      }
+
       // Search user inventory if user is logged in
       const userInventoryResults = []
       if (currentUser) {
@@ -284,8 +418,9 @@ export default function SearchBar() {
       // Remove duplicates and limit results
       const uniqueResults = combinedResults.filter((item, index, self) =>
         index === self.findIndex(t => t.id === item.id && t.type === item.type)
-      ).slice(0, 15) // Increased limit to accommodate inventory results
+      ).slice(0, 20) // Increased limit to accommodate brand and article results
 
+      console.log('Final search results:', uniqueResults.length, uniqueResults)
       setSearchResults(uniqueResults)
     } catch (error) {
       console.error('Search error:', error)
@@ -365,7 +500,7 @@ export default function SearchBar() {
           onChange={handleSearchChange}
           onKeyDown={handleKeyDown}
           onFocus={() => searchTerm.trim() && setShowResults(true)}
-          placeholder="Search for services, spare parts, or shops..."
+          placeholder="Search for services, spare parts, shops, brands, or articles..."
           className="w-full pl-12 pr-4 py-4 text-lg rounded-xl border-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#e60012]/20"
           style={{
             backgroundColor: 'var(--panel-gray)',
@@ -444,6 +579,15 @@ export default function SearchBar() {
                                 {result.type === 'service' && result.description && (
                                   <span> • {result.description.substring(0, 50)}...</span>
                                 )}
+                                {result.type === 'brand' && result.description && (
+                                  <span> • {result.description.substring(0, 50)}...</span>
+                                )}
+                                {result.type === 'brand-category' && result.description && (
+                                  <span> • {result.description.substring(0, 50)}...</span>
+                                )}
+                                {result.type === 'article' && result.description && (
+                                  <span> • {result.description.substring(0, 50)}...</span>
+                                )}
                               </div>
                               {(result.type === 'inventory' || result.type === 'part') && (
                                 <div className="text-xs mt-1 flex items-center space-x-2">
@@ -477,6 +621,43 @@ export default function SearchBar() {
                               {result.type === 'shop' && result.address && (
                                 <div className="text-xs mt-1 text-gray-500">
                                   📍 {result.address}
+                                </div>
+                              )}
+                              {result.type === 'brand' && result.categories && result.categories.length > 0 && (
+                                <div className="text-xs mt-1 flex flex-wrap gap-1">
+                                  {result.categories.slice(0, 3).map((category, idx) => (
+                                    <span key={idx} className="px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                                      {category}
+                                    </span>
+                                  ))}
+                                  {result.categories.length > 3 && (
+                                    <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                                      +{result.categories.length - 3} more
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                              {result.type === 'brand-category' && result.categories && result.categories.length > 0 && (
+                                <div className="text-xs mt-1 flex flex-wrap gap-1">
+                                  {result.categories.slice(0, 3).map((category, idx) => (
+                                    <span key={idx} className="px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                                      {category}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              {result.type === 'article' && result.tags && result.tags.length > 0 && (
+                                <div className="text-xs mt-1 flex flex-wrap gap-1">
+                                  {result.tags.slice(0, 3).map((tag, idx) => (
+                                    <span key={idx} className="px-2 py-1 rounded-full bg-teal-100 text-teal-700">
+                                      #{tag}
+                                    </span>
+                                  ))}
+                                  {result.tags.length > 3 && (
+                                    <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                                      +{result.tags.length - 3} more
+                                    </span>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -515,7 +696,15 @@ export default function SearchBar() {
                   'AC service',
                   'Samsung screen',
                   'Mobile repair',
-                  'Computer service'
+                  'Computer service',
+                  'Apple iPhone',
+                  'Samsung Galaxy',
+                  'iPhone 16 Pro',
+                  'Mobile repair guide',
+                  'Tech tips',
+                  'Apple Mobile',
+                  'Samsung Mobile',
+                  'LG AC'
                 ].map((suggestion) => (
                   <button
                     key={suggestion}
