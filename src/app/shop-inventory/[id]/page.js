@@ -1530,13 +1530,14 @@ export default function ShopInventoryPage({ params }) {
                       color: 'var(--text-main)',
                       borderColor: 'var(--border-color)'
                     }}
+                    placeholder="e.g., Tempered Glass"
                   />
                 </div>
 
                 {/* SKU */}
                 <div>
                   <label htmlFor="sku" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                    SKU
+                    Product Code (SKU)
                   </label>
                   <input
                     type="text"
@@ -1550,8 +1551,11 @@ export default function ShopInventoryPage({ params }) {
                       color: 'var(--text-main)',
                       borderColor: 'var(--border-color)'
                     }}
-                    placeholder="e.g., IPHONE13-BAT-001"
+                    placeholder="e.g., IPHONE13-BAT-001 (Unique product code for easy identification)"
                   />
+                  <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                    This helps you quickly find and identify products. Use a simple code like BRAND-MODEL-TYPE.
+                  </p>
                 </div>
                 
                 {/* Category with Autocomplete */}
@@ -1582,7 +1586,7 @@ export default function ShopInventoryPage({ params }) {
                         color: 'var(--text-main)',
                         borderColor: 'var(--border-color)'
                       }}
-                      placeholder="Type to search or add new category"
+                      placeholder="e.g., Mobile"
                     />
                     {showCategorySuggestions && (
                       <>
@@ -1666,7 +1670,7 @@ export default function ShopInventoryPage({ params }) {
                         color: 'var(--text-main)',
                         borderColor: 'var(--border-color)'
                       }}
-                      placeholder="Type to search or add new brand"
+                      placeholder="e.g., Apple"
                     />
                     {showBrandSuggestions && (
                       <div className="absolute z-50 w-full mt-1 border rounded-md shadow-lg max-h-60 overflow-y-auto" 
@@ -1747,7 +1751,7 @@ export default function ShopInventoryPage({ params }) {
                         color: 'var(--text-main)',
                         borderColor: 'var(--border-color)'
                       }}
-                      placeholder="Type to search or add new model"
+                      placeholder="e.g., iPhone 16"
                     />
                     {showModelSuggestions && (
                       <div className="absolute z-50 w-full mt-1 border rounded-md shadow-lg max-h-60 overflow-y-auto" 
@@ -1845,33 +1849,36 @@ export default function ShopInventoryPage({ params }) {
                   </div>
                 </div>
                 
-                <div>
-                  <label htmlFor="costPrice" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                    Cost Price (₹)*
-                  </label>
-                  <input
-                    type="number"
-                    id="costPrice"
-                    name="costPrice"
-                    value={formData.costPrice}
-                    onChange={handleChange}
-                    required
-                    min="0"
-                    step="0.01"
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
-                    style={{ 
-                      backgroundColor: isDarkMode ? '#374151' : '#ffffff',
-                      color: 'var(--text-main)',
-                      borderColor: 'var(--border-color)'
-                    }}
-                  />
-                </div>
+                                                    <div>
+                    <label htmlFor="costPrice" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Purchase Cost (₹)
+                    </label>
+                    <input
+                      type="number"
+                      id="costPrice"
+                      name="costPrice"
+                      value={formData.costPrice}
+                      onChange={handleChange}
+                      min="0"
+                      step="0.01"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                      placeholder="e.g., 1500"
+                    />
+                    <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      How much you paid to buy this item. This helps calculate your profit.
+                    </p>
+                  </div>
 
                 {/* Stock Levels Row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="minStockLevel" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Minimum Stock Level
+                      Alert When Stock Goes Below
                     </label>
                     <input
                       type="number"
@@ -1888,11 +1895,14 @@ export default function ShopInventoryPage({ params }) {
                       }}
                       placeholder="Default: 5"
                     />
+                    <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      We'll warn you when stock gets low so you can reorder on time.
+                    </p>
                   </div>
                   
                   <div>
                     <label htmlFor="maxStockLevel" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Maximum Stock Level
+                      Maximum Stock to Keep
                     </label>
                     <input
                       type="number"
@@ -1909,6 +1919,9 @@ export default function ShopInventoryPage({ params }) {
                       }}
                       placeholder="Optional"
                     />
+                    <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      Optional: Set a limit to avoid overstocking and save storage space.
+                    </p>
                   </div>
                 </div>
 
@@ -1916,7 +1929,7 @@ export default function ShopInventoryPage({ params }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="supplier" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Supplier
+                      Supplier/Vendor Name
                     </label>
                     <input
                       type="text"
@@ -1932,11 +1945,14 @@ export default function ShopInventoryPage({ params }) {
                       }}
                       placeholder="e.g., ABC Electronics"
                     />
+                    <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      Who you buy this item from. Helps you reorder from the right place.
+                    </p>
                   </div>
                   
                   <div>
                     <label htmlFor="location" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Location
+                      Storage Location (Where is this item kept?)
                     </label>
                     <input
                       type="text"
@@ -1950,8 +1966,11 @@ export default function ShopInventoryPage({ params }) {
                         color: 'var(--text-main)',
                         borderColor: 'var(--border-color)'
                       }}
-                      placeholder="e.g., Shelf A1, Drawer 3"
+                      placeholder="e.g., Shelf A1, Drawer 3, Back Room, Top Shelf"
                     />
+                    <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      Tell us where you keep this item so you can find it quickly when needed.
+                    </p>
                   </div>
                 </div>
 
@@ -1983,7 +2002,7 @@ export default function ShopInventoryPage({ params }) {
                   
                   <div>
                     <label htmlFor="warranty" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                      Warranty
+                      Warranty Period
                     </label>
                     <input
                       type="text"
@@ -1999,29 +2018,35 @@ export default function ShopInventoryPage({ params }) {
                       }}
                       placeholder="e.g., 1 year, 6 months"
                     />
+                    <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      How long is the warranty? Useful for customer service and returns.
+                    </p>
                   </div>
                 </div>
 
                 {/* Tags */}
-                <div>
-                  <label htmlFor="tags" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                    Tags
-                  </label>
-                  <input
-                    type="text"
-                    id="tags"
-                    name="tags"
-                    value={formData.tags}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
-                    style={{ 
-                      backgroundColor: isDarkMode ? '#374151' : '#ffffff',
-                      color: 'var(--text-main)',
-                      borderColor: 'var(--border-color)'
-                    }}
-                    placeholder="e.g., popular, fast-moving, seasonal (comma separated)"
-                  />
-                </div>
+                                                    <div>
+                    <label htmlFor="tags" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Product Tags (for easy search)
+                    </label>
+                    <input
+                      type="text"
+                      id="tags"
+                      name="tags"
+                      value={formData.tags}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#e60012] focus:border-transparent"
+                      style={{ 
+                        backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                      placeholder="e.g., popular, fast-moving, seasonal (comma separated)"
+                    />
+                    <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      Add keywords to help you find this item quickly. Separate with commas.
+                    </p>
+                  </div>
                 
                 {/* Description */}
                 <div>
