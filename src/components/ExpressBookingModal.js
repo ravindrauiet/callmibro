@@ -42,7 +42,17 @@ export default function ExpressBookingModal({ isOpen, onClose }) {
         isExpressBooking: true,
         status: 'pending',
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
+        // Add fields that admin dashboard expects
+        serviceName: 'Express Repair Service',
+        contactInfo: {
+          name: currentUser.displayName || currentUser.email.split('@')[0],
+          email: currentUser.email,
+          phone: mobileNumber.trim()
+        },
+        schedule: {
+          date: serverTimestamp()
+        }
       }
 
       await addDoc(collection(db, 'bookings'), bookingData)

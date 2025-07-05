@@ -158,7 +158,9 @@ export default function BookingsManagement() {
     booking.serviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     booking.contactInfo?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     booking.contactInfo?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.contactInfo?.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+    booking.contactInfo?.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    booking.mobileNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    booking.description?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   // Format date
@@ -328,7 +330,9 @@ export default function BookingsManagement() {
                       {booking.id.substring(0, 8)}...
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm" style={{ color: 'var(--text-main)' }}>{booking.serviceName}</div>
+                      <div className="text-sm" style={{ color: 'var(--text-main)' }}>
+                        {booking.serviceName || (booking.isExpressBooking ? 'Express Repair Service' : 'N/A')}
+                      </div>
                       {booking.isExpressBooking && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#e60012] text-white">
                           Express
@@ -336,11 +340,16 @@ export default function BookingsManagement() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm" style={{ color: 'var(--text-main)' }}>{booking.contactInfo?.name || 'N/A'}</div>
-                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{booking.contactInfo?.phone || 'N/A'}</div>
+                      <div className="text-sm" style={{ color: 'var(--text-main)' }}>
+                        {booking.contactInfo?.name || booking.userEmail?.split('@')[0] || 'N/A'}
+                      </div>
+                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        {booking.contactInfo?.phone || booking.mobileNumber || 'N/A'}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {booking.schedule?.date ? formatDate(booking.schedule.date) : 'N/A'}
+                      {booking.schedule?.date ? formatDate(booking.schedule.date) : 
+                       booking.createdAt ? formatDate(booking.createdAt) : 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge status={booking.status} />

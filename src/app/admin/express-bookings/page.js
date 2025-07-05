@@ -159,7 +159,9 @@ export default function ExpressBookingsManagement() {
     booking.serviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     booking.contactInfo?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     booking.contactInfo?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.contactInfo?.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+    booking.contactInfo?.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    booking.mobileNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    booking.description?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   // Format date
@@ -321,6 +323,9 @@ export default function ExpressBookingsManagement() {
                   Phone
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                  Description
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Date
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
@@ -339,20 +344,32 @@ export default function ExpressBookingsManagement() {
                       {booking.id.substring(0, 8)}...
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm" style={{ color: 'var(--text-main)' }}>{booking.serviceName}</div>
+                      <div className="text-sm" style={{ color: 'var(--text-main)' }}>
+                        {booking.serviceName || 'Express Repair Service'}
+                      </div>
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#e60012] text-white">
                         Express
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm" style={{ color: 'var(--text-main)' }}>{booking.contactInfo?.name || 'N/A'}</div>
-                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{booking.contactInfo?.email || 'N/A'}</div>
+                      <div className="text-sm" style={{ color: 'var(--text-main)' }}>
+                        {booking.contactInfo?.name || booking.userEmail?.split('@')[0] || 'N/A'}
+                      </div>
+                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        {booking.contactInfo?.email || booking.userEmail || 'N/A'}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {booking.contactInfo?.phone || 'N/A'}
+                      {booking.contactInfo?.phone || booking.mobileNumber || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {booking.schedule?.date ? formatDate(booking.schedule.date) : 'N/A'}
+                      <div className="max-w-xs truncate" title={booking.description}>
+                        {booking.description || 'N/A'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      {booking.schedule?.date ? formatDate(booking.schedule.date) : 
+                       booking.createdAt ? formatDate(booking.createdAt) : 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge status={booking.status} />
@@ -377,7 +394,7 @@ export default function ExpressBookingsManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  <td colSpan={8} className="px-6 py-4 text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
                     {searchTerm ? 'No express bookings found matching your search' : 'No express bookings found'}
                   </td>
                 </tr>
